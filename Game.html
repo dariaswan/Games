@@ -6,11 +6,11 @@
 <title>Смена в морге — Дарья</title>
 <style>
   :root{
-    --bg:#f4efe6;          /* светлые тона помещений */
+    --bg:#f4efe6;
     --panel:#fffdf8;
     --ink:#1c1a19;
     --muted:#6b6360;
-    --accent:#c8552b;      /* рыжий */
+    --accent:#c8552b;
     --accent2:#8a3b1f;
     --black:#161412;
     --gold:#c9a227;
@@ -31,25 +31,33 @@
     border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.18);
     padding:18px;position:relative;overflow:hidden;
   }
-  h1{font-size:1.25rem;margin:0 0 4px}
+  
+  /* Кнопка звука */
+  .mute{
+    position:absolute;right:14px;top:14px;border:0;background:#efe6d6;border-radius:10px;
+    width:32px;height:32px;font-size:16px;cursor:pointer;z-index:21;display:flex;
+    align-items:center;justify-content:center;padding:0;
+  }
+
+  h1{font-size:1.25rem;margin:0 0 4px;padding-right:40px;}
   h2{font-size:1.05rem;margin:0 0 10px}
-  .sub{color:var(--muted);font-size:.85rem;margin:0 0 14px}
+  .sub{color:var(--muted);font-size:.85rem;margin:0 0 14px;line-height: 1.3;}
   .hidden{display:none!important}
 
-  /* ---- HUD ---- */
-  .hud{display:flex;gap:8px;margin-bottom:10px}
-  .meter{flex:1;background:#eee6d8;border-radius:10px;overflow:hidden;position:relative;height:26px}
+  /* HUD (Шкалы) */
+  .hud{display:flex;gap:8px;margin-bottom:12px}
+  .meter{flex:1;background:#eee6d8;border-radius:10px;overflow:hidden;position:relative;height:32px}
   .meter span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:.72rem;font-weight:700;color:#3a3330;z-index:2;letter-spacing:.3px}
+    font-size:.75rem;font-weight:800;color:#3a3330;z-index:2;letter-spacing:.3px;text-shadow: 0 1px 2px rgba(255,255,255,0.8);}
   .meter i{position:absolute;left:0;top:0;bottom:0;width:50%;transition:width .25s ease}
   .meter.calm i{background:linear-gradient(90deg,#8fd0a0,#5aa872)}
   .meter.pro i{background:linear-gradient(90deg,#e0b76a,#c9a227)}
-  .timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.1rem;color:var(--accent2);
-    min-width:54px;text-align:right}
+  .timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.15rem;color:var(--accent2);
+    min-width:54px;text-align:right;display: flex; align-items: center; justify-content: flex-end;}
 
-  /* ---- Speech bubble ---- */
+  /* Speech bubble */
   .bubble{
-    position:absolute;right:14px;top:14px;max-width:78%;
+    position:absolute;right:14px;top:54px;max-width:78%;
     background:var(--black);color:#fff;padding:8px 12px;border-radius:14px 14px 4px 14px;
     font-size:.85rem;line-height:1.25;opacity:0;transform:translateY(-6px);
     transition:opacity .2s,transform .2s;z-index:20;pointer-events:none;
@@ -59,7 +67,7 @@
   .bubble::after{content:"";position:absolute;right:10px;bottom:-7px;
     border:7px solid transparent;border-top-color:var(--black);border-bottom:0}
 
-  /* ---- Task card ---- */
+  /* Task card */
   .card{
     background:#fff;border:2px solid #e8dcc8;border-radius:16px;padding:16px;margin-bottom:12px;
     animation:pop .18s ease;
@@ -78,7 +86,7 @@
   .choice.bad{border-color:var(--bad);background:#fbeaea}
   .choice:disabled{opacity:.85;cursor:default}
 
-  /* ---- Mini-game: orderlies (tap targets) ---- */
+  /* Arena */
   .arena{position:relative;height:210px;background:#eaf1f4;border-radius:14px;overflow:hidden;
     border:2px solid #d3e0e6;margin-bottom:10px}
   .target{
@@ -90,6 +98,7 @@
   }
   @keyframes spawn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 
+  /* Buttons */
   .btn{
     display:block;width:100%;border:0;border-radius:14px;padding:14px;
     font-size:1rem;font-weight:800;cursor:pointer;background:var(--accent);color:#fff;
@@ -101,7 +110,7 @@
   .row{display:flex;gap:8px}
   .row .btn{margin:0}
 
-  /* ---- Evening ---- */
+  /* Evening */
   .evening{
     background:linear-gradient(160deg,#241118,#3a1520 60%,#5b1f2e);color:#f6e9d8;
     border-radius:16px;padding:16px;
@@ -111,14 +120,13 @@
   .evening .choice.ok{background:#24422c;border-color:#4d8f5f}
   .evening .choice.bad{background:#4a1d24;border-color:#a33f4a}
 
+  /* Final */
   .scoreline{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:10px}
   .final{text-align:center;padding:10px 0}
   .final .big{font-size:2rem;font-weight:900;color:var(--accent2);margin:6px 0}
   .errlog{font-size:.8rem;color:var(--muted);max-height:110px;overflow:auto;text-align:left;
     background:#faf3e6;border-radius:10px;padding:8px;margin-top:10px}
   .errlog div{padding:2px 0}
-  .mute{position:absolute;left:14px;top:14px;border:0;background:#efe6d6;border-radius:10px;
-    width:34px;height:34px;font-size:16px;cursor:pointer;z-index:21}
 </style>
 </head>
 <body>
@@ -126,7 +134,7 @@
   <button class="mute" id="muteBtn" title="Звук">🔊</button>
   <div class="bubble" id="bubble"></div>
 
-  <!-- ===== START ===== -->
+  <!-- START -->
   <section id="startScreen">
     <h1>Смена в морге</h1>
     <p class="sub">Дарья, ритуальный агент и администратор морга. Три минуты — и вечерний ритуал.</p>
@@ -140,7 +148,7 @@
     </div>
   </section>
 
-  <!-- ===== SHIFT ===== -->
+  <!-- SHIFT -->
   <section id="shiftScreen" class="hidden">
     <div class="scoreline">
       <span>Смена идёт</span>
@@ -151,7 +159,6 @@
       <div class="meter pro"><i id="proBar"></i><span id="proLbl">Профессионализм</span></div>
     </div>
 
-    <!-- generic task card -->
     <div id="taskWrap">
       <div class="card" id="taskCard">
         <span class="tag" id="taskTag">Задача</span>
@@ -160,7 +167,6 @@
       </div>
     </div>
 
-    <!-- orderlies minigame -->
     <div id="orderlyWrap" class="hidden">
       <div class="card" style="padding:10px">
         <p class="q" style="margin-bottom:8px">Санитары заебали — успей натыкать по ним!</p>
@@ -169,7 +175,7 @@
     </div>
   </section>
 
-  <!-- ===== EVENING ===== -->
+  <!-- EVENING -->
   <section id="eveningScreen" class="hidden">
     <div class="evening">
       <h2>Вечерний ритуал 🍷</h2>
@@ -180,7 +186,7 @@
     </div>
   </section>
 
-  <!-- ===== FINAL ===== -->
+  <!-- FINAL -->
   <section id="finalScreen" class="hidden">
     <div class="final">
       <h1 id="finalTitle">Смена окончена</h1>
@@ -194,29 +200,20 @@
 </div>
 
 <script>
-/* =====================================================================
-   ДАРЬЯ — СМЕНА В МОРГЕ + ВЕЧЕРНИЙ РИТУАЛ
-   Один файл. Всё состояние в памяти + localStorage (лучший счёт).
-   ===================================================================== */
-
-/* ---------- утилиты ---------- */
 const $ = id => document.getElementById(id);
 const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
 
-/* ---------- звук (Web Audio, без файлов) ---------- */
 const Sound = (()=>{
   let ctx=null, muted=false;
   function ac(){ if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return ctx; }
   function beep(freq=440,dur=.08,type='sine',vol=.12){
     if(muted) return; const c=ac(); if(!c) return;
     const o=c.createOscillator(), g=c.createGain();
-    o.type=type; o.frequency.value=freq;
-    g.gain.value=vol;
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
     o.connect(g); g.connect(c.destination);
-    const t=c.currentTime;
-    g.gain.setValueAtTime(vol,t);
+    const t=c.currentTime; g.gain.setValueAtTime(vol,t);
     g.gain.exponentialRampToValueAtTime(.0001,t+dur);
     o.start(t); o.stop(t+dur+.02);
   }
@@ -230,7 +227,6 @@ const Sound = (()=>{
   };
 })();
 
-/* ---------- фразы Дарьи (она говорит сама) ---------- */
 const DARYA_LINES = {
   orderlies: "Санитары заебали",
   kostya:    "Костя, блядь",
@@ -238,29 +234,18 @@ const DARYA_LINES = {
   max:       "Макс, ты охуел",
   rapai:     "Опять эта тупая Рапай"
 };
-/* контекстные триггеры */
-const LINE_TRIGGERS = {
-  orderlies: "Санитары заебали",     // мини-игра с санитарами
-  kostya:    "Костя, блядь",         // Костя путает документы
-  ded:       "Опять у деда яйца блестят", // задача про деда
-  max:       "Макс, ты охуел",       // Макс приносит не тот венок
-  rapai:     "Опять эта тупая Рапай" // появляется Рапай
-};
 
-/* ---------- состояние ---------- */
 const state = {
   screen:'start',
   calm:60, pro:60,
   score:0,
   timeLeft:180,
   timerId:null,
-  busy:false,          // блокировка во время мини-игры
+  busy:false,
   errors:[],
-  best: +(localStorage.getItem('darya_best')||0),
-  eveningDone:false
+  best: +(localStorage.getItem('darya_best')||0)
 };
 
-/* ---------- пузырь с репликой ---------- */
 let bubbleTimer=null;
 function say(text, ms=1600){
   const b=$('bubble');
@@ -270,7 +255,6 @@ function say(text, ms=1600){
   bubbleTimer=setTimeout(()=>b.classList.remove('show'), ms);
 }
 
-/* ---------- HUD ---------- */
 function renderHUD(){
   $('calmBar').style.width = state.calm+'%';
   $('proBar').style.width  = state.pro+'%';
@@ -287,18 +271,14 @@ function changeMeters(dCalm,dPro){
   if(state.calm<=0 || state.pro<=0) endShift('Провал: шкалы на нуле.');
 }
 
-/* ---------- экраны ---------- */
 function show(id){
   ['startScreen','shiftScreen','eveningScreen','finalScreen'].forEach(s=>$(s).classList.add('hidden'));
   $(id).classList.remove('hidden');
 }
 
-/* =====================================================================
-   СМЕНА
-   ===================================================================== */
 function startShift(){
   state.calm=60; state.pro=60; state.score=0; state.timeLeft=180;
-  state.errors=[]; state.busy=false; state.eveningDone=false;
+  state.errors=[]; state.busy=false;
   renderHUD(); show('shiftScreen');
   clearInterval(state.timerId);
   state.timerId = setInterval(()=>{
@@ -309,11 +289,9 @@ function startShift(){
   nextTask();
 }
 
-/* -------- генератор задач -------- */
 function nextTask(){
   if(state.screen!=='shift') return;
   if(state.busy) return;
-  // раз в ~6 задач — мини-игра с санитарами
   if(Math.random()<0.18){ runOrderlyMinigame(); return; }
 
   const kind = pick(['docs','relatives','call','ded','kostya','rapai','max']);
@@ -321,7 +299,7 @@ function nextTask(){
 }
 
 function renderTask(kind){
-  const wrap=$('taskWrap'), card=$('taskCard');
+  const wrap=$('taskWrap');
   wrap.classList.remove('hidden'); $('orderlyWrap').classList.add('hidden');
   const tag=$('taskTag'), q=$('taskQ'), ch=$('taskChoices');
   ch.innerHTML='';
@@ -417,7 +395,6 @@ function renderTask(kind){
     btn.onclick=()=>{
       Sound.click();
       if(o.line) say(DARYA_LINES[o.line]||'...');
-      // блокируем все кнопки
       [...ch.children].forEach(b=>b.disabled=true);
       if(o.ok){
         btn.classList.add('ok'); Sound.ok();
@@ -436,7 +413,6 @@ function renderTask(kind){
   });
 }
 
-/* -------- мини-игра: санитары -------- */
 function runOrderlyMinigame(){
   state.busy=true;
   $('taskWrap').classList.add('hidden');
@@ -445,7 +421,7 @@ function runOrderlyMinigame(){
 
   const arena=$('arena');
   arena.innerHTML='';
-  let hits=0, misses=0, alive=0;
+  let hits=0, misses=0;
   const DURATION=3500, start=performance.now();
 
   function spawn(){
@@ -462,7 +438,7 @@ function runOrderlyMinigame(){
       el.style.transform='scale(.6)'; el.style.opacity='0';
       setTimeout(()=>el.remove(),120);
     };
-    arena.appendChild(el); alive++;
+    arena.appendChild(el);
     setTimeout(()=>{ if(!el.dataset.hit){ misses++; } el.remove(); }, rnd(500,900));
     setTimeout(spawn, rnd(220,420));
   }
@@ -473,15 +449,12 @@ function runOrderlyMinigame(){
     state.busy=false;
     $('orderlyWrap').classList.add('hidden');
     $('taskWrap').classList.remove('hidden');
-    // результат
-    const good = hits>=4;
-    if(good){ state.score+=8; changeMeters(+6,+4); Sound.ok(); }
+    if(hits>=4){ state.score+=8; changeMeters(+6,+4); Sound.ok(); }
     else { changeMeters(-6,-6); Sound.bad(); state.errors.push('Мини-игра: санитары'); }
     if(state.screen==='shift' && state.timeLeft>0) setTimeout(nextTask,500);
   }, DURATION+300);
 }
 
-/* -------- конец смены -------- */
 function endShift(reason){
   if(state.screen!=='shift') return;
   clearInterval(state.timerId);
@@ -491,9 +464,6 @@ function endShift(reason){
   startEvening(reason);
 }
 
-/* =====================================================================
-   ВЕЧЕР
-   ===================================================================== */
 const PSYCHICS = [
   {name:'Марат', real:false},
   {name:'Люба',  real:true},
@@ -559,9 +529,6 @@ function startEvening(reason){
   }
 }
 
-/* =====================================================================
-   ФИНАЛ
-   ===================================================================== */
 function toFinal(){
   show('finalScreen');
   state.screen='final';
@@ -579,9 +546,6 @@ function toFinal(){
   }
 }
 
-/* =====================================================================
-   ИНИЦИАЛИЗАЦИЯ
-   ===================================================================== */
 $('startBtn').onclick=()=>{ Sound.click(); state.screen='shift'; startShift(); };
 $('howBtn').onclick=()=>{ Sound.click(); $('howBox').classList.toggle('hidden'); };
 $('restartBtn').onclick=()=>{ Sound.click(); state.screen='start'; show('startScreen'); };
