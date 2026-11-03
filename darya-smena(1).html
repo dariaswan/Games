@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дарья: Смена</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Golos+Text:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ТОКЕНЫ ЦВЕТА
+   Светлый морг/офис (кафель, нержавейка) + Дарья: чёрное и рыжее.
+   ============================================================ */
+:root{
+  color-scheme: light;
+  --tile:#e8eeeb;        /* кафель */
+  --tile-line:#d6dfdb;   /* швы кафеля */
+  --surface:#fbfcfb;     /* бумага, карточки */
+  --steel:#c9d1d0;       /* нержавейка */
+  --steel-2:#eef2f1;
+  --ink:#16181a;         /* текст */
+  --muted:#5f6b70;
+  --black:#000000;       /* одежда Дарьи */
+  --hair:#b8341b;        /* рыжий — главный акцент */
+  --hair-2:#e0662f;
+  --ok:#23835a;
+  --bad:#c42b1f;
+  --calm:#3c7fa6;
+  --bubble-ink:#ffffff;
+  --shadow:0 2px 0 rgba(22,24,26,.08);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --tile:#1e2423; --tile-line:#262e2c; --surface:#283030; --steel:#3a4443; --steel-2:#2f3837;
+    --ink:#eef2f1; --muted:#a3afb0; --black:#000000; --hair:#e0532f; --hair-2:#f07a43;
+    --ok:#3fb07e; --bad:#ef5a4b; --calm:#6aaed6; --bubble-ink:#ffffff; --shadow:0 2px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --tile:#1e2423; --tile-line:#262e2c; --surface:#283030; --steel:#3a4443; --steel-2:#2f3837;
+  --ink:#eef2f1; --muted:#a3afb0; --black:#000000; --hair:#e0532f; --hair-2:#f07a43;
+  --ok:#3fb07e; --bad:#ef5a4b; --calm:#6aaed6; --bubble-ink:#ffffff; --shadow:0 2px 0 rgba(0,0,0,.35);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:16px; line-height:1.45; color:var(--ink);
+  background-color:var(--tile);
+  /* Кафельная плитка морга */
+  background-image:
+    linear-gradient(var(--tile-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tile-line) 1px, transparent 1px);
+  background-size:44px 44px;
+  min-height:100vh; -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+button:focus-visible{outline:3px solid var(--hair);outline-offset:2px}
+h1,h2,h3{font-family:"Unbounded","Golos Text",system-ui,sans-serif;line-height:1.15;margin:0}
+
+.wrap{max-width:960px;margin:0 auto;padding:12px 14px 28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.brand{font-family:"Unbounded",system-ui,sans-serif;font-weight:700;font-size:15px;letter-spacing:-.01em}
+.brand span{color:var(--hair)}
+.icon-btn{border:1.5px solid var(--ink);background:var(--surface);border-radius:999px;width:40px;height:40px;font-size:18px;display:grid;place-items:center}
+
+.screen{display:none}
+.screen.active{display:block}
+
+/* ---------- Кнопки ---------- */
+.btn{border:none;border-radius:12px;padding:13px 18px;font-weight:700;background:var(--black);color:#fff;box-shadow:var(--shadow);transition:transform .08s}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.red{background:var(--hair)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{font-size:18px;padding:16px 22px;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > .btn{flex:1 1 180px}
+
+/* ---------- Дарья (аватар + реплика) ---------- */
+.darya{display:flex;align-items:flex-start;gap:10px;min-height:86px}
+.avatar{flex:0 0 auto;width:78px;height:78px;border-radius:50%;background:var(--steel-2);border:2px solid var(--black);padding:0;overflow:hidden}
+.avatar svg{width:100%;height:100%;display:block}
+.bubble{position:relative;background:var(--black);color:var(--bubble-ink);border-radius:14px;padding:10px 14px;font-weight:700;font-size:15px;max-width:min(520px,100%);
+  opacity:0;transform:translateY(4px) scale(.98);transition:opacity .15s,transform .15s;margin-top:10px;border-left:4px solid var(--hair)}
+.bubble.show{opacity:1;transform:none}
+.bubble::before{content:"";position:absolute;left:-10px;top:14px;border:6px solid transparent;border-right-color:var(--black)}
+
+/* ---------- Меню ---------- */
+.hero{display:grid;grid-template-columns:1fr;gap:16px;align-items:center;margin:8px 0 18px}
+.hero h1{font-size:clamp(40px,10vw,84px);font-weight:900;letter-spacing:-.04em;line-height:.92}
+.hero h1 .tag{display:inline-block;background:var(--black);color:#fff;padding:0 .18em;border-radius:6px;transform:rotate(-2deg)}
+.hero p{color:var(--muted);max-width:56ch;margin:10px 0 0}
+.portrait{justify-self:center;width:min(260px,70vw);aspect-ratio:1;border-radius:50%;background:var(--surface);border:3px solid var(--black);overflow:hidden}
+.portrait svg{width:100%;height:100%}
+@media (min-width:760px){.hero{grid-template-columns:1.3fr 1fr}}
+.panel{background:var(--surface);border:1.5px solid var(--steel);border-radius:14px;padding:14px 16px;margin-top:14px}
+.panel h2{font-size:17px;margin-bottom:6px}
+details.panel summary{cursor:pointer;font-family:"Unbounded",system-ui,sans-serif;font-weight:700;font-size:16px}
+details.panel ul{padding-left:18px;margin:10px 0 0}
+details.panel li{margin:6px 0}
+.records{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted)}
+.records b{color:var(--ink);font-size:20px;font-family:"Unbounded",system-ui,sans-serif;display:block}
+
+/* ---------- HUD смены ---------- */
+.hud{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center;background:var(--surface);border:1.5px solid var(--steel);border-radius:14px;padding:10px 12px}
+.clock{font-family:"Unbounded",system-ui,sans-serif;font-weight:900;font-size:30px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.clock.low{color:var(--bad)}
+.scorebox{text-align:right;font-weight:700}
+.scorebox .s{font-family:"Unbounded",system-ui,sans-serif;font-size:20px}
+.scorebox .k{color:var(--hair);font-size:13px}
+.meters{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meter label{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted)}
+.meter .bar{height:10px;background:var(--steel-2);border-radius:999px;overflow:hidden;border:1px solid var(--steel)}
+.meter .bar i{display:block;height:100%;width:50%;border-radius:999px;transition:width .2s}
+.meter.calm i{background:var(--calm)}
+.meter.prof i{background:var(--hair)}
+.meter.low .bar{animation:pulse .6s infinite alternate}
+@keyframes pulse{to{box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 35%,transparent)}}
+
+.shift-darya{margin:12px 0 8px}
+
+/* ---------- Событие ---------- */
+.event{display:none;align-items:center;gap:10px;background:var(--black);color:#fff;border-radius:14px;padding:10px 12px;margin-bottom:10px;position:relative;overflow:hidden}
+.event.show{display:flex;animation:shake .35s}
+.event .ei{font-size:26px}
+.event .et{flex:1;font-weight:500;font-size:14.5px}
+.event .btn{background:var(--hair);padding:10px 12px;white-space:nowrap}
+.event .eb{position:absolute;left:0;bottom:0;height:3px;background:var(--hair-2);width:100%}
+@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+
+/* ---------- Арена и очередь: клиенты как бирки ---------- */
+.arena{position:relative;min-height:300px}
+.queue{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:760px){.queue{grid-template-columns:repeat(4,1fr)}}
+.tag-card{position:relative;text-align:left;background:var(--surface);border:1.5px solid var(--ink);border-radius:10px 26px 26px 10px;padding:14px 12px 12px 30px;min-height:138px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow);animation:drop .25s ease-out}
+/* дырка и верёвочка бирки */
+.tag-card::before{content:"";position:absolute;left:10px;top:50%;width:11px;height:11px;margin-top:-6px;border-radius:50%;border:1.5px solid var(--ink);background:var(--tile)}
+.tag-card::after{content:"";position:absolute;left:-14px;top:50%;width:26px;height:1.5px;background:var(--hair);transform:rotate(-14deg)}
+.tag-card .ic{font-size:26px;line-height:1}
+.tag-card .tt{font-weight:700;font-size:14.5px}
+.tag-card .tx{font-size:13px;color:var(--muted);flex:1}
+.tag-card .pat{height:6px;background:var(--steel-2);border-radius:999px;overflow:hidden}
+.tag-card .pat i{display:block;height:100%;background:var(--ok)}
+.tag-card.urgent{border-color:var(--bad)}
+.tag-card.urgent .pat i{background:var(--bad)}
+@keyframes drop{from{transform:translateY(-8px) rotate(-1deg);opacity:0}}
+.empty{grid-column:1/-1;color:var(--muted);text-align:center;padding:40px 0;font-style:italic}
+.queue.blocked .tag-card{filter:grayscale(1);opacity:.5}
+.smoke{display:none;position:absolute;inset:0;place-items:center;font-size:44px;pointer-events:none}
+.queue.blocked + .smoke{display:grid}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+
+/* Рапай — двойник Дарьи */
+.rapay{position:absolute;z-index:5;width:92px;border:none;background:none;padding:0;display:flex;flex-direction:column;align-items:center;transition:left .18s,top .18s}
+.rapay svg{width:84px;height:84px;border-radius:50%;background:var(--surface);border:2.5px solid #2b1b14}
+.rapay span{background:#2b1b14;color:#fff;font-weight:700;font-size:12px;padding:1px 8px;border-radius:999px;margin-top:-8px}
+
+.float{position:absolute;left:50%;top:30%;transform:translateX(-50%);font-weight:900;font-family:"Unbounded",system-ui,sans-serif;font-size:18px;color:var(--ok);pointer-events:none;z-index:6;animation:rise 1.1s forwards;white-space:nowrap;text-shadow:0 1px 0 var(--surface)}
+.float.bad{color:var(--bad)}
+@keyframes rise{to{transform:translate(-50%,-50px);opacity:0}}
+
+/* ---------- Модальное окно мини-игр ---------- */
+.modal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:color-mix(in srgb,var(--tile) 70%,transparent);backdrop-filter:blur(3px);padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
+.modal.show{display:grid}
+.mcard{width:min(460px,100%);background:var(--surface);border:2px solid var(--black);border-radius:18px;padding:16px;box-shadow:0 10px 0 var(--black)}
+.mcard h3{font-size:17px;margin-bottom:8px}
+.mtimer{height:6px;background:var(--steel-2);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.mtimer i{display:block;height:100%;width:100%;background:var(--hair)}
+.quote{font-size:17px;font-weight:500;margin:0 0 8px}
+.hint{color:var(--muted);font-size:14px;margin:4px 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{background:var(--steel-2);color:var(--ink);border:1.5px solid var(--steel);border-radius:12px;padding:13px 10px;font-weight:700;text-align:center}
+.opt:active{background:var(--steel)}
+.seq{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.seq span{border:1.5px dashed var(--muted);border-radius:8px;padding:4px 8px;font-size:14px}
+.seq span.done{border-style:solid;border-color:var(--ok);color:var(--ok);text-decoration:line-through}
+.bignum{font-family:"Unbounded",system-ui,sans-serif;font-size:42px;font-weight:900;text-align:center;letter-spacing:.04em;padding:14px 0;border:2px solid var(--ink);border-radius:10px 30px 30px 10px;margin:8px 0}
+.road{background:var(--steel-2);border-radius:12px;height:70px;position:relative;overflow:hidden;margin-bottom:10px}
+.road::after{content:"";position:absolute;left:0;right:0;top:50%;height:3px;background:repeating-linear-gradient(90deg,var(--muted) 0 20px,transparent 20px 40px);animation:roadmove .5s linear infinite}
+@keyframes roadmove{to{background-position:-40px 0}}
+.road svg{position:absolute;left:16px;top:10px;height:50px;z-index:1}
+.gauge{position:relative;height:34px;background:var(--steel-2);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:6px 0 10px}
+.gauge .zone{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--ok) 45%,transparent)}
+.gauge .needle{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:var(--hair)}
+.hits{font-weight:700;margin-bottom:10px}
+
+/* ---------- Ритуал ---------- */
+.ritual-stage{background:var(--surface);border:1.5px solid var(--steel);border-radius:16px;padding:16px;margin-top:12px}
+.ritual-stage.wobble{animation:sway 3.2s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(calc(var(--wob,0deg) * -1)) translateX(calc(var(--wobx,0px) * -1))}50%{transform:rotate(var(--wob,0deg)) translateX(var(--wobx,0px))}}
+.ritual-stage.drunk{filter:blur(.5px)}
+.stage-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.stage-head h2{font-size:18px}
+.stage-head small{color:var(--muted);font-weight:700}
+.clues{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:6px}
+.clues li{background:var(--steel-2);border-left:4px solid var(--hair);border-radius:6px;padding:7px 10px;font-weight:500}
+.choices{display:grid;gap:8px}
+.choice{text-align:left;background:var(--steel-2);border:1.5px solid var(--steel);border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:2px}
+.choice span{color:var(--muted);font-size:14.5px}
+.choice.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--surface))}
+.choice.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.choice.gone{opacity:.25;text-decoration:line-through}
+.feedback{margin-top:12px;font-weight:700;min-height:1.4em}
+.feedback.ok{color:var(--ok)} .feedback.bad{color:var(--bad)}
+.scene{font-size:18px;font-weight:500;padding:14px;border-radius:12px;background:var(--black);color:#fff;margin:6px 0 12px}
+.props{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.stat-line{display:flex;justify-content:space-between;border-bottom:1px dashed var(--steel);padding:8px 0}
+.stat-line b{font-family:"Unbounded",system-ui,sans-serif}
+.rank{font-family:"Unbounded",system-ui,sans-serif;font-size:clamp(22px,6vw,34px);font-weight:900;letter-spacing:-.02em;margin:6px 0 4px}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">Дарья<span>:</span> Смена</div>
+    <button class="icon-btn" id="btnMute" aria-label="Звук">🔊</button>
+  </div>
+
+  <!-- ===================== МЕНЮ ===================== -->
+  <section class="screen active" id="menu">
+    <div class="hero">
+      <div>
+        <h1>Смена <span class="tag">в морге</span></h1>
+        <p>Дарья — ритуальный агент и администратор морга. Рыжая, в чёрном, на новом X-Trail. Днём — покойники, родственники и санитары. Вечером — вино, IQOS и «Битва экстрасенсов».</p>
+      </div>
+      <div class="portrait" id="portrait"></div>
+    </div>
+    <div class="row">
+      <button class="btn red big" id="btnStart">Начать смену</button>
+      <button class="btn ghost big" id="btnRitualMenu">🔒 Вечерний ритуал</button>
+    </div>
+    <div class="panel">
+      <h2>Рекорды</h2>
+      <div class="records">
+        <div>Лучшая смена<b id="recShift">0</b></div>
+        <div>Лучший ритуал<b id="recRitual">0</b></div>
+        <div>Лучший день<b id="recBest">0</b></div>
+      </div>
+    </div>
+    <details class="panel">
+      <summary>Как играть</summary>
+      <ul>
+        <li><b>Смена длится 3 минуты.</b> Клиенты приходят бирками. Тапни бирку, чтобы взять клиента в работу, пока не кончилось его терпение.</li>
+        <li><b>Родственники</b> — прочитай, чего хотят, и отправь в нужный кабинет.</li>
+        <li><b>Документы</b> — заполни графы строго по порядку. Кнопки перемешиваются после каждой графы.</li>
+        <li><b>Вызов на X-Trail</b> — жми «Газ!», когда стрелка в зелёной зоне. Три попадания — доехала.</li>
+        <li><b>Поступление</b> — запомни номер бирки и выбери его из похожих.</li>
+        <li><b>Спокойствие</b> тает само и от косяков. Ноль — Дарья срывается, смена окончена. Кнопка IQOS возвращает спокойствие (перезарядка 20 секунд).</li>
+        <li><b>Профессионализм</b> растёт от успехов и падает от ошибок. Ноль — увольнение. В конце он добавляет очки.</li>
+        <li><b>События</b>: санитары, Костя, Макс, Рапай и дед в холодильнике. Реагируй быстро — жми кнопку в чёрной плашке.</li>
+        <li>Подряд обслуженные клиенты дают серию и бонус к очкам. Тапни на Дарью — она что-нибудь скажет.</li>
+        <li><b>Вечерний ритуал</b> открывается после первой смены. Вино даёт +2 секунды на каждый вопрос, но экран начинает плыть. Стики IQOS убирают один неверный вариант.</li>
+        <li>В ритуале: угадай настоящего экстрасенса по подсказкам (дедукция, как в детективах), а потом выбери, что крикнуть герою ужастика.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ===================== СМЕНА ===================== -->
+  <section class="screen" id="shift">
+    <div class="hud">
+      <div class="clock" id="clock">3:00</div>
+      <div class="scorebox"><div class="s" id="score">0</div><div class="k" id="streak"></div></div>
+      <div class="meters">
+        <div class="meter calm" id="meterCalm"><label>Спокойствие <span id="vCalm">100</span></label><div class="bar"><i id="barCalm"></i></div></div>
+        <div class="meter prof" id="meterProf"><label>Профессионализм <span id="vProf">70</span></label><div class="bar"><i id="barProf"></i></div></div>
+      </div>
+    </div>
+    <div class="darya shift-darya">
+      <button class="avatar" id="avatarShift" aria-label="Дарья"></button>
+      <div class="bubble" id="bubble"></div>
+    </div>
+    <div class="event" id="event"><div class="ei" id="evIcon"></div><div class="et" id="evText"></div><button class="btn" id="evBtn"></button><div class="eb" id="evBar"></div></div>
+    <div class="arena" id="arena">
+      <div class="queue" id="queue"></div>
+      <div class="smoke">🚬 🚬 🚬</div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnIqos">IQOS · затяжка</button>
+      <button class="btn ghost" id="btnQuit">Закончить смену</button>
+    </div>
+  </section>
+
+  <!-- ===================== РИТУАЛ ===================== -->
+  <section class="screen" id="ritual">
+    <div class="darya">
+      <button class="avatar" id="avatarRitual" aria-label="Дарья"></button>
+      <div class="bubble" id="rbubble"></div>
+    </div>
+    <div class="ritual-stage" id="stage"></div>
+  </section>
+
+  <!-- ===================== ИТОГИ ===================== -->
+  <section class="screen" id="results">
+    <div class="ritual-stage" id="resultsBox"></div>
+  </section>
+</div>
+
+<!-- Модалка мини-игр -->
+<div class="modal" id="modal"><div class="mcard"><div class="mtimer"><i id="mtimer"></i></div><div id="mbody"></div></div></div>
+
+<script>
+'use strict';
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const rand = (a, b) => a + Math.random() * (b - a);
+const randInt = (a, b) => Math.floor(rand(a, b + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function shuffle(arr){ for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+/* ============================================================
+   СОХРАНЕНИЕ (localStorage, с защитой от ошибок)
+   ============================================================ */
+const SAVE_KEY = 'darya_smena_v1';
+const Save = {
+  data: { bestShift: 0, bestRitual: 0, best: 0, lastShift: 0, unlocked: false, muted: false },
+  load(){ try { const raw = localStorage.getItem(SAVE_KEY); if(raw) Object.assign(this.data, JSON.parse(raw)); } catch(e){} },
+  save(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.data)); } catch(e){} }
+};
+
+/* ============================================================
+   ЗВУК: только Web Audio API, ничего не загружается
+   ============================================================ */
+const Sound = {
+  ctx: null, master: null, hum: null,
+  init(){
+    if(this.ctx){ if(this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = Save.data.muted ? 0 : 0.6;
+    this.master.connect(this.ctx.destination);
+  },
+  /* Базовый «пик»: частота, длительность, форма, громкость, скольжение, задержка */
+  tone(freq, dur = 0.1, type = 'sine', vol = 0.12, slide = null, delay = 0){
+    if(!this.ctx) return;
+    const t = this.ctx.currentTime + delay;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + dur + 0.03);
+  },
+  click(){ this.tone(880, 0.04, 'square', 0.04); },
+  blip(){ this.tone(320, 0.07, 'sine', 0.09, 640); },
+  ok(){ this.tone(660, 0.09, 'triangle', 0.11); this.tone(990, 0.13, 'triangle', 0.11, null, 0.08); },
+  fail(){ this.tone(220, 0.28, 'sawtooth', 0.07, 100); },
+  alert(){ this.tone(540, 0.1, 'square', 0.05); this.tone(540, 0.1, 'square', 0.05, null, 0.16); },
+  puff(){ this.tone(190, 0.35, 'sine', 0.07, 80); },
+  tune(){ [392, 392, 440, 392, 523, 494].forEach((f, i) => this.tone(f, 0.12, 'square', 0.035, null, i * 0.14)); },
+  /* Фоновый гул холодильников: два тихих осциллятора через фильтр */
+  startHum(base = 50){
+    if(!this.ctx || this.hum) return;
+    const g = this.ctx.createGain(); g.gain.value = 0.0001;
+    g.gain.setTargetAtTime(0.03, this.ctx.currentTime, 0.8);
+    const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 200;
+    const o1 = this.ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = base;
+    const o2 = this.ctx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = base * 2.01;
+    const g2 = this.ctx.createGain(); g2.gain.value = 0.35;
+    o1.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(this.master);
+    o1.start(); o2.start();
+    this.hum = { g, oscs: [o1, o2] };
+  },
+  stopHum(){
+    if(!this.hum) return;
+    const { g, oscs } = this.hum; const t = this.ctx.currentTime;
+    g.gain.setTargetAtTime(0.0001, t, 0.25);
+    oscs.forEach(o => o.stop(t + 1.2));
+    this.hum = null;
+  },
+  setMuted(m){
+    Save.data.muted = m; Save.save();
+    if(this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.6, this.ctx.currentTime, 0.05);
+  }
+};
+
+/* ============================================================
+   ГРАФИКА: Дарья, Рапай, X-Trail (inline SVG)
+   ============================================================ */
+const DARYA_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true">
+  <path d="M16 64C8 34 28 8 50 8s42 26 34 56c-2 18-14 30-34 30S18 82 16 64Z" fill="#b8341b"/>
+  <path d="M22 70c-4-14 0-26 6-32 2 18 0 30-6 32Zm56 0c4-14 0-26-6-32-2 18 0 30 6 32Z" fill="#e0662f" opacity=".55"/>
+  <rect x="24" y="74" width="52" height="30" rx="16" fill="#000"/>
+  <rect x="41" y="60" width="18" height="18" rx="4" fill="#000"/>
+  <circle cx="50" cy="46" r="19" fill="#f6d9c6"/>
+  <path d="M30 44c1-17 16-24 29-19 7 3 11 9 11 18-6-7-16-11-26-9-6 1-10 4-14 10Z" fill="#c63d1f"/>
+  <path d="M38.5 47.5q4-3 8 0" stroke="#000" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M53.5 47.5q4-3 8 0" stroke="#000" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M37.5 46l-2-1.5M62.5 46l2-1.5" stroke="#000" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="40" cy="53" r="2.5" fill="#f2a49a" opacity=".55"/><circle cx="60" cy="53" r="2.5" fill="#f2a49a" opacity=".55"/>
+  <path d="M45 57q5 3.5 10 0q-5 1.6-10 0Z" fill="#9d0f1c"/>
+</svg>`;
+/* Рапай: полная, длинные тёмные волосы, очень большие губы */
+const RAPAY_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true">
+  <path d="M12 52C12 22 30 6 50 6s38 16 38 46v48H12Z" fill="#2b1b14"/>
+  <ellipse cx="50" cy="94" rx="50" ry="24" fill="#000"/>
+  <ellipse cx="50" cy="51" rx="29" ry="26" fill="#f1cdb6"/>
+  <path d="M35 73q15 8 30 0" stroke="#d6a88f" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M12 52v48h15V58c-4-2-6-5-8-10Zm76 0v48H73V58c4-2 6-5 8-10Z" fill="#2b1b14"/>
+  <path d="M25 42c3-20 18-28 25-28s23 6 26 28c-7-10-16-15-26-15s-18 5-25 15Z" fill="#3a251c"/>
+  <circle cx="32" cy="56" r="5" fill="#eaa08f" opacity=".5"/><circle cx="68" cy="56" r="5" fill="#eaa08f" opacity=".5"/>
+  <path d="M36 40.5q5-3 10-.5M54 40q5-2.5 10 .5" stroke="#1a0f0b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="41" cy="46" rx="2.3" ry="2.1" fill="#000"/><ellipse cx="59" cy="46" rx="2.3" ry="2.1" fill="#000"/>
+  <path d="M38 44.5l-2.5-1.5M62 44.5l2.5-1.5" stroke="#000" stroke-width="1.3" stroke-linecap="round"/>
+  <path d="M48.5 50q1.5 3-1 4" stroke="#c99a82" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  <path d="M35 60c4-6 9-6 15-3 6-3 11-3 15 3-3 10-27 10-30 0Z" fill="#c2185b"/>
+  <path d="M35 60q15 4 30 0" stroke="#7a0f38" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="44" cy="58.5" rx="3" ry="1.2" fill="#fff" opacity=".5"/>
+</svg>`;
+const CAR_SVG = `<svg viewBox="0 0 160 60" aria-hidden="true">
+  <path d="M8 40V30l14-4 18-14h62l20 14 26 4v10Z" fill="#111"/>
+  <path d="M44 16h26v12H30Zm30 0h24l14 12H74Z" fill="#9fb4bd"/>
+  <circle cx="40" cy="42" r="10" fill="#222" stroke="#c9d1d0" stroke-width="3"/>
+  <circle cx="122" cy="42" r="10" fill="#222" stroke="#c9d1d0" stroke-width="3"/>
+  <rect x="140" y="30" width="8" height="4" rx="1" fill="#e0662f"/>
+  <text x="80" y="38" font-size="8" fill="#c9d1d0" font-family="sans-serif" text-anchor="middle">X-TRAIL</text>
+</svg>`;
+
+/* ============================================================
+   РЕПЛИКИ ДАРЬИ (пузырь). Приоритет: реплики событий не
+   перебиваются второстепенными репликами 1.6 секунды.
+   ============================================================ */
+const LINES = {
+  sign: ['Санитары заебали', 'Костя, блядь', 'Опять у деда яйца блестят', 'Макс, ты охуел', 'Опять эта тупая Рапай'],
+  click: ['Где мой IQOS?', 'Вечером вино и «Битва экстрасенсов». Держусь.', 'Я тут главная, вообще-то', 'Чёрный — это не траур, это стиль', 'Кто трогал мой кофе — тот следующий'],
+  ok: ['Следующий!', 'Профессионал, хули', 'Учитесь, пока я жива', 'Дарья не ошибается'],
+  fail: ['Сука, ну что за день', 'Да ёб вашу мать…', 'Я сейчас кого-нибудь закопаю. Бесплатно.'],
+  timeout: ['Ушёл. Ну и пиздуй.', 'Ждите, вам-то уже не к спеху', 'Профессионализм, ау?']
+};
+function say(text, el = $('#bubble'), prio = 1){
+  const now = performance.now();
+  if(el._lock && now < el._lock && prio < el._prio) return;
+  el._lock = now + 1600; el._prio = prio;
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ============================================================
+   ДАННЫЕ КЛИЕНТОВ
+   ============================================================ */
+const OFFICES = ['Оформление', 'Касса', 'Зал прощаний', 'Магазин'];
+const REQUESTS = [
+  ['Где тут справку о смерти дают?', 'Оформление'],
+  ['Хочу венок побольше, чтоб соседка удавилась', 'Магазин'],
+  ['Сколько с нас за всё это удовольствие?', 'Касса'],
+  ['Во сколько прощание? Мы с тортом.', 'Зал прощаний'],
+  ['Дедушке нужен костюм, старый моль сожрала', 'Магазин'],
+  ['Можно оплатить картой тёщи?', 'Касса'],
+  ['В свидетельстве фамилия с ошибкой, переделайте', 'Оформление'],
+  ['Хотим попрощаться, но чтобы без бывшей жены', 'Зал прощаний'],
+  ['Гроб с подогревом сидений есть? Как в X-Trail', 'Магазин'],
+  ['Кто подпишет нам заявление на захоронение?', 'Оформление'],
+  ['Мне чек нужен, я в налоговую', 'Касса'],
+  ['А в зале можно включить Стаса Михайлова?', 'Зал прощаний']
+];
+const RELATIVES = [['👵', 'Бабушка в норке'], ['🧔', 'Сын покойного'], ['💅', 'Внучка с маникюром'], ['👨‍💼', 'Зять с барсеткой'], ['🧕', 'Соседка-активистка'], ['🍺', 'Друг покойного, уже тёплый']];
+const DOCS = ['Справка о смерти', 'Заявление на захоронение', 'Договор ритуальных услуг', 'Акт выдачи тела', 'Опись вещей (носок — 1 шт.)'];
+const CALLS = ['ул. Ленина, 13 — бабушка уже не торопится', 'СНТ «Рассвет», участок 6 — спросить у собаки', 'Общага, 5 этаж, лифт не работает (конечно)', 'Элитный ЖК — охрана «не пущает»', 'Гараж № 47 — там все свои'];
+const BODIES = ['Дед, 87 лет, в одном носке', 'Мужик с дачи, тату «Не забуду мать родную»', 'Бабушка, при себе 40 тысяч в лифчике', 'Неизвестный в костюме Деда Мороза', 'Тамада со свадьбы. Перегулял.'];
+
+function makeClient(){
+  const kind = pick(['relative', 'relative', 'docs', 'call', 'body']);
+  const max = Math.max(18, 32 - S.elapsed / 20);   // терпение уменьшается к концу смены
+  const c = { id: S.nextId++, kind, patience: max, max, el: null, bar: null };
+  if(kind === 'relative'){
+    const [icon, who] = pick(RELATIVES); const [q, office] = pick(REQUESTS);
+    Object.assign(c, { icon, title: who, text: `«${q}»`, q, office });
+  } else if(kind === 'docs'){
+    Object.assign(c, { icon: '📄', title: 'Документы', text: pick(DOCS) });
+  } else if(kind === 'call'){
+    Object.assign(c, { icon: '🚙', title: 'Вызов на адрес', text: pick(CALLS) });
+  } else {
+    Object.assign(c, { icon: '🧊', title: 'Поступление', text: pick(BODIES) });
+  }
+  return c;
+}
+
+/* ============================================================
+   СОСТОЯНИЕ СМЕНЫ
+   ============================================================ */
+const SHIFT_LEN = 180, MAXQ = 4, IQOS_CD = 20;
+const S = { running: false };
+function resetShift(){
+  Object.assign(S, {
+    running: true, time: SHIFT_LEN, elapsed: 0, calm: 100, prof: 70, score: 0, done: 0, lost: 0,
+    streak: 0, bestStreak: 0, clients: [], nextId: 1, spawnIn: 1.2, eventIn: rand(16, 20),
+    event: null, lastEvent: null, iqosCd: 0, blocked: false, modalClient: null, last: performance.now(), endReason: ''
+  });
+}
+
+/* Изменить шкалы (dCalm — спокойствие, dProf — профессионализм) */
+function changeMeters(dCalm, dProf){
+  S.calm = clamp(S.calm + dCalm, 0, 100);
+  S.prof = clamp(S.prof + dProf, 0, 100);
+}
+function floatText(text, bad = false){
+  const f = document.createElement('div');
+  f.className = 'float' + (bad ? ' bad' : '');
+  f.textContent = text;
+  $('#arena').appendChild(f);
+  setTimeout(() => f.remove(), 1150);
+}
+
+/* ---------- Очередь ---------- */
+function addClient(){
+  if(S.clients.length >= MAXQ) return;
+  S.clients.push(makeClient());
+  renderQueue();
+}
+function removeClient(c){
+  const i = S.clients.indexOf(c);
+  if(i >= 0){ S.clients.splice(i, 1); renderQueue(); }
+}
+function renderQueue(){
+  const q = $('#queue'); q.innerHTML = '';
+  if(!S.clients.length){ q.innerHTML = '<div class="empty">Тишина… подозрительно.</div>'; return; }
+  S.clients.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'tag-card';
+    b.innerHTML = `<div class="ic">${c.icon}</div><div class="tt"></div><div class="tx"></div><div class="pat"><i></i></div>`;
+    b.querySelector('.tt').textContent = c.title;
+    b.querySelector('.tx').textContent = c.text;
+    b.onclick = () => acceptClient(c);
+    c.el = b; c.bar = b.querySelector('.pat i');
+    q.appendChild(b);
+  });
+  updatePatience();
+}
+function updatePatience(){
+  S.clients.forEach(c => {
+    if(!c.bar) return;
+    const p = clamp(c.patience / c.max, 0, 1);
+    c.bar.style.width = (p * 100).toFixed(1) + '%';
+    c.el.classList.toggle('urgent', p < 0.3);
+  });
+}
+function acceptClient(c){
+  if(!S.running || S.modalClient) return;
+  if(S.blocked){ Sound.fail(); say('Санитары заебали', $('#bubble'), 2); return; }
+  Sound.click();
+  removeClient(c);
+  S.modalClient = c;
+  ({ relative: mgRelative, docs: mgDocs, call: mgCall, body: mgBody })[c.kind](c);
+}
+function clientTimeout(c){
+  removeClient(c);
+  S.lost++; S.streak = 0;
+  changeMeters(-8, -10);
+  Sound.fail(); floatText('Клиент ушёл', true);
+  say(pick(LINES.timeout));
+}
+/* Итог обработки клиента после мини-игры */
+function resolveClient(c, ok, line){
+  if(ok){
+    S.done++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak);
+    const gain = 100 + Math.min(S.streak, 10) * 15;
+    S.score += gain;
+    changeMeters(2, 4);
+    Sound.ok(); floatText('+' + gain);
+    if(Math.random() < 0.35) say(pick(LINES.ok));
+  } else {
+    S.lost++; S.streak = 0;
+    changeMeters(-7, -8);
+    Sound.fail(); floatText('Косяк', true);
+    if(navigator.vibrate) navigator.vibrate(60);
+    say(line || pick(LINES.fail), $('#bubble'), line ? 2 : 1);
+  }
+}
+
+/* ============================================================
+   МИНИ-ИГРЫ (модальное окно, у каждой свой таймер)
+   ============================================================ */
+let MG = null;
+function newMG(limit){
+  const g = { done: false, left: limit, limit, iv: null, raf: 0 };
+  MG = g;
+  $('#mtimer').style.width = '100%';
+  g.iv = setInterval(() => {
+    if(g.done || document.hidden) return;
+    g.left -= 0.1;
+    $('#mtimer').style.width = clamp(g.left / g.limit * 100, 0, 100) + '%';
+    if(g.left <= 0) finishMG(g, false);
+  }, 100);
+  return g;
+}
+function openModal(html){ $('#mbody').innerHTML = html; $('#modal').classList.add('show'); }
+function closeModal(){ $('#modal').classList.remove('show'); $('#mbody').innerHTML = ''; }
+function finishMG(g, ok, line){
+  if(g.done) return;
+  g.done = true; clearInterval(g.iv); cancelAnimationFrame(g.raf);
+  if(MG === g) MG = null;
+  closeModal();
+  const c = S.modalClient; S.modalClient = null;
+  if(S.running && c) resolveClient(c, ok, line);
+}
+function abortMG(){
+  if(MG){ MG.done = true; clearInterval(MG.iv); cancelAnimationFrame(MG.raf); MG = null; }
+  closeModal(); S.modalClient = null;
+}
+
+/* 1) Родственник: выбрать правильный кабинет */
+function mgRelative(c){
+  const g = newMG(13);
+  const offices = shuffle(OFFICES.slice());
+  openModal(`<h3>${c.icon} ${c.title}</h3><p class="quote"></p><p class="hint">Куда отправить?</p>
+    <div class="grid2">${offices.map(o => `<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>`);
+  $('#mbody .quote').textContent = c.text;
+  $('#mbody').querySelectorAll('[data-o]').forEach(b => b.onclick = () => {
+    Sound.click();
+    finishMG(g, b.dataset.o === c.office, 'Не туда отправила. Сейчас вернутся орать.');
+  });
+}
+
+/* 2) Документы: графы по порядку, кнопки перемешиваются */
+function mgDocs(c){
+  const g = newMG(14);
+  const seq = shuffle(['ФИО', 'Дата', 'Подпись', 'Печать', 'Причина', 'Номер']).slice(0, 4);
+  let step = 0;
+  openModal(`<h3>📄 ${c.text}</h3><p class="hint">Заполни графы строго по порядку:</p>
+    <div class="seq">${seq.map((s, i) => `<span data-i="${i}">${i + 1}. ${s}</span>`).join('')}</div><div class="grid2" id="docBtns"></div>`);
+  function renderBtns(){
+    const box = $('#docBtns'); if(!box) return;
+    box.innerHTML = shuffle(seq.slice(step)).map(f => `<button class="opt" data-f="${f}">${f}</button>`).join('');
+    box.querySelectorAll('[data-f]').forEach(b => b.onclick = () => {
+      if(g.done) return;
+      if(b.dataset.f === seq[step]){
+        $(`#mbody .seq span[data-i="${step}"]`).classList.add('done');
+        step++; Sound.blip();
+        if(step === seq.length) finishMG(g, true); else renderBtns();
+      } else {
+        finishMG(g, false, Math.random() < 0.5 ? 'Костя, блядь' : 'Перепутала графы. Переделывать.');
+      }
+    });
+  }
+  renderBtns();
+}
+
+/* 3) Вызов на X-Trail: попасть стрелкой в зелёную зону 3 раза */
+function mgCall(c){
+  const g = newMG(16);
+  const need = 3; let hits = 0, misses = 0, pos = 0, dir = 1, speed = 0.55, zone = { a: 0, w: 0.22 };
+  openModal(`<h3>🚙 Вызов</h3><p class="hint"></p><div class="road">${CAR_SVG}</div>
+    <div class="gauge"><div class="zone"></div><div class="needle"></div></div>
+    <div class="hits"></div><button class="btn red big" id="gas">Газ!</button>`);
+  $('#mbody .hint').textContent = c.text;
+  const zoneEl = $('#mbody .zone'), needle = $('#mbody .needle'), hitsEl = $('#mbody .hits');
+  function newZone(){ zone.a = rand(0.08, 0.92 - zone.w); zoneEl.style.left = zone.a * 100 + '%'; zoneEl.style.width = zone.w * 100 + '%'; }
+  function showHits(){ hitsEl.textContent = `Попадания: ${hits}/${need} · Промахи: ${misses}/3`; }
+  newZone(); showHits();
+  let last = performance.now();
+  function loop(now){
+    if(g.done) return;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    pos += dir * speed * dt;
+    if(pos >= 1){ pos = 1; dir = -1; } if(pos <= 0){ pos = 0; dir = 1; }
+    needle.style.left = pos * 100 + '%';
+    g.raf = requestAnimationFrame(loop);
+  }
+  g.raf = requestAnimationFrame(loop);
+  $('#gas').onclick = () => {
+    if(g.done) return;
+    if(pos >= zone.a && pos <= zone.a + zone.w){
+      hits++; Sound.blip(); speed *= 1.1; zone.w = Math.max(0.16, zone.w - 0.02);
+      if(hits >= need){ finishMG(g, true); return; }
+      newZone();
+    } else {
+      misses++; Sound.tone(150, 0.12, 'square', 0.05);
+      if(misses >= 3){ finishMG(g, false, 'Влетела в яму на новом X-Trail. Пиздец.'); return; }
+    }
+    showHits();
+  };
+}
+
+/* 4) Поступление: запомнить номер бирки и выбрать из похожих */
+function mutate(n){
+  const s = String(n).split(''); const i = randInt(0, 3); let d;
+  do { d = randInt(0, 9); } while(String(d) === s[i] || (i === 0 && d === 0));
+  s[i] = String(d); return +s.join('');
+}
+function mgBody(c){
+  const num = randInt(1000, 9999);
+  const set = new Set([num]);
+  while(set.size < 4) set.add(mutate(num));
+  const opts = shuffle([...set]);
+  const g = newMG(12);
+  openModal(`<h3>🧊 ${c.text}</h3><p class="hint">Запомни номер бирки:</p><div class="bignum">№ ${num}</div>`);
+  setTimeout(() => {
+    if(g.done) return;
+    $('#mbody').innerHTML = `<h3>🧊 Какой был номер?</h3><p class="hint">Санитар уже повёз каталку…</p>
+      <div class="grid2">${opts.map(o => `<button class="opt" data-n="${o}">№ ${o}</button>`).join('')}</div>`;
+    $('#mbody').querySelectorAll('[data-n]').forEach(b => b.onclick = () => {
+      Sound.click();
+      finishMG(g, +b.dataset.n === num, Math.random() < 0.5 ? 'Санитары заебали' : 'Не тот дед. Опять.');
+    });
+  }, 2300);
+}
+
+/* ============================================================
+   СЛУЧАЙНЫЕ СОБЫТИЯ (по одному за раз, чёрная плашка)
+   ============================================================ */
+function showEvent(cfg){
+  const ev = Object.assign({ left: cfg.time }, cfg);
+  S.event = ev;
+  $('#evIcon').textContent = cfg.icon;
+  $('#evText').textContent = cfg.text;
+  const btn = $('#evBtn');
+  if(cfg.btn){
+    btn.hidden = false; btn.textContent = cfg.btn;
+    btn.onclick = () => { if(S.event === ev && S.running) cfg.onBtn(ev); };
+  } else { btn.hidden = true; btn.onclick = null; }
+  ev.btnEl = btn;
+  $('#event').classList.add('show');
+  Sound.alert();
+  return ev;
+}
+/* Закрыть текущее событие (onEnd — уборка, всегда вызывается) */
+function endEvent(){
+  const ev = S.event; if(!ev) return;
+  S.event = null;
+  $('#event').classList.remove('show');
+  $('#evBtn').onclick = null;
+  if(ev.onEnd) ev.onEnd();
+  S.eventIn = rand(18, 28);
+}
+
+/* Санитары перекрыли проход: бирки заблокированы, пока не разгонишь */
+function evOrderlies(){
+  let taps = 6;
+  S.blocked = true; $('#queue').classList.add('blocked');
+  showEvent({
+    icon: '🚬', text: 'Санитары устроили перекур прямо в проходе. Каталки стоят.', btn: `Разогнать (${taps})`, time: 11,
+    onBtn(ev){ taps--; Sound.click(); if(taps <= 0){ changeMeters(2, 2); floatText('Разбежались'); endEvent(); } else ev.btnEl.textContent = `Разогнать (${taps})`; },
+    onTimeout(){ changeMeters(-10, -4); floatText('Полсмены коту под хвост', true); },
+    onEnd(){ S.blocked = false; $('#queue').classList.remove('blocked'); }
+  });
+  say('Санитары заебали', $('#bubble'), 2);
+}
+/* Костя перепутал бирки: терпение двух клиентов падает вдвое */
+function evKostya(){
+  showEvent({ icon: '🤦‍♂️', text: 'Костя перепутал бирки на каталках. Очередь звереет.', btn: 'Наорать на Костю', time: 6,
+    onBtn(){ Sound.click(); changeMeters(5, 0); floatText('Полегчало'); endEvent(); } });
+  if(S.clients.length) shuffle(S.clients.slice()).slice(0, 2).forEach(c => { c.patience *= 0.65; });
+  else { addClient(); addClient(); }
+  say('Костя, блядь', $('#bubble'), 2);
+}
+/* Макс включил музыку в зале прощаний */
+function evMax(){
+  showEvent({ icon: '🎶', text: 'Макс врубил в зале прощаний «Рюмку водки на столе». На полную.', btn: 'Выключить', time: 8,
+    onBtn(){ Sound.click(); changeMeters(3, 2); floatText('Тишина. Скорбим.'); endEvent(); },
+    onTimeout(){ changeMeters(-12, -6); floatText('Родня подпевает. Скандал.', true); } });
+  Sound.tune();
+  say('Макс, ты охуел', $('#bubble'), 2);
+}
+/* Рапай — двойник: тапни её 3 раза, иначе уведёт клиента */
+function evRapay(){
+  let taps = 3;
+  const el = document.createElement('button');
+  el.className = 'rapay'; el.setAttribute('aria-label', 'Рапай');
+  el.innerHTML = RAPAY_SVG + '<span>Рапай</span>';
+  const move = () => { el.style.left = rand(2, 70) + '%'; el.style.top = rand(0, 55) + '%'; };
+  move(); $('#arena').appendChild(el);
+  const ev = showEvent({ icon: '🖤', text: 'Рапай припёрлась. Губы вперёд, волосы до пояса — перегородила весь проход! Тапни её 3 раза.', time: 9,
+    onTimeout(){
+      if(S.clients.length){ removeClient(pick(S.clients)); S.lost++; S.streak = 0; changeMeters(-5, -6); floatText('Рапай увела клиента', true); }
+      else { changeMeters(-6, 0); floatText('Рапай выпила твой кофе', true); }
+    },
+    onEnd(){ el.remove(); } });
+  el.onclick = e => {
+    e.stopPropagation();
+    if(S.event !== ev || !S.running) return;
+    taps--; Sound.click();
+    if(taps <= 0){ S.score += 150; changeMeters(4, 2); floatText('+150 Рапай выгнана'); endEvent(); }
+    else move();
+  };
+  say('Опять эта тупая Рапай', $('#bubble'), 2);
+}
+/* Дед в холодильнике */
+function evDed(){
+  showEvent({ icon: '✨', text: 'Холодильник № 3: простыня сползла, а родственники уже на подходе.', btn: 'Накрыть простынёй', time: 8,
+    onBtn(){ Sound.click(); changeMeters(2, 3); floatText('Прикрыто'); endEvent(); },
+    onTimeout(){ changeMeters(-8, -5); floatText('Родственники всё увидели', true); } });
+  say('Опять у деда яйца блестят', $('#bubble'), 2);
+}
+/* Хорошее событие */
+function evBonus(){
+  showEvent({ icon: '📺', text: 'Подруга пишет: вечером новый выпуск «Битвы экстрасенсов»!', time: 3 });
+  changeMeters(10, 0); floatText('+10 спокойствия');
+  say('Так, вечером вино. Держимся.', $('#bubble'), 2);
+}
+const EVENTS = [
+  { id: 'orderlies', f: evOrderlies, w: 2 }, { id: 'kostya', f: evKostya, w: 2 }, { id: 'max', f: evMax, w: 2 },
+  { id: 'rapay', f: evRapay, w: 2 }, { id: 'ded', f: evDed, w: 2 }, { id: 'bonus', f: evBonus, w: 1 }
+];
+function startRandomEvent(){
+  const pool = EVENTS.filter(e => e.id !== S.lastEvent);       // без повтора подряд
+  const total = pool.reduce((s, e) => s + e.w, 0);
+  let r = Math.random() * total, chosen = pool[0];
+  for(const e of pool){ r -= e.w; if(r <= 0){ chosen = e; break; } }
+  S.lastEvent = chosen.id;
+  chosen.f();
+}
+
+/* ============================================================
+   ИГРОВОЙ ЦИКЛ СМЕНЫ
+   ============================================================ */
+function spawnInterval(){
+  const k = clamp(S.elapsed / SHIFT_LEN, 0, 1);
+  return rand(0.85, 1.4) * (8.5 - 3.5 * k);        // от ~9 до ~5.5 секунды
+}
+function updateHUD(){
+  const t = Math.max(0, Math.ceil(S.time));
+  const clock = $('#clock');
+  clock.textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
+  clock.classList.toggle('low', t <= 20);
+  $('#score').textContent = S.score;
+  $('#streak').textContent = S.streak >= 2 ? `серия ×${S.streak}` : '';
+  $('#vCalm').textContent = Math.round(S.calm); $('#barCalm').style.width = S.calm + '%';
+  $('#vProf').textContent = Math.round(S.prof); $('#barProf').style.width = S.prof + '%';
+  $('#meterCalm').classList.toggle('low', S.calm < 25);
+  $('#meterProf').classList.toggle('low', S.prof < 25);
+  const ib = $('#btnIqos');
+  ib.disabled = S.iqosCd > 0;
+  ib.textContent = S.iqosCd > 0 ? `IQOS · ${Math.ceil(S.iqosCd)} с` : 'IQOS · затяжка';
+}
+function loop(now){
+  if(!S.running) return;
+  let dt = (now - S.last) / 1000; S.last = now;
+  dt = clamp(dt, 0, 0.25);                       // вкладка была скрыта — не «перематываем» время
+  S.time -= dt; S.elapsed += dt;
+  S.calm = clamp(S.calm - dt * 0.14, 0, 100);    // спокойствие тает само
+  S.iqosCd = Math.max(0, S.iqosCd - dt);
+
+  for(const c of S.clients.slice()){ c.patience -= dt; if(c.patience <= 0) clientTimeout(c); }
+
+  S.spawnIn -= dt;
+  if(!S.clients.length && !S.modalClient && S.spawnIn > 1) S.spawnIn = 1;
+  if(S.spawnIn <= 0){ addClient(); S.spawnIn = spawnInterval(); }
+
+  if(S.event){
+    S.event.left -= dt;
+    $('#evBar').style.width = clamp(S.event.left / S.event.time * 100, 0, 100) + '%';
+    if(S.event.left <= 0){ const ev = S.event; if(ev.onTimeout) ev.onTimeout(); endEvent(); }
+  } else {
+    S.eventIn -= dt;
+    if(S.eventIn <= 0) startRandomEvent();
+  }
+
+  updatePatience(); updateHUD();
+  if(S.calm <= 0){ endShift('calm'); return; }
+  if(S.prof <= 0){ endShift('fired'); return; }
+  if(S.time <= 0){ endShift('time'); return; }
+  requestAnimationFrame(loop);
+}
+function startShift(){
+  Sound.init(); Sound.stopHum(); Sound.startHum(50);
+  stopRitual();
+  resetShift();
+  $('#queue').classList.remove('blocked');
+  $('#event').classList.remove('show');
+  document.querySelectorAll('.rapay').forEach(e => e.remove());
+  renderQueue(); updateHUD();
+  show('shift');
+  say('Так. Смена. Поехали.', $('#bubble'), 2);
+  requestAnimationFrame(t => { S.last = t; requestAnimationFrame(loop); });
+}
+function shiftFinalScore(){ return S.score + Math.round(S.prof) * 10 + Math.round(S.calm) * 5; }
+function endShift(reason){
+  if(!S.running) return;
+  S.running = false; S.endReason = reason;
+  abortMG();
+  if(S.event){ const ev = S.event; S.event = null; $('#event').classList.remove('show'); if(ev.onEnd) ev.onEnd(); }
+  Sound.stopHum();
+  reason === 'time' ? Sound.ok() : Sound.fail();
+  const total = shiftFinalScore();
+  Save.data.lastShift = total;
+  Save.data.bestShift = Math.max(Save.data.bestShift, total);
+  Save.data.unlocked = true;
+  Save.save();
+  showShiftResults(total);
+}
+
+/* ============================================================
+   ВЕЧЕРНИЙ РИТУАЛ
+   ============================================================ */
+/* Экстрасенсы: настоящий тот, чьё предсказание сходится со ВСЕМИ подсказками */
+const PSYCHIC = [
+  { clues: ['Стеклянное', 'Открыли вчера вечером', 'Пахнет Италией и плохими решениями'], answer: 'пустая бутылка кьянти', psychics: [
+    { name: 'Маг Серафим', line: 'Вижу букву М… или Ж… возможно, Ы.' },
+    { name: 'Ведьма Анжела', line: 'Там бутылка. Красное, итальянское. Пустая, конечно.', real: true },
+    { name: 'Шаман Гена', line: 'Там хрустальный бокал вашей бабушки. Новый, нетронутый.' },
+    { name: 'Потомственная Зинаида', line: 'Там кошелёк. Положите в него пять тысяч. Мне.' } ] },
+  { clues: ['Маленькое и белое', 'Нагревается, но не горит', 'Всегда лежит в сумке у Дарьи'], answer: 'стик для IQOS', psychics: [
+    { name: 'Маг Серафим', line: 'Там зажигалка. Я чувствую пламя!' },
+    { name: 'Ясновидящий Арнольд', line: 'Там стик. Табачный. Греется, а дыма нет.', real: true },
+    { name: 'Шаман Гена', line: 'Там зуб. Белый. Вашего бывшего.' },
+    { name: 'Потомственная Зинаида', line: 'У вас кто-то умер. Я точно вижу. (Она работает в морге, гений.)' } ] },
+  { clues: ['Бумажное', 'В нём кого-то убили, но не по-настоящему', 'Дарья дочитала его в три часа ночи'], answer: 'детектив в мягкой обложке', psychics: [
+    { name: 'Ведьма Анжела', line: 'Там свидетельство о смерти. Самое настоящее.' },
+    { name: 'Медиум Виолетта', line: 'Книга. Детектив. Убийца — садовник, не благодарите.', real: true },
+    { name: 'Маг Серафим', line: 'Там газета с кроссвордом. Дарья любит кроссворды.' },
+    { name: 'Шаман Гена', line: 'Духи говорят: там пицца. Гена голоден.' } ] },
+  { clues: ['Металлическое', 'Открывает что-то японское', 'Лежит в кармане чёрной куртки'], answer: 'ключ от нового X-Trail', psychics: [
+    { name: 'Ясновидящий Арнольд', line: 'Ключ от гаража. Старого, советского.' },
+    { name: 'Потомственная Зинаида', line: 'Палочки для суши. Японские же!' },
+    { name: 'Медиум Виолетта', line: 'Ключ. Автомобильный. Машина японская и совсем новая.', real: true },
+    { name: 'Маг Серафим', line: 'Кольцо. Скоро свадьба. Или похороны.' } ] },
+  { clues: ['Липкое и блестящее', 'Уходит по тюбику в день — губы-то огромные', 'Чужое, лежало рядом с длинным тёмным волосом'], answer: 'блеск для губ Рапай', rapay: true, psychics: [
+    { name: 'Шаман Гена', line: 'Там мёд. Липкий. Гена бы съел.' },
+    { name: 'Ведьма Анжела', line: 'Блеск для губ. Пустой. Хозяйка с длинными тёмными волосами.', real: true },
+    { name: 'Маг Серафим', line: 'Там помада Дарьи! Требую ДНК-тест.' },
+    { name: 'Медиум Виолетта', line: 'Там рыжая заколка. Блестящая.' } ] }
+];
+/* Ужастик: первый вариант — единственно разумный */
+const HORROR = [
+  { scene: 'Свет погас. Героиня шепчет: «Пойду проверю, что там в подвале…»', options: ['Не ходи в подвал, дура!', 'Возьми свечку и надень пеньюар!', 'Позови Рапай, её не жалко'], doom: 'Пошла в подвал. В пеньюаре. Минус героиня.' },
+  { scene: 'Фарфоровая кукла в углу медленно повернула голову.', options: ['Сожги её нахуй и съезжай!', 'Причеши её, она же милая', 'Сфоткай для сторис'], doom: 'Кукла набрала 300 лайков. Героиня — нет.' },
+  { scene: 'Герои решают разделиться: «Так мы быстрее найдём выход».', options: ['Не разделяйтесь, долбоёбы!', 'Отличный план, ребята!', 'Разделитесь ещё раз, на всякий'], doom: 'Разделились. Встретятся уже у Дарьи на работе.' },
+  { scene: 'Маньяк упал. Героиня бросает нож и рыдает рядом с ним.', options: ['Добей его, он сейчас встанет!', 'Обними его, ему тоже тяжело', 'Вызови ему такси'], doom: 'Он встал. Они всегда встают.' },
+  { scene: 'Из телевизора вылезает мокрая девочка с длинными волосами.', options: ['Выдерни шнур из розетки!', 'Переключи на «Битву экстрасенсов»', 'Предложи ей полотенце и бокал'], doom: 'Девочка допила твоё вино. И героиню.' },
+  { scene: 'Из темноты морга голос: «Да-а-аша… иди сюда-а-а…»', options: ['Костя, блядь, это ты?!', 'Иду, мой хороший!', 'Спрячься в холодильник'], doom: 'Это был Костя. Но осадочек остался.', win: 'Это был Костя. С тортом. Придурок.' }
+];
+const R = { score: 0, wine: 0, sticks: 3, queue: [], idx: 0, q: null, nextT: null };
+
+function stopRitual(){
+  if(R.q){ R.q.done = true; clearInterval(R.q.iv); R.q = null; }
+  clearTimeout(R.nextT);
+}
+function applyWine(){
+  const st = $('#stage');
+  st.style.setProperty('--wob', (R.wine * 0.7) + 'deg');
+  st.style.setProperty('--wobx', (R.wine * 3) + 'px');
+  st.classList.toggle('wobble', R.wine > 0);
+  st.classList.toggle('drunk', R.wine >= 3);
+}
+function startRitual(){
+  Sound.init(); Sound.stopHum(); Sound.startHum(38);
+  stopRitual();
+  Object.assign(R, { score: 0, wine: 0, sticks: 3, idx: 0 });
+  R.queue = [
+    ...shuffle(PSYCHIC.slice()).slice(0, 4).map(d => ({ type: 'psy', d })),
+    ...shuffle(HORROR.slice()).slice(0, 5).map(d => ({ type: 'hor', d }))
+  ];
+  show('ritual'); applyWine();
+  $('#stage').innerHTML = `
+    <div class="stage-head"><h2>Дома. Вечер.</h2><small>Ритуал</small></div>
+    <p>X-Trail на парковке, пальто на крючке, телевизор включён. Сначала угадаем настоящего экстрасенса, потом поорём на героев ужастика.</p>
+    <div class="props">
+      <button class="btn" id="btnWine">🍷 Налить бокал (0/3)</button>
+      <span class="hint">Каждый бокал: +2 с на вопрос, но экран плывёт.</span>
+    </div>
+    <p class="hint">Стиков IQOS: 3. Каждый убирает один неверный вариант.</p>
+    <button class="btn red big" id="btnBegin">Включить «Битву экстрасенсов»</button>`;
+  $('#btnWine').onclick = () => {
+    if(R.wine >= 3) return;
+    R.wine++; Sound.tone(700, 0.25, 'sine', 0.06, 500);
+    $('#btnWine').textContent = `🍷 Налить бокал (${R.wine}/3)`;
+    if(R.wine >= 3) $('#btnWine').disabled = true;
+    applyWine();
+    say(['Ну, за покойников.', 'Второй — для дедукции.', 'Третий — и я сама экстрасенс.'][R.wine - 1], $('#rbubble'));
+  };
+  $('#btnBegin').onclick = () => { Sound.click(); nextQuestion(); };
+  say('Наконец-то. Вино, IQOS и шарлатаны.', $('#rbubble'));
+}
+function nextQuestion(){
+  if(R.idx >= R.queue.length){ endRitual(); return; }
+  const item = R.queue[R.idx];
+  if(item.type === 'hor' && (R.idx === 0 || R.queue[R.idx - 1].type !== 'hor')) say('Так, а теперь ужастик. Свет выключаем.', $('#rbubble'));
+  runQuestion(item);
+}
+function runQuestion(item){
+  const isPsy = item.type === 'psy', d = item.d;
+  const psyCount = R.queue.filter(x => x.type === 'psy').length;
+  const num = isPsy ? R.idx + 1 : R.idx - psyCount + 1;
+  const tot = isPsy ? psyCount : R.queue.length - psyCount;
+  const limit = (isPsy ? 24 : 13) + R.wine * 2;
+  const opts = isPsy
+    ? d.psychics.map(p => ({ name: p.name, line: p.line, correct: !!p.real }))
+    : d.options.map((t, i) => ({ name: '', line: t, correct: i === 0 }));
+  shuffle(opts);
+
+  const st = $('#stage');
+  st.innerHTML = `
+    <div class="stage-head"><h2>${isPsy ? 'Битва экстрасенсов' : 'Что крикнуть герою?'}</h2><small>${isPsy ? 'Раунд' : 'Сцена'} ${num}/${tot}</small></div>
+    <div class="mtimer"><i id="rtimer"></i></div>
+    ${isPsy ? '<p class="hint">Что в чёрном ящике? Подсказки:</p><ul class="clues"></ul><p class="hint">Кто из экстрасенсов настоящий?</p>' : '<div class="scene"></div>'}
+    <div class="choices"></div>
+    <div class="props"><button class="btn ghost" id="btnStick">IQOS-подсказка (${R.sticks})</button></div>
+    <div class="feedback" id="fb"></div>`;
+  if(isPsy){ const ul = st.querySelector('.clues'); d.clues.forEach(c => { const li = document.createElement('li'); li.textContent = c; ul.appendChild(li); }); }
+  else st.querySelector('.scene').textContent = d.scene;
+
+  const box = st.querySelector('.choices');
+  opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'choice'; b.dataset.i = i;
+    if(isPsy){ const n = document.createElement('b'); n.textContent = o.name; b.appendChild(n); const s = document.createElement('span'); s.textContent = `«${o.line}»`; b.appendChild(s); }
+    else { const n = document.createElement('b'); n.textContent = `«${o.line}»`; b.appendChild(n); }
+    b.onclick = () => answer(b);
+    box.appendChild(b);
+  });
+  const buttons = [...box.children];
+
+  const q = { done: false, left: limit, limit, iv: null }; R.q = q;
+  q.iv = setInterval(() => {
+    if(q.done || document.hidden) return;
+    q.left -= 0.1;
+    const t = $('#rtimer'); if(t) t.style.width = clamp(q.left / q.limit * 100, 0, 100) + '%';
+    if(q.left <= 0) answer(null);
+  }, 100);
+
+  const stickBtn = $('#btnStick');
+  stickBtn.disabled = R.sticks <= 0;
+  stickBtn.onclick = () => {
+    if(q.done || R.sticks <= 0) return;
+    const wrong = buttons.filter(b => !opts[+b.dataset.i].correct && !b.classList.contains('gone'));
+    if(wrong.length <= 1) { say('Тут уже и без IQOS понятно', $('#rbubble')); return; }   // оставляем хотя бы один неверный
+    const g = pick(wrong); g.classList.add('gone'); g.disabled = true;
+    R.sticks--; Sound.puff();
+    stickBtn.textContent = `IQOS-подсказка (${R.sticks})`; stickBtn.disabled = R.sticks <= 0;
+  };
+
+  function answer(btn){
+    if(q.done) return;
+    q.done = true; clearInterval(q.iv); R.q = null;
+    const ok = !!btn && opts[+btn.dataset.i].correct;
+    buttons.forEach(b => { b.disabled = true; if(opts[+b.dataset.i].correct) b.classList.add('right'); });
+    if(btn && !ok) btn.classList.add('wrong');
+    stickBtn.disabled = true;
+    const fb = $('#fb');
+    if(ok){
+      const pts = 100 + Math.round(Math.max(0, q.left) * 8);
+      R.score += pts; Sound.ok();
+      fb.className = 'feedback ok';
+      fb.textContent = isPsy ? `+${pts}. В ящике: ${d.answer}. Дедукция, детка.` : `+${pts}. ${d.win || 'Герой послушался. Впервые в истории кино.'}`;
+    } else {
+      Sound.fail();
+      fb.className = 'feedback bad';
+      fb.textContent = isPsy ? `${btn ? 'Развели' : 'Время вышло'}. В ящике: ${d.answer}.` : (btn ? d.doom : 'Промолчала. ' + d.doom);
+    }
+    if(isPsy && d.rapay) say('Опять эта тупая Рапай', $('#rbubble'), 2);
+    else if(!ok) say(isPsy ? 'Шарлатаны, как и родственники' : 'Ну и сдохни, дебил', $('#rbubble'));
+    R.nextT = setTimeout(() => { R.idx++; nextQuestion(); }, 2600);
+  }
+}
+function endRitual(){
+  stopRitual(); Sound.stopHum(); Sound.ok();
+  Save.data.bestRitual = Math.max(Save.data.bestRitual, R.score);
+  const day = (Save.data.lastShift || 0) + R.score;
+  Save.data.best = Math.max(Save.data.best, day);
+  Save.save();
+  R.wine = 0; applyWine();
+  showRitualResults(day);
+}
+
+/* ============================================================
+   ИТОГИ
+   ============================================================ */
+function shiftRank(s){
+  if(s < 1500) return 'Стажёрка на испытательном';
+  if(s < 3000) return 'Крепкий администратор';
+  if(s < 4500) return 'Королева морга';
+  return 'Легенда ритуалки. Даже покойники довольны.';
+}
+function ritualRank(s){
+  if(s < 500) return 'Сама шарлатанка';
+  if(s < 1100) return 'Экстрасенс третьего ранга';
+  return 'Победительница «Битвы»';
+}
+function statLine(label, val){ return `<div class="stat-line"><span>${label}</span><b>${val}</b></div>`; }
+function showShiftResults(total){
+  const why = { time: 'Смена закончилась. Все живые разошлись, остальные остались.', calm: 'Спокойствие на нуле. Дарья послала всех и ушла курить.', fired: 'Профессионализм на нуле. Начальство в ярости.', quit: 'Дарья закончила смену пораньше. Имеет право.' }[S.endReason];
+  $('#resultsBox').innerHTML = `
+    <div class="stage-head"><h2>Итоги смены</h2><small>3 минуты ада</small></div>
+    <p class="hint"></p>
+    <div class="rank">${shiftRank(total)}</div>
+    ${statLine('Обслужено клиентов', S.done)}
+    ${statLine('Потеряно клиентов', S.lost)}
+    ${statLine('Лучшая серия', S.bestStreak)}
+    ${statLine('Очки за работу', S.score)}
+    ${statLine('Бонус за профессионализм', Math.round(S.prof) * 10)}
+    ${statLine('Бонус за спокойствие', Math.round(S.calm) * 5)}
+    ${statLine('Итого', total)}
+    <p class="hint">Рекорд смены: ${Save.data.bestShift}</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn red big" id="rToRitual">🍷 Вечерний ритуал</button>
+      <button class="btn big" id="rAgain">Ещё смена</button>
+      <button class="btn ghost big" id="rMenu">В меню</button>
+    </div>`;
+  $('#resultsBox .hint').textContent = why;
+  $('#rToRitual').onclick = () => { Sound.click(); startRitual(); };
+  $('#rAgain').onclick = () => { Sound.click(); startShift(); };
+  $('#rMenu').onclick = () => { Sound.click(); goMenu(); };
+  show('results');
+}
+function showRitualResults(day){
+  $('#resultsBox').innerHTML = `
+    <div class="stage-head"><h2>Итоги вечера</h2><small>Вино допито</small></div>
+    <div class="rank">${ritualRank(R.score)}</div>
+    ${statLine('Очки ритуала', R.score)}
+    ${statLine('Последняя смена', Save.data.lastShift || 0)}
+    ${statLine('Весь день', day)}
+    ${statLine('Лучший день', Save.data.best)}
+    <p class="hint">Завтра снова на смену. Покойники ждут, им-то не к спеху.</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn red big" id="rAgain">Новая смена</button>
+      <button class="btn big" id="rRitual">Ещё раз ритуал</button>
+      <button class="btn ghost big" id="rMenu">В меню</button>
+    </div>`;
+  $('#rAgain').onclick = () => { Sound.click(); startShift(); };
+  $('#rRitual').onclick = () => { Sound.click(); startRitual(); };
+  $('#rMenu').onclick = () => { Sound.click(); goMenu(); };
+  show('results');
+}
+
+/* ============================================================
+   НАВИГАЦИЯ И ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo(0, 0);
+}
+function goMenu(){
+  stopRitual(); Sound.stopHum();
+  if(S.running){ S.running = false; abortMG(); if(S.event){ const ev = S.event; S.event = null; if(ev.onEnd) ev.onEnd(); } }
+  $('#event').classList.remove('show');
+  renderMenu(); show('menu');
+}
+function renderMenu(){
+  $('#recShift').textContent = Save.data.bestShift;
+  $('#recRitual').textContent = Save.data.bestRitual;
+  $('#recBest').textContent = Save.data.best;
+  const b = $('#btnRitualMenu');
+  b.disabled = !Save.data.unlocked;
+  b.textContent = Save.data.unlocked ? '🍷 Вечерний ритуал' : '🔒 Вечерний ритуал';
+}
+function updateMuteBtn(){ $('#btnMute').textContent = Save.data.muted ? '🔇' : '🔊'; }
+
+function init(){
+  Save.load();
+  $('#portrait').innerHTML = DARYA_SVG;
+  $('#avatarShift').innerHTML = DARYA_SVG;
+  $('#avatarRitual').innerHTML = DARYA_SVG;
+  renderMenu(); updateMuteBtn();
+
+  $('#btnStart').onclick = () => startShift();
+  $('#btnRitualMenu').onclick = () => { if(Save.data.unlocked){ Sound.click(); startRitual(); } };
+  $('#btnMute').onclick = () => { Sound.init(); Sound.setMuted(!Save.data.muted); updateMuteBtn(); Sound.click(); };
+  $('#btnIqos').onclick = () => {
+    if(!S.running || S.iqosCd > 0) return;
+    S.iqosCd = IQOS_CD; changeMeters(18, 0); Sound.puff(); floatText('+18 спокойствия');
+    say(pick(['Затяжка. Живём.', 'Пять минут — и я снова человек', 'Не трогайте меня 10 секунд']));
+  };
+  $('#btnQuit').onclick = () => { if(S.running){ Sound.click(); endShift('quit'); } };
+  /* Тап по Дарье: случайная реплика (фирменные — чаще) */
+  const talk = el => () => { Sound.click(); say(Math.random() < 0.6 ? pick(LINES.sign) : pick(LINES.click), el); };
+  $('#avatarShift').onclick = talk($('#bubble'));
+  $('#avatarRitual').onclick = talk($('#rbubble'));
+  /* При возврате во вкладку сбрасываем отсчёт кадра */
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) S.last = performance.now(); });
+}
+init();
+</script>
+</body>
+</html>
