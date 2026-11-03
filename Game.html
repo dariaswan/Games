@@ -32,7 +32,6 @@
     padding:18px;position:relative;overflow:hidden;
   }
   
-  /* Кнопка звука */
   .mute{
     position:absolute;right:14px;top:14px;border:0;background:#efe6d6;border-radius:10px;
     width:32px;height:32px;font-size:16px;cursor:pointer;z-index:21;display:flex;
@@ -44,7 +43,6 @@
   .sub{color:var(--muted);font-size:.85rem;margin:0 0 14px;line-height: 1.3;}
   .hidden{display:none!important}
 
-  /* HUD (Шкалы) */
   .hud{display:flex;gap:8px;margin-bottom:12px}
   .meter{flex:1;background:#eee6d8;border-radius:10px;overflow:hidden;position:relative;height:32px}
   .meter span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -55,7 +53,6 @@
   .timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.15rem;color:var(--accent2);
     min-width:54px;text-align:right;display: flex; align-items: center; justify-content: flex-end;}
 
-  /* Speech bubble */
   .bubble{
     position:absolute;right:14px;top:54px;max-width:78%;
     background:var(--black);color:#fff;padding:8px 12px;border-radius:14px 14px 4px 14px;
@@ -67,7 +64,6 @@
   .bubble::after{content:"";position:absolute;right:10px;bottom:-7px;
     border:7px solid transparent;border-top-color:var(--black);border-bottom:0}
 
-  /* Task card */
   .card{
     background:#fff;border:2px solid #e8dcc8;border-radius:16px;padding:16px;margin-bottom:12px;
     animation:pop .18s ease;
@@ -86,7 +82,6 @@
   .choice.bad{border-color:var(--bad);background:#fbeaea}
   .choice:disabled{opacity:.85;cursor:default}
 
-  /* Arena */
   .arena{position:relative;height:210px;background:#eaf1f4;border-radius:14px;overflow:hidden;
     border:2px solid #d3e0e6;margin-bottom:10px}
   .target{
@@ -98,7 +93,6 @@
   }
   @keyframes spawn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 
-  /* Buttons */
   .btn{
     display:block;width:100%;border:0;border-radius:14px;padding:14px;
     font-size:1rem;font-weight:800;cursor:pointer;background:var(--accent);color:#fff;
@@ -110,7 +104,6 @@
   .row{display:flex;gap:8px}
   .row .btn{margin:0}
 
-  /* Evening */
   .evening{
     background:linear-gradient(160deg,#241118,#3a1520 60%,#5b1f2e);color:#f6e9d8;
     border-radius:16px;padding:16px;
@@ -120,7 +113,6 @@
   .evening .choice.ok{background:#24422c;border-color:#4d8f5f}
   .evening .choice.bad{background:#4a1d24;border-color:#a33f4a}
 
-  /* Final */
   .scoreline{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:10px}
   .final{text-align:center;padding:10px 0}
   .final .big{font-size:2rem;font-weight:900;color:var(--accent2);margin:6px 0}
@@ -134,7 +126,6 @@
   <button class="mute" id="muteBtn" title="Звук">🔊</button>
   <div class="bubble" id="bubble"></div>
 
-  <!-- START -->
   <section id="startScreen">
     <h1>Смена в морге</h1>
     <p class="sub">Дарья, ритуальный агент и администратор морга. Три минуты — и вечерний ритуал.</p>
@@ -148,7 +139,6 @@
     </div>
   </section>
 
-  <!-- SHIFT -->
   <section id="shiftScreen" class="hidden">
     <div class="scoreline">
       <span>Смена идёт</span>
@@ -175,7 +165,6 @@
     </div>
   </section>
 
-  <!-- EVENING -->
   <section id="eveningScreen" class="hidden">
     <div class="evening">
       <h2>Вечерний ритуал 🍷</h2>
@@ -186,7 +175,6 @@
     </div>
   </section>
 
-  <!-- FINAL -->
   <section id="finalScreen" class="hidden">
     <div class="final">
       <h1 id="finalTitle">Смена окончена</h1>
@@ -364,7 +352,7 @@ function renderTask(kind){
     case 'rapai':
       data = {
         tag:'Рапай',
-        q:'На пороге снова Рапай — рыжая, во всём чёрном, с «сюрпризом». Что делаешь?',
+        q:'На пороге снова Рапай — жирная, тупая, темноволосая, с огромными губами, с «сюрпризом». Что делаешь?',
         opts:[
           {t:'Вежливо принять и зафиксировать в журнале', ok:true, dc:+4, dp:+6},
           {t:'«Опять эта тупая Рапай» — и закрыть дверь', ok:false, dc:-6, dp:-8, line:'rapai'},
