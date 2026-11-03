@@ -282,7 +282,11 @@ function nextTask(){
   if(state.busy) return;
   if(Math.random()<0.18){ runOrderlyMinigame(); return; }
 
-  const kind = pick(['docs','relatives','call','ded','kostya','rapai','max']);
+  const kinds = [
+    'docs', 'relatives', 'call', 'ded', 'kostya', 'rapai', 'max', 
+    'leak', 'double_service', 'yulia_call', 'cataphalk', 'max_jac', 'kostya_credit'
+  ];
+  const kind = pick(kinds);
   renderTask(kind);
 }
 
@@ -341,7 +345,7 @@ function renderTask(kind){
     case 'kostya':
       data = {
         tag:'Коллега',
-        q:'Костя опять перепутал документы двух заказов. Твоя реакция?',
+        q:'Костя опять перепутал документы. Говорит: «Ну я же на китайской машине, у меня кредиты, мне можно». Твоя реакция?',
         opts:[
           {t:'Спокойно исправить и попросить быть внимательнее', ok:true, dc:+5, dp:+8},
           {t:'«Костя, блядь» — громко, на весь коридор', ok:true, dc:-4, dp:+2, line:'kostya', comment:'Ну хоть честно.'},
@@ -352,23 +356,98 @@ function renderTask(kind){
     case 'rapai':
       data = {
         tag:'Рапай',
-        q:'На пороге снова Рапай — жирная, тупая, темноволосая, с огромными губами, с «сюрпризом». Что делаешь?',
+        q:'Рапай (жирная, тупая, темноволосая, с огромными губами) сует телефон в лицо: «А вот скажите, почему у вас тут так пахнет? И вообще, вы верите в призраков?» Что делаешь?',
         opts:[
-          {t:'Вежливо принять и зафиксировать в журнале', ok:true, dc:+4, dp:+6},
+          {t:'Вежливо попросить не снимать и вернуться к работе', ok:true, dc:+4, dp:+6},
           {t:'«Опять эта тупая Рапай» — и закрыть дверь', ok:false, dc:-6, dp:-8, line:'rapai'},
-          {t:'Сделать вид, что не заметила', ok:false, dc:-8, dp:-6}
+          {t:'Начать отвечать на её тупые вопросы', ok:false, dc:-8, dp:-6}
         ]
       };
       break;
     case 'max':
-    default:
       data = {
         tag:'Венок',
-        q:'Макс принёс венок не того цвета и не той надписи. Что делаешь?',
+        q:'Макс принёс венок не того цвета и не той надписи. Говорит: «Зато влез в мой Jac!» Что делаешь?',
         opts:[
           {t:'Вернуть и оформить замену по регламенту', ok:true, dc:+5, dp:+8},
           {t:'«Макс, ты охуел» — и отправить обратно', ok:false, dc:-4, dp:+4, line:'max'},
           {t:'Оставить как есть, «сойдёт»', ok:false, dc:-6, dp:-12}
+        ]
+      };
+      break;
+    case 'leak':
+      data = {
+        tag:'Покойник',
+        q:'Покойник потёк прямо перед прощанием. Санитары ржут: «Зато не сухой, как шутки Кости!» Что делаешь?',
+        opts:[
+          {t:'Срочно вызвать санитаров и всё оперативно исправить', ok:true, dc:+4, dp:+8},
+          {t:'«Санитары заебали» — и уйти пить кофе', ok:false, dc:-8, dp:-12, line:'orderlies'},
+          {t:'Попытаться сама вытереть', ok:false, dc:-10, dp:-6}
+        ]
+      };
+      break;
+    case 'double_service':
+      data = {
+        tag:'Прощания',
+        q:'Два прощания назначены на одно время в одном зале. Кто-то из родственников уже начал кричать. Твои действия?',
+        opts:[
+          {t:'Быстро развести потоки и извиниться перед обоими', ok:true, dc:+6, dp:+8},
+          {t:'Сказать: «Макс, ты охуел, ты чё ставил?»', ok:false, dc:-6, dp:-8, line:'max'},
+          {t:'Закрыть двери и надеяться, что сами разберутся', ok:false, dc:-12, dp:-10}
+        ]
+      };
+      break;
+    case 'yulia_call':
+      data = {
+        tag:'Звонок',
+        q:'Звонит Юля (начальница). «Ты почему отчёт не скинула? Я жду». Что отвечаешь?',
+        opts:[
+          {t:'Спокойно: «Сейчас всё отправлю, были форс-мажоры»', ok:true, dc:+5, dp:+8},
+          {t:'«Юля, я тут с покойником воюю, подожди»', ok:false, dc:-4, dp:-6},
+          {t:'Сбросить и сказать, что не слышала', ok:false, dc:-10, dp:-12}
+        ]
+      };
+      break;
+    case 'cataphalk':
+      data = {
+        tag:'Катафалк',
+        q:'Катафалк застрял в пробке, а выезд через 10 минут. Костя говорит: «Зато у меня кредит выплачен... почти». Что делаешь?',
+        opts:[
+          {t:'Искать другой транспорт и предупреждать родственников', ok:true, dc:+6, dp:+8},
+          {t:'«Костя, блядь, ты вообще полезен?»', ok:false, dc:-6, dp:-8, line:'kostya'},
+          {t:'Ждать и надеяться на чудо', ok:false, dc:-8, dp:-10}
+        ]
+      };
+      break;
+    case 'max_jac':
+      data = {
+        tag:'Пикап Jac',
+        q:'Макс полчаса рассказывает, какой у него крутой китайский пикап Jac, хотя все знают, что это говно. Что делаешь?',
+        opts:[
+          {t:'Вежливо кивать и заниматься работой', ok:true, dc:+2, dp:+6},
+          {t:'«Макс, ты охуел», это же ведро с болтами', ok:false, dc:-4, dp:+4, line:'max'},
+          {t:'Спорить с ним полчаса о китайском автопроме', ok:false, dc:-10, dp:-6}
+        ]
+      };
+      break;
+    case 'kostya_credit':
+      data = {
+        tag:'Кредиты Кости',
+        q:'Костя жалуется, что взял кредит на китайскую машину, а потом еще один кредит, чтобы вернуть долг другу. И тут же шутит про «жёсткую подвеску». Что делать?',
+        opts:[
+          {t:'Сочувственно кивнуть и вернуться к работе', ok:true, dc:+4, dp:+6},
+          {t:'«Костя, блядь, ты хоть одну шутку не про это придумай»', ok:false, dc:-4, dp:+2, line:'kostya'},
+          {t:'Дать ему денег в долг', ok:false, dc:-8, dp:-10}
+        ]
+      };
+      break;
+    default:
+      data = {
+        tag:'Смена',
+        q:'Обычный рабочий момент. Что делаешь?',
+        opts:[
+          {t:'Работать', ok:true, dc:+2, dp:+2},
+          {t:'Отлынивать', ok:false, dc:-4, dp:-4}
         ]
       };
   }
@@ -419,7 +498,7 @@ function runOrderlyMinigame(){
     const w=arena.clientWidth-64, h=arena.clientHeight-64;
     el.style.left=rnd(4,Math.max(4,w))+'px';
     el.style.top =rnd(4,Math.max(4,h))+'px';
-    el.textContent=pick(['🧑‍⚕️','💪','🩺','🧟']);
+    el.textContent=pick(['🧑‍⚕️','💪','🩺','🧟','🚗','🚙']);
     el.onclick=()=>{
       if(el.dataset.hit) return;
       el.dataset.hit='1'; hits++; Sound.pop();
@@ -538,10 +617,4 @@ $('startBtn').onclick=()=>{ Sound.click(); state.screen='shift'; startShift(); }
 $('howBtn').onclick=()=>{ Sound.click(); $('howBox').classList.toggle('hidden'); };
 $('restartBtn').onclick=()=>{ Sound.click(); state.screen='start'; show('startScreen'); };
 $('toFinalBtn').onclick=()=>{ Sound.click(); toFinal(); };
-$('muteBtn').onclick=()=>{ const m=Sound.toggle(); $('muteBtn').textContent=m?'🔇':'🔊'; };
-
-renderHUD();
-show('startScreen');
-</script>
-</body>
-</html>
+$('muteBtn').onclick=()=>{ const m=Sound.toggle(); $('muteBtn').textContent=m?'🔇':'
