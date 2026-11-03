@@ -33,7 +33,7 @@
   }
   
   .mute{
-    position:absolute;right:14px;top:14px;border:0;background:#efe6d6;border-radius:10px;
+    position:absolute;left:14px;top:14px;border:0;background:#efe6d6;border-radius:10px;
     width:32px;height:32px;font-size:16px;cursor:pointer;z-index:21;display:flex;
     align-items:center;justify-content:center;padding:0;
   }
@@ -43,7 +43,7 @@
   .sub{color:var(--muted);font-size:.85rem;margin:0 0 14px;line-height: 1.3;}
   .hidden{display:none!important}
 
-  .hud{display:flex;gap:8px;margin-bottom:12px}
+  .hud{display:flex;gap:8px;margin-bottom:12px; align-items: center;}
   .meter{flex:1;background:#eee6d8;border-radius:10px;overflow:hidden;position:relative;height:32px}
   .meter span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     font-size:.75rem;font-weight:800;color:#3a3330;z-index:2;letter-spacing:.3px;text-shadow: 0 1px 2px rgba(255,255,255,0.8);}
@@ -231,7 +231,8 @@ const state = {
   timerId:null,
   busy:false,
   errors:[],
-  best: +(localStorage.getItem('darya_best')||0)
+  best: +(localStorage.getItem('darya_best')||0),
+  recentTasks: [] 
 };
 
 let bubbleTimer=null;
@@ -266,7 +267,7 @@ function show(id){
 
 function startShift(){
   state.calm=60; state.pro=60; state.score=0; state.timeLeft=180;
-  state.errors=[]; state.busy=false;
+  state.errors=[]; state.busy=false; state.recentTasks=[];
   renderHUD(); show('shiftScreen');
   clearInterval(state.timerId);
   state.timerId = setInterval(()=>{
@@ -280,13 +281,26 @@ function startShift(){
 function nextTask(){
   if(state.screen!=='shift') return;
   if(state.busy) return;
-  if(Math.random()<0.18){ runOrderlyMinigame(); return; }
+  
+  if(Math.random()<0.15){ runOrderlyMinigame(); return; }
 
-  const kinds = [
+  const allKinds = [
     'docs', 'relatives', 'call', 'ded', 'kostya', 'rapai', 'max', 
-    'leak', 'double_service', 'yulia_call', 'cataphalk', 'max_jac', 'kostya_credit'
+    'leak', 'double_service', 'yulia_call', 'cataphalk', 'max_jac', 
+    'kostya_credit', 'another_kostya', 'rapai_blog', 'max_jac_pride'
   ];
-  const kind = pick(kinds);
+  
+  let available = allKinds.filter(k => !state.recentTasks.includes(k));
+  if(available.length === 0) { 
+    state.recentTasks = []; 
+    available = allKinds; 
+  }
+  
+  const kind = pick(available);
+  
+  state.recentTasks.push(kind);
+  if(state.recentTasks.length > 5) state.recentTasks.shift();
+
   renderTask(kind);
 }
 
@@ -441,6 +455,39 @@ function renderTask(kind){
         ]
       };
       break;
+    case 'another_kostya':
+      data = {
+        tag:'Костя',
+        q:'Костя снова с пошлой шуткой про «жёсткое тело» прямо при родственниках. Что делаешь?',
+        opts:[
+          {t:'Строго шикнуть на него и извиниться перед людьми', ok:true, dc:+5, dp:+8},
+          {t:'«Костя, блядь, у тебя совесть есть?»', ok:false, dc:-6, dp:-6, line:'kostya'},
+          {t:'Заржать вместе с ним', ok:false, dc:-10, dp:-10}
+        ]
+      };
+      break;
+    case 'rapai_blog':
+      data = {
+        tag:'Рапай',
+        q:'Рапай снимает сторис: «Смотрите, тут у них в морге всё так мрачно, а я бы сделала тут бьюти-салон!» Что делаешь?',
+        opts:[
+          {t:'Попросить покинуть помещение с камерой', ok:true, dc:+4, dp:+6},
+          {t:'«Опять эта тупая Рапай» и отобрать телефон', ok:false, dc:-6, dp:-8, line:'rapai'},
+          {t:'Рассказать ей о правилах этики', ok:false, dc:-8, dp:-6}
+        ]
+      };
+      break;
+    case 'max_jac_pride':
+      data = {
+        tag:'Макс и Jac',
+        q:'Макс гордо паркует свой пикап Jac прямо на месте катафалка. «Он же китайский, ему везде можно!» Что делаешь?',
+        opts:[
+          {t:'Заставить перепарковаться, пока не приехали родственники', ok:true, dc:+5, dp:+8},
+          {t:'«Макс, ты охуел» — пусть отъезжает', ok:false, dc:-6, dp:-6, line:'max'},
+          {t:'Оставить как есть, пусть стоит', ok:false, dc:-10, dp:-12}
+        ]
+      };
+      break;
     default:
       data = {
         tag:'Смена',
@@ -455,7 +502,10 @@ function renderTask(kind){
   tag.textContent = data.tag;
   q.textContent = data.q;
 
-  data.opts.forEach(o=>{
+  // ВОТ ЗДЕСЬ МЫ ПЕРЕМЕШИВАЕМ ВАРИАНТЫ ОТВЕТОВ
+  const shuffledOpts = data.opts.sort(() => Math.random() - 0.5);
+
+  shuffledOpts.forEach(o=>{
     const btn=document.createElement('button');
     btn.className='choice';
     btn.textContent=o.t;
@@ -489,7 +539,7 @@ function runOrderlyMinigame(){
   const arena=$('arena');
   arena.innerHTML='';
   let hits=0, misses=0;
-  const DURATION=3500, start=performance.now();
+  const DURATION=4000, start=performance.now();
 
   function spawn(){
     if(performance.now()-start>DURATION) return;
@@ -506,8 +556,8 @@ function runOrderlyMinigame(){
       setTimeout(()=>el.remove(),120);
     };
     arena.appendChild(el);
-    setTimeout(()=>{ if(!el.dataset.hit){ misses++; } el.remove(); }, rnd(500,900));
-    setTimeout(spawn, rnd(220,420));
+    setTimeout(()=>{ if(!el.dataset.hit){ misses++; } el.remove(); }, rnd(1200,1600));
+    setTimeout(spawn, rnd(500,800));
   }
   spawn();
 
@@ -516,7 +566,7 @@ function runOrderlyMinigame(){
     state.busy=false;
     $('orderlyWrap').classList.add('hidden');
     $('taskWrap').classList.remove('hidden');
-    if(hits>=4){ state.score+=8; changeMeters(+6,+4); Sound.ok(); }
+    if(hits>=3){ state.score+=8; changeMeters(+6,+4); Sound.ok(); }
     else { changeMeters(-6,-6); Sound.bad(); state.errors.push('Мини-игра: санитары'); }
     if(state.screen==='shift' && state.timeLeft>0) setTimeout(nextTask,500);
   }, DURATION+300);
@@ -558,63 +608,10 @@ function startEvening(reason){
 
   const grid=document.createElement('div'); grid.className='choices';
   const correct = PSYCHICS.find(p=>p.real).name;
-  PSYCHICS.forEach(p=>{
+  
+  // И тут тоже перемешаем экстрасенсов
+  const shuffledPsychics = [...PSYCHICS].sort(() => Math.random() - 0.5);
+
+  shuffledPsychics.forEach(p=>{
     const b=document.createElement('button');
-    b.className='choice'; b.textContent=p.name;
-    b.onclick=()=>{
-      [...grid.children].forEach(x=>x.disabled=true);
-      if(p.name===correct){ b.classList.add('ok'); state.score+=15; Sound.ok(); }
-      else { b.classList.add('bad'); Sound.bad(); state.errors.push('Вечер: экстрасенс'); }
-      setTimeout(renderHorror, 500);
-    };
-    grid.appendChild(b);
-  });
-  wrap.appendChild(grid);
-  body.appendChild(wrap);
-
-  function renderHorror(){
-    body.innerHTML='';
-    const q=document.createElement('p');
-    q.className='q'; q.textContent='Ужастик: герой идёт в подвал. Твой совет?';
-    body.appendChild(q);
-    const g=document.createElement('div'); g.className='choices';
-    const advice=pick(HORROR_ADVICE);
-    const opts=[advice, 'Да пусть идёт, чё будет-то', 'Позвонить Косте, блядь'];
-    opts.sort(()=>Math.random()-.5);
-    opts.forEach(t=>{
-      const b=document.createElement('button');
-      b.className='choice'; b.textContent=t;
-      b.onclick=()=>{
-        [...g.children].forEach(x=>x.disabled=true);
-        if(t===advice){ b.classList.add('ok'); state.score+=10; Sound.ok(); }
-        else { b.classList.add('bad'); Sound.bad(); state.errors.push('Вечер: ужастик'); }
-        $('toFinalBtn').classList.remove('hidden');
-      };
-      g.appendChild(b);
-    });
-    body.appendChild(g);
-  }
-}
-
-function toFinal(){
-  show('finalScreen');
-  state.screen='final';
-  $('finalTitle').textContent='Смена окончена';
-  $('finalScore').textContent=state.score+' очков';
-  const comment = state.score>=70 ? 'Дарья довольна. Наливай.' :
-                  state.score>=40 ? 'Норм смена. Айкос и вино заслужены.' :
-                  'Тяжёлый день. Дарья уже достала вино.';
-  $('finalComment').textContent=comment + (state.best?(' Лучший счёт: '+state.best):'');
-  const log=$('errLog');
-  if(state.errors.length){
-    log.innerHTML='<b>Косяки смены:</b>'+state.errors.slice(-8).map(e=>'<div>• '+e+'</div>').join('');
-  } else {
-    log.innerHTML='<div>Без косяков. Подозрительно.</div>';
-  }
-}
-
-$('startBtn').onclick=()=>{ Sound.click(); state.screen='shift'; startShift(); };
-$('howBtn').onclick=()=>{ Sound.click(); $('howBox').classList.toggle('hidden'); };
-$('restartBtn').onclick=()=>{ Sound.click(); state.screen='start'; show('startScreen'); };
-$('toFinalBtn').onclick=()=>{ Sound.click(); toFinal(); };
-$('muteBtn').onclick=()=>{ const m=Sound.toggle(); $('muteBtn').textContent=m?'🔇':'
+    b.className='choice'; b.text
