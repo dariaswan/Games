@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Хранитель чата</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+  }
+  .app { max-width: 500px; margin: 0 auto; padding: 12px; }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: #16213e; border-radius: 14px;
+    margin-bottom: 10px; font-size: 14px;
+  }
+  .header .day { font-weight: 700; color: #e94560; }
+  .header .points { color: #f5c542; font-weight: 700; }
+  .header .turn { color: #8ecae6; }
+  .chat {
+    background: #0f3460; border-radius: 14px; padding: 12px;
+    min-height: 280px; max-height: 50vh; overflow-y: auto;
+    margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .msg {
+    max-width: 85%; padding: 8px 12px; border-radius: 14px;
+    font-size: 13px; line-height: 1.4; animation: fadeIn .3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .msg.left { align-self: flex-start; background: #1a1a2e; border-bottom-left-radius: 4px; }
+  .msg.right { align-self: flex-end; background: #e94560; border-bottom-right-radius: 4px; }
+  .msg .name { font-size: 11px; font-weight: 700; color: #8ecae6; margin-bottom: 2px; }
+  .msg.right .name { color: #fff; }
+  .msg.system { align-self: center; background: transparent; color: #888; font-style: italic; font-size: 12px; text-align: center; }
+  .girls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .girl-card {
+    background: #16213e; border-radius: 10px; padding: 8px 6px;
+    font-size: 11px; text-align: center; cursor: pointer;
+    border: 2px solid transparent; transition: border .2s;
+  }
+  .girl-card:active { border-color: #e94560; }
+  .girl-card .gname { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+  .girl-card .bar { height: 4px; background: #333; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .girl-card .bar div { height: 100%; border-radius: 2px; transition: width .4s; }
+  .girl-card .mood { color: #4caf50; }
+  .girl-card .act { color: #f5c542; }
+  .girl-card .warm { color: #e94560; }
+  .actions { display: flex; flex-direction: column; gap: 8px; }
+  .btn {
+    background: #16213e; border: 1px solid #e94560; color: #eee;
+    padding: 12px; border-radius: 10px; font-size: 14px;
+    cursor: pointer; text-align: left; transition: background .2s;
+  }
+  .btn:active { background: #e94560; }
+  .btn:disabled { opacity: .4; }
+  .btn .cost { float: right; color: #f5c542; font-size: 12px; }
+  .footer { text-align: center; font-size: 11px; color: #555; margin-top: 10px; }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.85);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+  }
+  .modal-box {
+    background: #16213e; border-radius: 16px; padding: 20px;
+    max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto;
+  }
+  .modal-box h2 { margin-top: 0; color: #e94560; font-size: 18px; }
+  .modal-box p { font-size: 14px; line-height: 1.5; }
+  .modal-box .close {
+    background: #e94560; color: #fff; border: none; padding: 10px 20px;
+    border-radius: 10px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 12px;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <span class="day" id="dayLabel">День 1</span>
+    <span class="turn" id="turnLabel">Утро</span>
+    <span class="points" id="pointsLabel">⚡ 6</span>
+  </div>
+  <div class="chat" id="chat"></div>
+  <div class="girls" id="girls"></div>
+  <div class="actions" id="actions"></div>
+  <div class="footer">Хранитель чата • нажми на девочку, чтобы узнать о ней</div>
+</div>
+
+<script>
+const GIRLS = [
+  { id:'dasha', name:'Даша', hair:'каштановые волосы, карие глаза',
+    desc:'Весёлая, ироничная, мало пишет. Репетитор английского, увлекается ИИ и играми. Муж Дэнчик (готовит, но матерится), сын Костя-подросток. Любит мемы.',
+    keys:['мем','Костя','Дэнчик','игра'], color:'#9b59b6', baseMood:6, baseAct:3, baseWarm:7 },
+  { id:'galya', name:'Галя', hair:'тёмные волосы и глаза',
+    desc:'Спокойная, рассудительная, мало пишет. Математика, удалёнка. Парень Серёжа. Кот без зубов — любимец чата. Любит дачу и готовить.',
+    keys:['кот','дача','Серёжа','математика'], color:'#3498db', baseMood:6, baseAct:2, baseWarm:6 },
+  { id:'nastyaS', name:'Настя С', hair:'блондинка, голубые глаза',
+    desc:'Борется за справедливость, саморазвитие. В декрете с сыном Львом, изучает ИИ. Муж Тёма. Вяжет игрушки, рассказывает рецепты.',
+    keys:['Лев','Тёма','вяжет','справедливость'], color:'#e67e22', baseMood:7, baseAct:4, baseWarm:7 },
+  { id:'nastyaB', name:'Настя Б', hair:'тёмные волосы, голубые глаза',
+    desc:'Больше всех пишет, бытовуха. Активная. Дети Софыч и Санек-младший. Муж Санек-программист. Любит шопинг и сериалы. Не любит свекровь.',
+    keys:['Софыч','Санек','сериал','свекровь'], color:'#f39c12', baseMood:5, baseAct:9, baseWarm:8 },
+  { id:'sofa', name:'Софа', hair:'блондинка, карие глаза',
+    desc:'Спокойная, доброжелательная, всех поддерживает. Ждёт мальчика. Муж Дима. Играет на пианино, из Питера.',
+    keys:['пианино','Питер','Дима','малыш'], color:'#2ecc71', baseMood:7, baseAct:3, baseWarm:8 },
+  { id:'tanya', name:'Таня', hair:'русые волосы, голубые глаза, очки',
+    desc:'Жена армянина, на ПП. Всегда поддерживает. О себе мало рассказывает, присылает фото корги Чарли.',
+    keys:['Чарли','корги','ПП','Армения'], color:'#1abc9c', baseMood:6, baseAct:3, baseWarm:6 },
+  { id:'roza', name:'Роза', hair:'чёрные кудри, тёмные глаза, маленький рост',
+    desc:'Правдивая, резкая, эмоциональная, но с подругами милая. Ремонт. Парень Дима, собака Руби (вест-хайленд). Начальник отдела, сотрудники — «покемоны». Курит айкос.',
+    keys:['Руби','ремонт','покемоны','айкос'], color:'#e74c3c', baseMood:5, baseAct:5, baseWarm:5 },
+  { id:'alena', name:'Алёна', hair:'очень светлый блонд, светлые глаза, веснушки',
+    desc:'Заботливая «мамочка», но прямолинейная и резкая. В чате почти не пишет, но все её любят. Муж Серков — большой ребёнок.',
+    keys:['Серков','забота','мамочка'], color:'#ecf0f1', baseMood:6, baseAct:2, baseWarm:7 },
+  { id:'anya', name:'Аня', hair:'блонд, кудри, голубые глаза',
+    desc:'Работает гримёром в театре. Весёлая и общительная, но в чате почти не пишет.',
+    keys:['театр','грим','спектакль'], color:'#ff6b9d', baseMood:7, baseAct:2, baseWarm:6 }
+];
+
+const TURNS = ['Утро','День','Вечер'];
+const EVENTS = [
+  { text:'Софыч принёс двойку из школы.', girl:'nastyaB', mood:-2, act:+2 },
+  { text:'Руби порвала обои в новом ремонте.', girl:'roza', mood:-2, act:+2 },
+  { text:'Костя застрял в игре и не слышит маму.', girl:'dasha', mood:-1, act:+1 },
+  { text:'Кот Гале опять без зуба и требует пюре.', girl:'galya', mood:+2, act:+1 },
+  { text:'Чарли-корги выпросил кусочек ПП-шной еды.', girl:'tanya', mood:+2, act:+1 },
+  { text:'Серков придумал игру, где все должны кричать.', girl:'alena', mood:+2, act:+1 },
+  { text:'В театре премьера, Аня делала грим звезде.', girl:'anya', mood:+2, act:+2 },
+  { text:'Лев научился новому слову и все умиляются.', girl:'nastyaS', mood:+2, act:+1 },
+  { text:'Дима-Софыч принёс цветы без повода.', girl:'sofa', mood:+2, act:+1 },
+  { text:'Дэнчик опять сжёг что-то на кухне.', girl:'dasha', mood:-1, act:+2 },
+  { text:'Свекровь Насти Б опять пришла без предупреждения.', girl:'nastyaB', mood:-3, act:+3 },
+  { text:'Роза назвала сотрудников «покемонами» на планёрке.', girl:'roza', mood:+2, act:+2 },
+  { text:'Настя С связала игрушку Льву — все в восторге.', girl:'nastyaS', mood:+2, act:+1 },
+  { text:'Галя испекла пирог и зовёт всех на дачу.', girl:'galya', mood:+3, act:+2 },
+  { text:'Таня молчит, но Чарли снова в чате.', girl:'tanya', mood:+2, act:+1 },
+  { text:'Аня выложила закулисье театра.', girl:'anya', mood:+2, act:+2 }
+];
+
+const REACTIONS = {
+  dasha: ['Лол, это мем какой-то','Костя, отойди от компа!','Ну всё, я в игре'],
+  galya: ['Спокойно, девочки','Кот передаёт привет','Дача ждёт'],
+  nastyaS: ['Это несправедливо!','Лев, не трогай!','Я тут связала кое-что'],
+  nastyaB: ['Софыч, ты чего!','Санек, помоги!','Я полежу с сериалом'],
+  sofa: ['Вы все такие классные','Дима, спасибо','Питер скучает'],
+  tanya: ['Держитесь, девочки','Чарли шлёт лучи добра','На ПП можно всё'],
+  roza: ['Это уже слишком','Руби, ты балбес','Мои покемоны опять'],
+  alena: ['Серков, сядь','Так, всем успокоиться','Забота — это сила'],
+  anya: ['В театре сегодня безумие','Кудри дыбом','Грим спасёт мир']
+};
+
+const ENDINGS = [
+  { name:'Большая встреча', check: g => allAvg('mood') >= 7 && allAvg('warm') >= 7,
+    text:'Все девять девочек в отличном настроении и хотят встретиться! Чат живёт, смеётся и строит планы. Вы — лучший хранитель.' },
+  { name:'Чат ожил', check: g => allAvg('act') >= 5 && allAvg('warm') >= 6,
+    text:'Чат шумит, девочки пишут, шутят и поддерживают друг друга. Встреча не за горами!' },
+  { name:'Тихий вечер', check: g => allAvg('warm') >= 5,
+    text:'Не все активны, но всем тепло. Молчаливые девочки откликаются, а чат живёт тихо и уютно.' },
+  { name:'Все разбежались', check: g => allAvg('mood') < 5,
+    text:'Настроение на нуле. Кто-то обиделся, кто-то ушёл в молчанку. Чат затих... Но Хранитель всегда может начать заново.' },
+  { name:'Ссора в чате', check: g => g.some(x => x.mood <= 2),
+    text:'Роза была слишком резкой, Настя Б устала, кто-то замолчал. Чат бурлит, но не тем. Попробуете снова?' }
+];
+
+let state = {
+  day: 1, turn: 0, points: 6,
+  girls: GIRLS.map(g => ({
+    ...g, mood: clamp(g.baseMood + rand(-2,2)),
+    act: clamp(g.baseAct + rand(-1,2)),
+    warm: clamp(g.baseWarm + rand(-1,1))
+  })),
+  log: []
+};
+
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function clamp(v){ return Math.max(0, Math.min(10, v)); }
+function allAvg(key){ return state.girls.reduce((s,g)=>s+g[key],0)/state.girls.length; }
+
+function render(){
+  document.getElementById('dayLabel').textContent = 'День ' + state.day;
+  document.getElementById('turnLabel').textContent = TURNS[state.turn];
+  document.getElementById('pointsLabel').textContent = '⚡ ' + state.points;
+
+  const chat = document.getElementById('chat');
+  chat.innerHTML = '';
+  state.log.slice(-30).forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (m.sys ? 'system' : (m.right ? 'right' : 'left'));
+    if (m.name) div.innerHTML = '<div class="name">' + m.name + '</div>' + m.text;
+    else div.textContent = m.text;
+    chat.appendChild(div);
+  });
+  chat.scrollTop = chat.scrollHeight;
+
+  const girlsEl = document.getElementById('girls');
+  girlsEl.innerHTML = '';
+  state.girls.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'girl-card';
+    card.innerHTML = `
+      <div class="gname" style="color:${g.color}">${g.name}</div>
+      <div class="bar"><div class="mood" style="width:${g.mood*10}%;background:#4caf50"></div></div>
+      <div class="bar"><div class="act" style="width:${g.act*10}%;background:#f5c542"></div></div>
+      <div class="bar"><div class="warm" style="width:${g.warm*10}%;background:#e94560"></div></div>
+    `;
+    card.onclick = () => showGirl(g);
+    girlsEl.appendChild(card);
+  });
+
+  const actions = document.getElementById('actions');
+  actions.innerHTML = '';
+  if (state.points > 0) {
+    const keys = state.girls.flatMap(g => g.keys).slice(0, 9);
+    const randomKey = keys[Math.floor(Math.random()*keys.length)];
+    addBtn(actions, '💬 Написать в чат: «' + randomKey + '»', 1, () => actionMessage(randomKey));
+    const ev = EVENTS[Math.floor(Math.random()*EVENTS.length)];
+    addBtn(actions, '📢 Событие: ' + ev.text, 2, () => actionEvent(ev));
+    addBtn(actions, '❤️ Поддержать всех (лайк)', 1, () => actionLike());
+  } else {
+    addBtn(actions, '🌙 Завершить ход', 0, () => nextTurn(), true);
+  }
+  if (state.points > 0) {
+    addBtn(actions, '🌙 Завершить ход', 0, () => nextTurn(), true);
+  }
+}
+
+function addBtn(parent, text, cost, fn, noCost){
+  const btn = document.createElement('button');
+  btn.className = 'btn';
+  btn.innerHTML = text + (cost ? '<span class="cost">⚡' + cost + '</span>' : '');
+  btn.onclick = fn;
+  parent.appendChild(btn);
+}
+
+function actionMessage(key){
+  if (state.points < 1) return;
+  state.points--;
+  const girl = state.girls.find(g => g.keys.includes(key)) || state.girls[rand(0,8)];
+  girl.mood = clamp(girl.mood + 2);
+  girl.act = clamp(girl.act + 2);
+  girl.warm = clamp(girl.warm + 1);
+  state.log.push({ sys:true, text:'— Хранитель пишет про «' + key + '» —' });
+  state.log.push({ name:girl.name, text: REACTIONS[girl.id][rand(0,2)], right:true });
+  render();
+}
+
+function actionEvent(ev){
+  if (state.points < 2) return;
+  state.points -= 2;
+  const girl = state.girls.find(g => g.id === ev.girl) || state.girls[0];
+  girl.mood = clamp(girl.mood + ev.mood);
+  girl.act = clamp(girl.act + ev.act);
+  girl.warm = clamp(girl.warm + (ev.mood > 0 ? 1 : -1));
+  state.log.push({ sys:true, text:'— ' + ev.text + ' —' });
+  state.log.push({ name:girl.name, text: REACTIONS[girl.id][rand(0,2)], right:true });
+  render();
+}
+
+function actionLike(){
+  if (state.points < 1) return;
+  state.points--;
+  state.girls.forEach(g => { g.mood = clamp(g.mood + 1); g.warm = clamp(g.warm + 1); });
+  state.log.push({ sys:true, text:'— Хранитель поддержал всех —' });
+  state.girls.forEach(g => state.log.push({ name:g.name, text: REACTIONS[g.id][rand(0,2)], right:true }));
+  render();
+}
+
+function nextTurn(){
+  state.log.push({ sys:true, text:'— ' + TURNS[state.turn] + ' заканчивается —' });
+  state.turn++;
+  state.points = 6;
+  state.girls.forEach(g => {
+    g.mood = clamp(g.mood + rand(-1,1));
+    g.act = clamp(g.act + rand(-1,1));
+    g.warm = clamp(g.warm + rand(-1,0));
+  });
+  if (state.turn > 2) {
+    state.turn = 0;
+    state.day++;
+    if (state.day > 3) {
+      showEnding();
+      return;
+    }
+    state.log.push({ sys:true, text:'— Новый день: День ' + state.day + ' —' });
+    state.girls.forEach(g => { g.mood = clamp(g.mood + rand(0,2)); });
+  }
+  render();
+}
+
+function showGirl(g){
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `<div class="modal-box">
+    <h2 style="color:${g.color}">${g.name}</h2>
+    <p><b>Внешность:</b> ${g.hair}</p>
+    <p>${g.desc}</p>
+    <p><b>Настроение:</b> ${g.mood}/10<br>
+       <b>Активность:</b> ${g.act}/10<br>
+       <b>Тепло к чату:</b> ${g.warm}/10</p>
+    <p><i>Ключики: ${g.keys.join(', ')}</i></p>
+    <button class="close">Закрыть</button>
+  </div>`;
+  modal.querySelector('.close').onclick = () => modal.remove();
+  document.body.appendChild(modal);
+}
+
+function showEnding(){
+  let ending = ENDINGS.find(e => e.check(state.girls)) || ENDINGS[2];
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `<div class="modal-box">
+    <h2>${ending.name}</h2>
+    <p>${ending.text}</p>
+    <p><b>Итоги:</b><br>
+    Среднее настроение: ${allAvg('mood').toFixed(1)}<br>
+    Средняя активность: ${allAvg('act').toFixed(1)}<br>
+    Тепло к чату: ${allAvg('warm').toFixed(1)}</p>
+    <button class="close">Играть снова</button>
+  </div>`;
+  modal.querySelector('.close').onclick = () => { modal.remove(); resetGame(); };
+  document.body.appendChild(modal);
+}
+
+function resetGame(){
+  state = {
+    day: 1, turn: 0, points: 6,
+    girls: GIRLS.map(g => ({
+      ...g, mood: clamp(g.baseMood + rand(-2,2)),
+      act: clamp(g.baseAct + rand(-1,2)),
+      warm: clamp(g.baseWarm + rand(-1,1))
+    })),
+    log: []
+  };
+  state.log.push({ sys:true, text:'— День 1, утро. Чат просыпается —' });
+  render();
+}
+
+resetGame();
+</script>
+</body>
+</html>
