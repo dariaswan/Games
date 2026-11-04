@@ -98,47 +98,63 @@ html,body{margin:0;height:100%;background:#07040a;color:var(--ink);overflow:hidd
 body.touch #tc,body.touch #mini,body.touch #menuBtn{display:block}
 body.touch .keys{display:none}
 body.touch .tkeys{display:block;margin-top:auto;font-size:13px;color:var(--dim);line-height:1.6}
-body.touch #c{border-radius:8px;touch-action:none}
-body.touch #side{display:none;left:auto;right:0;z-index:4;border-radius:0 8px 8px 0;border-left:3px solid var(--brass);box-shadow:-20px 0 40px #000c;width:340px}
+/* Touch mode: full-screen canvas with a following camera, UI sized in real screen pixels */
+body.touch #stage{display:block}
+body.touch #wrap{position:fixed;inset:0;width:auto !important;height:auto;transform:none !important}
+body.touch #c{width:100%;height:100%;border-radius:0;touch-action:none}
+body.touch #side{display:none;left:auto;right:0;top:0;bottom:0;height:auto;width:min(340px,88vw);overflow-y:auto;z-index:6;
+  border-radius:0;border-left:3px solid var(--brass);box-shadow:-20px 0 40px #000c;padding:14px 16px calc(14px + env(safe-area-inset-bottom))}
 body.touch.sideopen #side{display:flex}
-body.touch #side .who canvas{width:52px;height:52px}
+body.touch #side .who canvas{width:48px;height:48px}
 body.touch #ql li{font-size:14px}
 body.touch #hint,body.touch #inv,body.touch .meta,body.touch .nerves .lbl{font-size:14px}
-#joy{position:absolute;left:26px;bottom:26px;width:180px;height:180px;border-radius:50%;z-index:3;touch-action:none;
-  background:radial-gradient(circle,rgba(42,20,32,.35),rgba(20,8,14,.6));border:2px solid rgba(217,178,106,.5)}
-#knob{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;pointer-events:none;
+#joy{position:absolute;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));width:128px;height:128px;border-radius:50%;z-index:3;touch-action:none;
+  background:radial-gradient(circle,rgba(42,20,32,.35),rgba(20,8,14,.6));border:2px solid rgba(217,178,106,.55)}
+#knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 35% 30%,#f0d28e,#b98d45);box-shadow:0 4px 12px #000a}
-#act{position:absolute;right:30px;bottom:40px;width:136px;height:136px;border-radius:50%;z-index:3;touch-action:none;
-  border:3px solid #f0d28e;background:rgba(217,178,106,.88);color:#1a0c14;font-family:Georgia,serif;font-size:40px;line-height:1;cursor:pointer;
-  box-shadow:0 6px 0 var(--brass2),0 10px 30px #000a;padding:0}
-#act small{display:block;font-size:15px;margin-top:6px;font-family:Verdana,sans-serif}
-#act.idle{opacity:.45}
+#act{position:absolute;right:calc(18px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;z-index:3;touch-action:none;
+  border:3px solid #f0d28e;background:rgba(217,178,106,.9);color:#1a0c14;font-family:Georgia,serif;font-size:28px;line-height:1;cursor:pointer;
+  box-shadow:0 5px 0 var(--brass2),0 10px 30px #000a;padding:0}
+#act small{display:block;font-size:12px;margin-top:4px;font-family:Verdana,sans-serif}
+#act.idle{opacity:.5}
 #act.ring{background:var(--ember);border-color:#ffc0a8;animation:ring .4s ease-in-out infinite alternate}
-#act:active{transform:translateY(3px);box-shadow:0 3px 0 var(--brass2)}
+#act:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brass2)}
 #wrap.dlgopen #joy,#wrap.dlgopen #act{display:none}
-#mini{position:absolute;left:12px;top:12px;max-width:430px;z-index:2;pointer-events:none;
-  background:rgba(18,8,14,.86);border:1px solid var(--brass2);border-radius:8px;padding:8px 12px;font-size:16px;line-height:1.35}
-#mini .md{font-family:Georgia,serif;color:var(--brass);font-size:13px}
-#mini .mn{display:inline-block;margin-left:8px;color:var(--dim);font-size:13px}
-#menuBtn{position:absolute;right:12px;top:12px;z-index:5;font:16px Georgia,serif;color:var(--ink);padding:9px 14px;border-radius:8px;
+#mini{position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));max-width:calc(100% - 150px);z-index:2;pointer-events:none;
+  background:rgba(18,8,14,.86);border:1px solid var(--brass2);border-radius:8px;padding:6px 10px;font-size:14px;line-height:1.35}
+#mini .md{font-family:Georgia,serif;color:var(--brass);font-size:12px}
+#mini .mn{display:inline-block;margin-left:8px;color:var(--dim);font-size:12px}
+#menuBtn{position:absolute;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));z-index:5;font:15px Georgia,serif;color:var(--ink);padding:8px 12px;border-radius:8px;
   background:rgba(18,8,14,.9);border:1px solid var(--brass2);cursor:pointer}
-body.touch #dtext{font-size:22px;max-width:none}
-body.touch #dname{font-size:22px}
-body.touch #dch button{font-size:20px;padding:12px 14px}
-body.touch #dmore{font-size:15px}
-body.touch #toast{font-size:18px;top:70px}
+body.touch #dlg{left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:auto;min-height:0;
+  max-height:58%;overflow-y:auto;padding:10px 14px 24px 78px;z-index:4}
+body.touch #dlg.narr{padding-left:14px}
+body.touch #dport{left:10px;top:10px;width:56px;height:56px}
+body.touch #dname{font-size:16px;margin-bottom:4px}
+body.touch #dtext{font-size:16px;line-height:1.45;min-height:0;max-width:none}
+body.touch #dch{gap:6px;margin-top:8px}
+body.touch #dch button{font-size:15px;padding:10px 12px}
+body.touch #dmore{font-size:12px;bottom:6px}
+body.touch #toast{left:50%;top:calc(60px + env(safe-area-inset-top));font-size:14px;white-space:normal;max-width:86vw;text-align:center}
+body.touch #ov{border-radius:0;overflow-y:auto;align-items:flex-start;padding:16px 0 30px}
+body.touch .card{padding:12px 18px;margin:auto}
+body.touch .card h1{font-size:40px;letter-spacing:4px}
+body.touch .card h2{font-size:26px}
+body.touch .card .sub{font-size:15px}
+body.touch .card p{font-size:14px}
+body.touch .card canvas{width:min(500px,92vw);height:auto}
+body.touch .stats{font-size:14px}
+body.touch .card button{font-size:18px}
 #rot{display:none;position:fixed;inset:0;z-index:50;background:#07040a;color:var(--ink);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px}
 #rot .ph{font-size:64px;animation:turn 1.6s ease-in-out infinite}
 @keyframes turn{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
 #rot p{font-family:Georgia,serif;font-size:22px;margin:0;color:var(--brass)}
 #rot span{font-size:14px;color:var(--dim);max-width:300px;line-height:1.5}
 #rot button{font:16px Georgia,serif;margin-top:8px;padding:10px 20px;border-radius:6px;border:1px solid var(--brass2);background:transparent;color:var(--ink)}
-@media (orientation: portrait){ body.touch:not(.rotok) #rot{display:flex} }
 @media (prefers-reduced-motion: reduce){ #act.ring,#rot .ph{animation:none} }
 </style>
 </head>
 <body>
-<div id="rot"><div class="ph">📱</div><p>Поверните телефон</p><span>Игра широкая — горизонтально её гораздо удобнее смотреть.</span><button id="rotok">Играть так</button></div>
 <div id="stage"><div id="wrap">
   <canvas id="c" width="960" height="640"></canvas>
   <div id="toast"></div>
@@ -174,10 +190,34 @@ const W = 960, H = 640, T = 32;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
 const wrap = $('wrap');
+// Camera: on touch screens the world is zoomed in and follows Daria
+const cam = {x:0, y:0, z:1, vw:W, vh:H, snap:true};
+let DPR = 1;
+function resizeCanvas(){
+  if (TOUCH){
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    const cw = innerWidth, chh = innerHeight;
+    cv.width = Math.round(cw*DPR); cv.height = Math.round(chh*DPR);
+    let z = Math.max(1, Math.min(2.4, Math.min(cw/560, chh/290)));
+    z = Math.max(z, Math.min(chh/640, cw/300));
+    cam.z = z; cam.vw = cw/z; cam.vh = chh/z;
+  } else { DPR = 1; cv.width = W; cv.height = H; cam.z = 1; cam.vw = W; cam.vh = H; cam.x = cam.y = 0; }
+  cam.snap = true;
+}
+function updateCam(dt){
+  if (!TOUCH || !player){ cam.x = cam.y = 0; return; }
+  const tx = cam.vw >= W ? (W - cam.vw)/2 : Math.max(0, Math.min(W - cam.vw, player.x - cam.vw/2));
+  const ty = cam.vh >= H ? (H - cam.vh)/2 : Math.max(0, Math.min(H - cam.vh, player.y - 20 - cam.vh/2));
+  if (cam.snap){ cam.x = tx; cam.y = ty; cam.snap = false; }
+  else { const k = Math.min(1, dt*7); cam.x += (tx - cam.x)*k; cam.y += (ty - cam.y)*k; }
+}
 let TOUCH = matchMedia('(pointer: coarse)').matches;
 function setTouch(on){ TOUCH = on; document.body.classList.toggle('touch', on); fit(); }
-function fit(){ const ww = TOUCH ? 960 : 1240; wrap.style.width = ww + 'px';
-  const s = Math.min(innerWidth/ww, innerHeight/640); wrap.style.transform = 'scale(' + s + ')'; }
+function fit(){
+  if (TOUCH){ wrap.style.width = ''; wrap.style.transform = ''; }
+  else { wrap.style.width = '1240px'; const s = Math.min(innerWidth/1240, innerHeight/640); wrap.style.transform = 'scale(' + s + ')'; }
+  resizeCanvas();
+}
 addEventListener('touchstart', () => { if (!TOUCH) setTouch(true); }, {passive:true});
 addEventListener('orientationchange', () => setTimeout(fit, 250));
 document.body.classList.toggle('touch', TOUCH);
@@ -840,7 +880,7 @@ function startLevel(i){
   S.level = i; S.step = 0; S.inv = []; S.occ = LEVELS[i].occ; S.time = 0; S.over = false;
   S.pendingCall = null; S.ringing = null; S.rzone = [462,352,125,62];
   S.sockFixed = true; S.blesna = false; S.makeup = false;
-  player = {x:392, y:376, dir:0, anim:0, moving:false};
+  player = {x:392, y:376, dir:0, anim:0, moving:false}; cam.snap = true;
   NPC = {
     yulia: {id:'yulia', x:400, y:142, dir:0, anim:0, hidden:true},
     kostya:{id:'kostya',x:712, y:206, dir:2, anim:0},
@@ -1021,7 +1061,7 @@ function joyMove(e){
   let dx = (e.clientX - (r.left + r.width/2)) / (r.width/2), dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
   const m = Math.hypot(dx,dy); if (m > 1){ dx /= m; dy /= m; }
   JOY.x = m < 0.2 ? 0 : dx; JOY.y = m < 0.2 ? 0 : dy;
-  knob.style.transform = 'translate(' + (dx*52) + 'px,' + (dy*52) + 'px)';
+  const tr = joy.offsetWidth*0.3; knob.style.transform = 'translate(' + (dx*tr) + 'px,' + (dy*tr) + 'px)';
 }
 function joyEnd(e){ if (e.pointerId !== JOY.id) return; JOY.id = null; JOY.x = JOY.y = 0; knob.style.transform = ''; }
 joy.addEventListener('pointerdown', e => { e.preventDefault(); JOY.id = e.pointerId; try { joy.setPointerCapture(e.pointerId); } catch (_) {} joyMove(e); });
@@ -1031,7 +1071,6 @@ actBtn.addEventListener('pointerdown', e => { e.preventDefault(); doAction(); })
 actBtn.addEventListener('click', e => e.preventDefault());
 $('menuBtn').addEventListener('click', () => document.body.classList.toggle('sideopen'));
 $('side').addEventListener('click', () => { if (TOUCH) document.body.classList.remove('sideopen'); });
-$('rotok').addEventListener('click', () => { document.body.classList.add('rotok'); fit(); });
 let actState = '';
 function updateTouchUI(){
   if (!TOUCH || !S) return;
@@ -1068,7 +1107,7 @@ function renderLight(t){
     gr.addColorStop(0,'rgba(0,0,0,' + L.a + ')'); gr.addColorStop(0.55,'rgba(0,0,0,' + (L.a*0.55) + ')'); gr.addColorStop(1,'rgba(0,0,0,0)');
     lg.fillStyle = gr; lg.fillRect(L.x-L.r, L.y-L.r, L.r*2, L.r*2); lg.restore();
   }
-  ctx.drawImage(lc,0,0);
+  ctx.imageSmoothingEnabled = true; ctx.drawImage(lc,0,0); ctx.imageSmoothingEnabled = false;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const glow = (x,y,r,col,room) => { ctx.save(); const rc = ROOMRECT[room]; ctx.beginPath(); ctx.rect(rc[0],rc[1],rc[2],rc[3]); ctx.clip();
     const g = ctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(x-r,y-r,r*2,r*2); ctx.restore(); };
@@ -1195,13 +1234,17 @@ function update(dt,t){
 
 // ---------- Render ----------
 function render(t){
+  const sc = cam.z*DPR;
+  ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#000'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(sc,0,0,sc,Math.round(-cam.x*sc),Math.round(-cam.y*sc)); ctx.imageSmoothingEnabled = false;
   ctx.drawImage(stat,0,0);
   drawDyn(t);
   const ents = [{e:player, L:LOOK.daria}].concat(npcs().map(n => ({e:n, L:LOOK[n.id]}))).sort((a,b) => a.e.y - b.e.y);
   for (const {e,L} of ents){ const fr = e.moving ? [0,1,0,2][Math.floor(e.anim*8) % 4] : 0; drawPerson(ctx, e.x, e.y, L, e.dir, fr, 2, t); }
   drawMorgueTube();
   renderLight(t);
-  ctx.drawImage(vig,0,0);
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.imageSmoothingEnabled = true; ctx.drawImage(vig,0,0,cv.width,cv.height); ctx.restore();
+  ctx.setTransform(sc,0,0,sc,Math.round(-cam.x*sc),Math.round(-cam.y*sc));
   for (const n of npcs()) if (n.bubble) bubble(n.x, n.y - personH(LOOK[n.id])*2 - 10, n.bubble.t);
   if (S.ringing) bubble(player.x, player.y - 48 + Math.sin(t*20), '📱 дзынь!');
   if (!D && !S.over){ const tg = findTarget(); if (tg) drawPrompt(tg,t); }
@@ -1209,7 +1252,7 @@ function render(t){
 let last = performance.now();
 function loop(now){
   const dt = Math.min(0.05, (now - last)/1000); last = now; const t = now/1000;
-  if (running){ update(dt,t); render(t); updateTouchUI(); }
+  if (running){ update(dt,t); updateCam(dt); render(t); updateTouchUI(); }
   requestAnimationFrame(loop);
 }
 
