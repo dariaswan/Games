@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>«Вечность»: три смены Дарьи</title>
+<style>
+:root{
+  --velvet:#2a1420; --velvet2:#1a0c14; --brass:#d9b26a; --brass2:#8a6a36;
+  --ink:#f1e7dc; --dim:#a8939a; --ember:#ff7a52; --frost:#8fe3ef; --line:#4a2a38;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="light"]){ --velvet2:#1a0c14; } }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#07040a;color:var(--ink);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  font-family:Verdana,"DejaVu Sans",Tahoma,sans-serif}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#wrap{position:relative;width:1240px;height:640px;flex:none;transform-origin:center center}
+#c{position:absolute;left:0;top:0;width:960px;height:640px;background:#000;border-radius:8px 0 0 8px}
+
+#side{position:absolute;left:960px;top:0;width:280px;height:640px;padding:16px 18px 12px;
+  background:linear-gradient(180deg,var(--velvet),var(--velvet2));border-left:3px solid var(--brass2);
+  border-radius:0 8px 8px 0;display:flex;flex-direction:column;gap:11px}
+.who{display:flex;gap:12px;align-items:center}
+.who canvas{width:60px;height:60px;border:2px solid var(--brass2);border-radius:50%;background:#140a10}
+.nm{font-family:Georgia,"Times New Roman",serif;font-size:23px;color:var(--brass);line-height:1}
+.role{font-size:11px;color:var(--dim);margin-top:5px;line-height:1.35}
+.meta{display:flex;justify-content:space-between;font-size:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 0}
+#phone{font-size:12px;padding:7px 10px;border-radius:6px;background:#3a1b2a;border:1px solid var(--ember);display:none}
+#phone.on{display:block;animation:ring .5s ease-in-out infinite alternate}
+@keyframes ring{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+.nerves .lbl{font-size:12px;display:flex;justify-content:space-between;margin-bottom:5px;color:var(--dim)}
+.bar{height:8px;background:#12080d;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#c0392b,#ff7a52 40%,#3ddc84);transition:width .4s}
+#inv{font-size:12px;color:var(--dim)}
+#inv b{color:var(--ink);font-weight:normal}
+.day{font-family:Georgia,serif}
+.day .d1{font-size:12px;color:var(--dim)}
+.day .d2{font-size:17px;color:var(--brass);margin-top:2px}
+#ql{list-style:none;margin:0;padding:0;counter-reset:q;display:flex;flex-direction:column;gap:4px}
+#ql li{counter-increment:q;font-size:11.5px;line-height:1.3;color:#6f5a63;padding-left:23px;position:relative}
+#ql li::before{content:counter(q);position:absolute;left:0;top:-1px;width:16px;height:16px;border-radius:50%;
+  border:1px solid #4d3540;font-size:9px;display:flex;align-items:center;justify-content:center}
+#ql li.cur{color:var(--ink)}
+#ql li.cur::before{border-color:var(--ember);color:var(--ember);box-shadow:0 0 8px #ff7a5288}
+#ql li.done{color:#7f6d74;text-decoration:line-through}
+#ql li.done::before{content:"✓";border-color:#3ddc84;color:#3ddc84}
+#ql li.hid{color:#4f3d45}
+#hint{font-size:11.5px;color:var(--frost);line-height:1.45;background:#0e161a88;border-left:2px solid var(--frost);padding:7px 10px;border-radius:0 6px 6px 0}
+.keys{margin-top:auto;font-size:10.5px;color:var(--dim);line-height:1.6}
+.keys b{display:inline-block;min-width:18px;padding:0 4px;border:1px solid #5a4250;border-bottom-width:2px;border-radius:4px;text-align:center;color:var(--ink);font-weight:normal;margin-right:2px}
+
+#dlg{position:absolute;left:14px;bottom:14px;width:932px;min-height:132px;display:none;
+  background:linear-gradient(180deg,#1f1019f5,#12080ef5);border:2px solid var(--brass2);border-radius:10px;
+  padding:14px 18px 14px 104px;box-shadow:0 12px 40px #000c;cursor:pointer}
+#dlg.on{display:block}
+#dlg.narr{padding-left:18px}
+#dlg.phone{border-color:var(--frost)}
+#dport{position:absolute;left:16px;top:14px;width:72px;height:72px;border:2px solid var(--brass2);border-radius:8px;image-rendering:pixelated}
+#dlg.narr #dport{display:none}
+#dname{font-family:Georgia,serif;font-size:18px;margin-bottom:6px}
+#dtext{font-size:16px;line-height:1.5;min-height:48px;max-width:780px}
+#dlg.narr #dtext{font-style:italic;color:#d9c9d3}
+#dch{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+#dch button{font:inherit;font-size:14.5px;text-align:left;color:var(--ink);background:#2b1622;border:1px solid #5a3446;border-radius:6px;padding:7px 12px;cursor:pointer}
+#dch button.sel,#dch button:hover{border-color:var(--ember);background:#3a1b2a}
+#dch button:focus-visible{outline:2px solid var(--frost);outline-offset:2px}
+#dch button span{color:var(--ember);margin-right:8px}
+#dmore{position:absolute;right:14px;bottom:10px;font-size:11px;color:var(--dim)}
+
+#toast{position:absolute;left:480px;top:16px;transform:translate(-50%,-20px);opacity:0;pointer-events:none;
+  background:#12080ef0;border:1px solid var(--ember);color:var(--ink);padding:9px 16px;border-radius:8px;font-size:14px;
+  transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 6px 20px #000a}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+#ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,#2a1420ee,#07040af8);border-radius:8px;z-index:5}
+#ov.hide{display:none}
+.card{text-align:center;max-width:660px;padding:20px}
+.card h1{font-family:Georgia,"Times New Roman",serif;font-weight:normal;font-size:60px;margin:0;color:var(--brass);letter-spacing:6px;text-shadow:0 0 24px #d9b26a55}
+.card h2{font-family:Georgia,serif;font-weight:normal;font-size:38px;margin:0;color:var(--brass)}
+.card .sub{font-family:Georgia,serif;font-style:italic;color:var(--dim);font-size:17px;margin:6px 0 12px}
+.card p{font-size:14px;line-height:1.6;color:#dccbd3;margin:10px auto;max-width:560px}
+.card canvas{display:block;margin:8px auto 2px;image-rendering:pixelated}
+.card button{font-family:Georgia,serif;font-size:19px;margin-top:14px;padding:10px 30px;color:#1a0c14;background:var(--brass);border:0;border-radius:6px;cursor:pointer;box-shadow:0 4px 0 var(--brass2)}
+.card button:hover{filter:brightness(1.1)}
+.card button:focus-visible{outline:3px solid var(--frost);outline-offset:3px}
+.stats{display:grid;grid-template-columns:1fr auto;gap:6px 26px;max-width:380px;margin:12px auto;font-size:14px;text-align:left}
+.stats span:nth-child(even){color:var(--brass);text-align:right}
+.rank{font-family:Georgia,serif;font-size:22px;color:var(--ember);margin-top:6px}
+.note{font-size:12px;color:var(--dim);font-style:italic}
+@media (prefers-reduced-motion: reduce){ #toast,.bar i{transition:none} #phone.on{animation:none} }
+
+/* ---------- Touch controls (phones / tablets) ---------- */
+#tc,#mini,#menuBtn,.tkeys{display:none}
+body.touch #tc,body.touch #mini,body.touch #menuBtn{display:block}
+body.touch .keys{display:none}
+body.touch .tkeys{display:block;margin-top:auto;font-size:13px;color:var(--dim);line-height:1.6}
+body.touch #c{border-radius:8px;touch-action:none}
+body.touch #side{display:none;left:auto;right:0;z-index:4;border-radius:0 8px 8px 0;border-left:3px solid var(--brass);box-shadow:-20px 0 40px #000c;width:340px}
+body.touch.sideopen #side{display:flex}
+body.touch #side .who canvas{width:52px;height:52px}
+body.touch #ql li{font-size:14px}
+body.touch #hint,body.touch #inv,body.touch .meta,body.touch .nerves .lbl{font-size:14px}
+#joy{position:absolute;left:26px;bottom:26px;width:180px;height:180px;border-radius:50%;z-index:3;touch-action:none;
+  background:radial-gradient(circle,rgba(42,20,32,.35),rgba(20,8,14,.6));border:2px solid rgba(217,178,106,.5)}
+#knob{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 35% 30%,#f0d28e,#b98d45);box-shadow:0 4px 12px #000a}
+#act{position:absolute;right:30px;bottom:40px;width:136px;height:136px;border-radius:50%;z-index:3;touch-action:none;
+  border:3px solid #f0d28e;background:rgba(217,178,106,.88);color:#1a0c14;font-family:Georgia,serif;font-size:40px;line-height:1;cursor:pointer;
+  box-shadow:0 6px 0 var(--brass2),0 10px 30px #000a;padding:0}
+#act small{display:block;font-size:15px;margin-top:6px;font-family:Verdana,sans-serif}
+#act.idle{opacity:.45}
+#act.ring{background:var(--ember);border-color:#ffc0a8;animation:ring .4s ease-in-out infinite alternate}
+#act:active{transform:translateY(3px);box-shadow:0 3px 0 var(--brass2)}
+#wrap.dlgopen #joy,#wrap.dlgopen #act{display:none}
+#mini{position:absolute;left:12px;top:12px;max-width:430px;z-index:2;pointer-events:none;
+  background:rgba(18,8,14,.86);border:1px solid var(--brass2);border-radius:8px;padding:8px 12px;font-size:16px;line-height:1.35}
+#mini .md{font-family:Georgia,serif;color:var(--brass);font-size:13px}
+#mini .mn{display:inline-block;margin-left:8px;color:var(--dim);font-size:13px}
+#menuBtn{position:absolute;right:12px;top:12px;z-index:5;font:16px Georgia,serif;color:var(--ink);padding:9px 14px;border-radius:8px;
+  background:rgba(18,8,14,.9);border:1px solid var(--brass2);cursor:pointer}
+body.touch #dtext{font-size:22px;max-width:none}
+body.touch #dname{font-size:22px}
+body.touch #dch button{font-size:20px;padding:12px 14px}
+body.touch #dmore{font-size:15px}
+body.touch #toast{font-size:18px;top:70px}
+#rot{display:none;position:fixed;inset:0;z-index:50;background:#07040a;color:var(--ink);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px}
+#rot .ph{font-size:64px;animation:turn 1.6s ease-in-out infinite}
+@keyframes turn{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+#rot p{font-family:Georgia,serif;font-size:22px;margin:0;color:var(--brass)}
+#rot span{font-size:14px;color:var(--dim);max-width:300px;line-height:1.5}
+#rot button{font:16px Georgia,serif;margin-top:8px;padding:10px 20px;border-radius:6px;border:1px solid var(--brass2);background:transparent;color:var(--ink)}
+@media (orientation: portrait){ body.touch:not(.rotok) #rot{display:flex} }
+@media (prefers-reduced-motion: reduce){ #act.ring,#rot .ph{animation:none} }
+</style>
+</head>
+<body>
+<div id="rot"><div class="ph">📱</div><p>Поверните телефон</p><span>Игра широкая — горизонтально её гораздо удобнее смотреть.</span><button id="rotok">Играть так</button></div>
+<div id="stage"><div id="wrap">
+  <canvas id="c" width="960" height="640"></canvas>
+  <div id="toast"></div>
+
+  <aside id="side">
+    <div class="who"><canvas id="hudp" width="64" height="64"></canvas>
+      <div><div class="nm">Дарья</div><div class="role">ритуальный агент,<br>главная по моргу «Вечности»</div></div></div>
+    <div class="meta"><span id="loc">Лобби</span><span id="clk">09:15</span></div>
+    <div id="phone"></div>
+    <div class="nerves"><div class="lbl"><span>Нервы</span><span id="nv">100</span></div><div class="bar"><i id="nb"></i></div></div>
+    <div id="inv">В руках: <b>ничего</b></div>
+    <div class="day"><div class="d1" id="d1"></div><div class="d2" id="d2"></div></div>
+    <ol id="ql"></ol>
+    <div id="hint"></div>
+    <div class="tkeys">Джойстик слева — идти<br>Кнопка справа — говорить, использовать, отвечать на звонок<br>Нажатие на окно диалога — дальше</div>
+    <div class="keys"><b>W</b><b>A</b><b>S</b><b>D</b> или стрелки — идти<br><b>E</b> или <b>Пробел</b> — говорить, отвечать на звонок<br><b>1</b><b>2</b><b>3</b> — выбор ответа · <b>M</b> — звук</div>
+  </aside>
+
+  <div id="tc"><div id="joy"><div id="knob"></div></div><button id="act" class="idle" aria-label="Действие">E<small>Говорить</small></button></div>
+  <div id="mini"></div>
+  <button id="menuBtn" aria-label="Задачи и статус">☰ Задачи</button>
+
+  <div id="dlg"><canvas id="dport" width="64" height="64"></canvas>
+    <div id="dname"></div><div id="dtext"></div><div id="dch"></div><div id="dmore">E ▸</div></div>
+
+  <div id="ov"><div class="card" id="card"></div></div>
+</div></div>
+
+<script>
+(() => {
+'use strict';
+const W = 960, H = 640, T = 32;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+const wrap = $('wrap');
+let TOUCH = matchMedia('(pointer: coarse)').matches;
+function setTouch(on){ TOUCH = on; document.body.classList.toggle('touch', on); fit(); }
+function fit(){ const ww = TOUCH ? 960 : 1240; wrap.style.width = ww + 'px';
+  const s = Math.min(innerWidth/ww, innerHeight/640); wrap.style.transform = 'scale(' + s + ')'; }
+addEventListener('touchstart', () => { if (!TOUCH) setTouch(true); }, {passive:true});
+addEventListener('orientationchange', () => setTimeout(fit, 250));
+document.body.classList.toggle('touch', TOUCH);
+addEventListener('resize', fit); fit();
+
+// ---------- Map ----------
+const MAP = [
+'##############################',
+'#........#..........#........#',
+'#........#..........#........#',
+'#........#..........#........#',
+'#........D..........D........#',
+'#........#..........#........#',
+'#........#..........#........#',
+'#........#..........#........#',
+'#........#####DD##############',
+'#........#..........#........#',
+'#........#..........#........#',
+'#........D..........D........#',
+'#........#..........#........#',
+'#........#..........#........#',
+'##############DD##############'
+];
+for (let i = 0; i < 5; i++) MAP.push(','.repeat(30));
+function region(c, r){
+  if (r < 0 || r >= 20 || c < 0 || c >= 30) return 'wall';
+  const ch = MAP[r][c];
+  if (ch === '#') return 'wall';
+  if (ch === 'D') return 'door';
+  if (r >= 15) return 'parking';
+  if (c >= 1 && c <= 8) return 'hall';
+  if (c >= 10 && c <= 19) return r <= 7 ? 'corridor' : 'lobby';
+  if (c >= 21 && c <= 28) return r <= 7 ? 'morgue' : 'staff';
+  return 'door';
+}
+const ROOM = {hall:'Прощальный зал', corridor:'Служебный коридор', morgue:'Морг', staff:'Комната отдыха', lobby:'Лобби, ресепшен', parking:'Парковка'};
+const ROOMRECT = {hall:[32,18,256,430], corridor:[320,18,320,238], morgue:[672,18,256,238], staff:[672,274,256,174], lobby:[320,274,320,174], parking:[0,466,960,174]};
+const FACE = {hall:'#4a1f34', corridor:'#56614f', morgue:'#a9c2c8', staff:'#86623f', lobby:'#9c8665', parking:'#6b3a31'};
+
+// ---------- Characters ----------
+const LOOK = {
+  daria:{skin:'#f7d4bd',hair:'#ff3d17',hair2:'#b8260b',eye:'#1fd35a',big:true,top:'#1c1b27',top2:'#11101a',legs:'#111118',collar:'#ffffff',style:'long',lips:'#d4505c',freckles:true},
+  yulia:{skin:'#efcdb3',hair:'#0b0a0f',hair2:'#000',eye:'#3b2716',top:'#2d1836',top2:'#1c0f23',legs:'#130f19',style:'short',tall:3,lips:'#a3122c',collar:'#cfcfe0'},
+  max:{skin:'#eec3a2',hair:'#6b4526',hair2:'#4a2f18',eye:'#262626',top:'#4c8fc4',top2:'#3a77a8',legs:'#3a6f9c',style:'cap',cap:'#2c6596',vneck:true},
+  kostya:{skin:'#e7c09f',hair:'#8b7b5c',hair2:'#5e5038',eye:'#262626',top:'#6f9480',top2:'#587a67',legs:'#4f6d5d',style:'buzz',mustache:true,shifty:true,vneck:true},
+  rapai:{skin:'#f0bf9a',hair:'#141116',hair2:'#000',eye:'#2b1d14',top:'#e8649f',top2:'#c84d84',legs:'#3a2a3a',style:'bun',wide:4,lips:'#e0123f',bigLips:true,cheeks:true,phone:true}
+};
+function personH(L){ return 18 + (L.tall || 0); }
+function drawPerson(g, x, y, L, dir, frame, s, t){
+  s = s || 2; t = t || 0;
+  const w = 10 + (L.wide || 0), th = 6 + (L.tall || 0), Hh = personH(L);
+  const ox = Math.round(x - w*s/2), oy = Math.round(y - Hh*s);
+  const R = (a,b,c,d,col) => { g.fillStyle = col; g.fillRect(ox + a*s, oy + b*s, c*s, d*s); };
+  if (s <= 2){ g.fillStyle = 'rgba(0,0,0,.38)'; g.beginPath(); g.ellipse(x, y, w*s*0.5, 2.6*s, 0, 0, 7); g.fill(); }
+  const hx = (w - 8)/2, ty = 8, ly = 8 + th;
+  const lo = frame === 1 ? 1 : 0, ro = frame === 2 ? 1 : 0;
+  R(w/2-3, ly, 2, 4-lo, L.legs); R(w/2+1, ly, 2, 4-ro, L.legs);
+  R(w/2-3, ly+3-lo, 2, 1, '#09080b'); R(w/2+1, ly+3-ro, 2, 1, '#09080b');
+  R(1, ty, w-2, th, L.top);
+  R(0, ty+1, 1, th-2, L.top2); R(w-1, ty+1, 1, th-2, L.top2);
+  R(0, ty+th-1, 1, 1, L.skin); R(w-1, ty+th-1, 1, 1, L.skin);
+  if (dir !== 1){
+    if (L.collar){ R(w/2-1.5, ty, 3, 1.5, L.collar); R(w/2-0.5, ty+1, 1, 1.5, L.collar); }
+    if (L.vneck) R(w/2-1, ty, 2, 1, L.skin);
+    if (L.phone){ const px = dir === 2 ? 0 : w-2; R(px, ty+2, 2, 3, '#1b1b22'); R(px+0.5, ty+2.5, 1, 2, '#9fe3ff'); }
+  }
+  R(hx, 1, 8, 7, L.skin);
+  const hr = L.hair, h2 = L.hair2;
+  switch (L.style){
+    case 'long':
+      if (dir === 1){ R(hx-1,0,10,7,hr); R(hx-1,7,10,th+2,hr); R(hx,th+8,8,1,h2); }
+      else {
+        R(hx-1,0,10,3,hr); R(hx-1,0,2,th+5,hr); R(hx+7,0,2,th+5,hr);
+        R(hx-1,th+4,2,1,h2); R(hx+7,th+4,2,1,h2);
+        if (dir === 0){ R(hx+1,2,3,1,hr); R(hx+5,2,1,1,hr); }
+        else if (dir === 2) R(hx+5,0,4,th+5,hr); else R(hx-1,0,4,th+5,hr);
+      }
+      break;
+    case 'short':
+      if (dir === 1) R(hx-1,0,10,6,hr);
+      else { R(hx-1,0,10,2.5,hr); R(hx-1,0,1,5,hr); R(hx+8,0,1,5,hr);
+        if (dir === 0) R(hx+3,2,4,1,hr); else if (dir === 2) R(hx+5,0,4,6,hr); else R(hx-1,0,4,6,hr); }
+      break;
+    case 'cap':
+      R(hx-1,0,10,3,L.cap);
+      if (dir === 0){ R(hx,3,8,1,'#1d4a6e'); R(hx,3.5,1,2,hr); R(hx+7,3.5,1,2,hr); }
+      else if (dir === 1) R(hx,3,8,3,hr);
+      else if (dir === 2){ R(hx-2,2,3,1,'#1d4a6e'); R(hx+5,3,3,3,hr); }
+      else { R(hx+7,2,3,1,'#1d4a6e'); R(hx,3,3,3,hr); }
+      break;
+    case 'buzz':
+      if (dir === 1) R(hx,0,8,5,hr); else { R(hx,0,8,2,hr); R(hx,1,1,3,hr); R(hx+7,1,1,3,hr); }
+      break;
+    case 'bun':
+      R(hx+2.5,-2,3,2.5,hr);
+      if (dir === 1) R(hx-1,0,10,6,hr);
+      else { R(hx-1,0,10,3,hr); R(hx-1,0,1,6,hr); R(hx+8,0,1,6,hr);
+        if (dir === 2) R(hx+5,0,4,6,hr); else if (dir === 3) R(hx-1,0,4,6,hr); }
+      break;
+  }
+  if (dir === 1) return;
+  const off = L.shifty ? (Math.sin(t*1.7) > 0 ? 0.5 : -0.5) : 0;
+  const eyes = dir === 0 ? (L.big ? [hx+1, hx+5] : [hx+2, hx+5]) : dir === 2 ? [L.big ? hx+0.5 : hx+1] : [L.big ? hx+5.5 : hx+6];
+  for (const ex of eyes){
+    if (L.big){ R(ex,3.5,2,2.5,'#ffffff'); R(ex+0.5,4,1.5,2,L.eye); R(ex+0.5,4,0.5,0.5,'#ffffff'); R(ex-0.2,3,2.4,0.5,'#2a1208'); }
+    else R(ex+off,4,1,1,L.eye);
+  }
+  if (L.cheeks && dir === 0){ R(hx+0.5,5.3,1.2,0.8,'#ec7d8e'); R(hx+6.3,5.3,1.2,0.8,'#ec7d8e'); }
+  if (L.freckles && dir === 0){ R(hx+1.5,6,0.5,0.5,'#d98a6a'); R(hx+6,6,0.5,0.5,'#d98a6a'); }
+  const mx = dir === 0 ? hx+3 : dir === 2 ? hx+0.5 : hx+5.5;
+  if (L.mustache) R(dir === 0 ? hx+2 : mx-0.5, 5.4, dir === 0 ? 4 : 2.5, 0.8, h2);
+  if (L.bigLips){ R(dir === 0 ? hx+2.3 : mx-0.3, 6, dir === 0 ? 3.4 : 2.2, 1.4, L.lips); R(dir === 0 ? hx+3 : mx, 6.6, dir === 0 ? 2 : 1.4, 0.3, '#8a0624'); }
+  else R(mx, 6.3, dir === 0 ? 2 : 1.5, 0.6, L.lips || '#b07560');
+}
+
+// ---------- Static layer ----------
+const solids = [];
+const solid = (x,y,w,h) => solids.push({x,y,w,h});
+const stat = document.createElement('canvas'); stat.width = W; stat.height = H;
+const sg = stat.getContext('2d');
+function rr(g,x,y,w,h,r,fill){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); if (fill){ g.fillStyle = fill; g.fill(); } }
+const P = (g,x,y,w,h,c) => { g.fillStyle = c; g.fillRect(x,y,w,h); };
+let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+function label(g, txt, x, y, size, col, font){ g.font = (font === undefined ? 'bold ' : font) + size + 'px Verdana, sans-serif'; g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, x, y); }
+
+function drawFloor(g,c,r){
+  const x = c*T, y = r*T, reg = region(c,r);
+  switch (reg){
+    case 'hall': P(g,x,y,T,T,'#3c1520'); P(g,x+14,y+14,4,4,'#4e1d2b'); P(g,x,y,T,1,'#33111b'); break;
+    case 'corridor': P(g,x,y,T,T,(c+r)&1 ? '#55585f' : '#4c4f56'); break;
+    case 'morgue': P(g,x,y,T,T,'#b7c6cc'); P(g,x,y,T,1,'#8fa3ab'); P(g,x,y,1,T,'#8fa3ab'); P(g,x+16,y,1,T,'#a3b4bb'); P(g,x,y+16,T,1,'#a3b4bb'); break;
+    case 'staff': P(g,x,y,T,T,'#6f4b2e'); for (let i=0;i<4;i++){ P(g,x,y+i*8,T,1,'#5c3e25'); P(g,x+((r*7+i*13+c*5)%28),y+i*8,1,8,'#5c3e25'); } break;
+    case 'lobby': P(g,x,y,T,T,'#bcab8b'); P(g,x,y,T,1,'#a6967a'); P(g,x,y,1,T,'#a6967a'); P(g,x+5+(c*3%9),y+20-(r%5),12,1,'#ccbe9f'); break;
+    case 'parking': P(g,x,y,T,T,'#33353a'); for (let i=0;i<5;i++) P(g,x+rnd()*T,y+rnd()*T,1,1,rnd()>.5?'#3d4046':'#2b2d31'); break;
+    case 'door':
+      if (r === 14){ P(g,x,y,T,T,'#2b2e33'); P(g,x+2,y+4,T-4,T-8,'#6f97a8'); P(g,x+2,y+4,T-4,2,'#9cc4d4'); P(g,c===14?x+T-2:x,y+2,2,T-4,'#222'); }
+      else { P(g,x,y,T,T,'#5b4330'); P(g,x,y,T,2,'#3a2a1d'); P(g,x,y+T-2,T,2,'#3a2a1d'); }
+      break;
+  }
+}
+function drawWall(g,c,r){
+  const x = c*T, y = r*T;
+  P(g,x,y,T,T,'#19151e'); P(g,x,y,T,2,'#2a2432');
+  const below = r+1 < 20 ? MAP[r+1][c] : '#';
+  if (below !== '#'){
+    let reg = region(c, r+1); if (reg === 'door') reg = 'corridor';
+    P(g,x,y+T-14,T,14,FACE[reg]); P(g,x,y+T-14,T,1,'rgba(255,255,255,.14)'); P(g,x,y+T-2,T,2,'rgba(0,0,0,.4)');
+    if (reg === 'hall') for (let i=4;i<T;i+=8) P(g,x+i,y+T-14,2,12,'rgba(0,0,0,.2)');
+    if (reg === 'morgue') for (let i=0;i<T;i+=8) P(g,x+i,y+T-14,1,12,'rgba(0,0,0,.12)');
+    if (reg === 'parking'){ for (let j=0;j<3;j++) for (let i=0;i<T;i+=10) P(g,x+i+(j%2)*5,y+T-13+j*4,9,3,j%2?'#7a4538':'#723f33'); }
+  }
+}
+function buildStatic(){
+  const g = sg; solids.length = 0; seed = 7;
+  for (let r=0;r<20;r++) for (let c=0;c<30;c++){ if (MAP[r][c] === '#') drawWall(g,c,r); else drawFloor(g,c,r); }
+  // wall decorations
+  for (let x=32;x<288;x+=16){ const gr = g.createLinearGradient(x,0,x+16,0); gr.addColorStop(0,'#2b0f22'); gr.addColorStop(.5,'#4e1a3c'); gr.addColorStop(1,'#2b0f22'); g.fillStyle = gr; g.fillRect(x,18,16,14); }
+  P(g,148,17,24,15,'#0c0a0c'); P(g,151,19,18,11,'#7d7a74'); P(g,157,21,6,4,'#cfc6b8'); P(g,155,25,10,5,'#2a2a2a');
+  g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.moveTo(166,17); g.lineTo(172,23); g.stroke();
+  rr(g,372,19,58,12,2,'#8a6a36'); label(g,'ДИРЕКТОР',401,25.5,7,'#1a0c14');
+  rr(g,456,19,48,12,2,'#3a3f38'); label(g,'← ЗАЛ',480,25.5,7,'#d9d2c0');
+  rr(g,530,19,54,12,2,'#3a3f38'); label(g,'МОРГ →',557,25.5,7,'#bfeef5');
+  rr(g,326,276,116,11,2,'#4a2a20'); label(g,'Мы рядом в трудную минуту',384,281.5,6.5,'#e6cf9c','');
+  g.fillStyle = '#efe7d6'; g.beginPath(); g.arc(560,281,5,0,7); g.fill(); g.strokeStyle = '#222'; g.lineWidth = 1; g.beginPath(); g.moveTo(560,281); g.lineTo(560,277.5); g.moveTo(560,281); g.lineTo(563,281); g.stroke();
+  rr(g,686,275,50,12,2,'#e8651f'); label(g,'ДРАКОН ♥',711,281.5,6.5,'#fff');
+  rr(g,770,275,126,12,2,'#efe7d6'); label(g,'В МОРГЕ НЕ ЕСТЬ! — Д.',833,281.5,6.5,'#b0122a');
+  rr(g,70,466,360,13,2,'#1a0c14'); label(g,'ПРОЩАЛЬНЫЙ ЗАЛ «ВЕЧНОСТЬ»',250,473,9,'#d9b26a');
+  rr(g,530,466,370,13,2,'#1a0c14'); label(g,'РИТУАЛЬНЫЕ УСЛУГИ · МОРГ · КРУГЛОСУТОЧНО',715,473,8,'#d9b26a');
+
+  // HALL
+  P(g,136,112,32,336,'#6b0f1d'); P(g,136,112,2,336,'#b8923e'); P(g,166,112,2,336,'#b8923e');
+  P(g,96,66,128,44,'#1e130d'); P(g,96,104,128,6,'#2e1d14'); solid(96,66,128,44);
+  g.fillStyle = '#7a4a24'; g.beginPath(); g.moveTo(102,86); g.lineTo(116,70); g.lineTo(212,72); g.lineTo(220,86); g.lineTo(212,100); g.lineTo(116,102); g.closePath(); g.fill();
+  g.strokeStyle = '#3f2410'; g.lineWidth = 2; g.stroke();
+  g.fillStyle = '#efe6d2'; g.beginPath(); g.moveTo(108,86); g.lineTo(119,75); g.lineTo(208,76); g.lineTo(214,86); g.lineTo(208,96); g.lineTo(119,97); g.closePath(); g.fill();
+  g.fillStyle = '#ffffff'; g.beginPath(); g.ellipse(119,86,6,8,0,0,7); g.fill();
+  for (const vx of [40,260]){ P(g,vx+5,74,10,12,'#2b2b33'); P(g,vx+5,74,10,2,'#55556a');
+    for (let i=0;i<6;i++){ g.fillStyle = i%2 ? '#d92b3a' : '#f3efe6'; g.beginPath(); g.arc(vx+4+(i%3)*6, 64+Math.floor(i/3)*6, 3.5, 0, 7); g.fill(); }
+    P(g,vx+2,70,3,4,'#2f6b35'); P(g,vx+15,70,3,4,'#2f6b35'); solid(vx,60,20,26); }
+  for (const cx of [73,249]){ P(g,cx-7,120,14,5,'#a78232'); P(g,cx-2,104,4,16,'#c9a24a'); P(g,cx-6,103,12,3,'#c9a24a'); P(g,cx-3,96,6,8,'#f3ecd8'); solid(cx-7,110,14,15); }
+  for (const cy of [196,256,316]) for (const bx of [48,176]){ for (let i=0;i<5;i++){ const x = bx+i*16; P(g,x+1,cy,14,5,'#2a1a1f'); P(g,x+1,cy+5,14,9,'#5a3540'); P(g,x+2,cy+6,12,2,'#6b4250'); } solid(bx,cy,80,14); }
+  for (const wx of [44,276]){ P(g,wx-2,384,4,10,'#3a2a1a'); g.strokeStyle = '#2f5a2e'; g.lineWidth = 6; g.beginPath(); g.arc(wx,372,11,0,7); g.stroke();
+    for (let a=0;a<6.28;a+=1.05){ g.fillStyle = '#c42030'; g.beginPath(); g.arc(wx+Math.cos(a)*11,372+Math.sin(a)*11,2.5,0,7); g.fill(); }
+    P(g,wx-1,374,2,14,'#111'); P(g,wx+2,376,2,12,'#111'); solid(wx-12,380,24,12); }
+  // hall speaker
+  P(g,262,164,20,18,'#151318'); P(g,262,164,20,2,'#3a3540'); g.fillStyle = '#2c2a30'; g.beginPath(); g.arc(272,175,5,0,7); g.fill(); P(g,270,166,4,2,'#3a3540'); solid(262,164,20,18);
+
+  // CORRIDOR
+  P(g,330,190,300,3,'#43464c');
+  P(g,380,44,40,18,'#1e1a22'); P(g,384,46,32,8,'#2c2632');
+  P(g,352,66,96,34,'#5a3b24'); P(g,352,66,96,4,'#6d4a2e'); solid(352,66,96,34);
+  P(g,362,74,16,12,'#efe8da'); P(g,366,72,14,12,'#ffffff'); P(g,396,72,26,16,'#2e3238'); P(g,398,74,22,11,'#6fb7d6');
+  P(g,430,76,8,9,'#a01b2a'); P(g,431,74,6,2,'#d9d9d9'); rr(g,384,92,34,6,1,'#c9a24a');
+  P(g,330,40,30,28,'#a07a4a'); P(g,330,52,30,3,'#c9b38a'); label(g,'ВЕНКИ',345,62,6,'#3a2a1a'); solid(330,40,30,28);
+  P(g,596,44,24,36,'#e9edf0'); P(g,600,36,16,12,'#5fb6e3'); P(g,602,38,4,8,'#9fd8f5'); P(g,604,62,8,4,'#3b88c4'); solid(596,44,24,36);
+  P(g,566,212,18,16,'#e5c21c'); P(g,568,214,14,4,'#8ab6c8'); P(g,574,196,2,18,'#8a6a3a'); solid(566,212,18,16);
+
+  // MORGUE
+  P(g,688,34,224,40,'#8b989f'); P(g,688,34,224,3,'#aab6bc');
+  for (let i=0;i<7;i++) for (let j=0;j<2;j++){ const x = 690+i*32, y = 38+j*18; P(g,x,y,28,15,'#a3afb5'); P(g,x+10,y+6,8,3,'#5d686e'); label(g,String(i+1+j*7),x+5,y+4,5,'#3b4448'); }
+  P(g,821,40,9,8,'#f5d43a'); solid(688,34,224,40);
+  for (const tx of [744,812,880]){ P(g,tx+3,104,4,64,'#5e6a70'); P(g,tx+27,104,4,64,'#5e6a70'); P(g,tx,100,34,70,'#b6c3c9'); P(g,tx,100,34,2,'#dce5e9');
+    rr(g,tx+5,106,24,58,9,'#f4f6f7'); g.fillStyle = '#e3e8ea'; g.beginPath(); g.arc(tx+17,114,7,0,7); g.fill();
+    P(g,tx+14,164,7,5,'#e9d26a'); solid(tx,100,34,70); }
+  g.strokeStyle = '#7c8c93'; g.lineWidth = 2; g.beginPath(); g.arc(722,150,6,0,7); g.stroke(); P(g,719,149,7,1,'#7c8c93');
+  P(g,760,210,80,30,'#8f9ba1'); P(g,760,210,80,3,'#b5c0c5'); P(g,772,215,28,18,'#efe6cf'); P(g,786,215,1,18,'#9a8a6a'); P(g,806,218,16,2,'#2a2a8a'); solid(760,210,80,30);
+
+  // STAFF ROOM
+  P(g,740,320,120,60,'#5a3a26'); P(g,744,324,112,52,'#6b4630');
+  P(g,760,330,80,36,'#9b7048'); P(g,760,330,80,4,'#b08458'); solid(760,330,80,36);
+  P(g,786,334,14,14,'#f4f4f4'); P(g,800,338,4,4,'#d0d0d0'); P(g,786,332,14,3,'#cfcfcf');
+  P(g,812,338,8,8,'#c83a3a'); P(g,824,340,8,8,'#3a6ac8'); g.fillStyle = '#e3c07a'; g.beginPath(); g.arc(770,352,7,0,7); g.fill(); for (let i=0;i<4;i++) P(g,765+i*3,349+(i%2)*4,3,3,'#9a5a2a');
+  rr(g,780,408,120,36,6,'#2f5b43'); P(g,784,412,112,10,'#3b6e53'); solid(780,408,120,36);
+  P(g,888,294,32,46,'#eef0f1'); P(g,888,315,32,1,'#b9bec1'); P(g,914,300,2,10,'#999'); P(g,893,299,6,6,'#e8651f'); P(g,902,322,5,5,'#5fb6e3'); solid(888,294,32,46);
+
+  // LOBBY
+  P(g,400,360,160,72,'#5a1520'); P(g,404,364,152,64,'#6e1a28'); P(g,404,364,152,1,'#b8923e'); P(g,404,427,152,1,'#b8923e');
+  P(g,336,300,104,34,'#4a2f1f'); P(g,336,300,104,6,'#6b4632'); solid(336,300,104,34);
+  P(g,352,288,24,16,'#1d1f24'); P(g,354,290,20,11,'#4aa3b5'); P(g,362,304,4,3,'#1d1f24');
+  P(g,388,312,30,8,'#d9b26a'); label(g,'ДАРЬЯ',403,316.5,5.5,'#1a0c14'); g.fillStyle = '#c9a24a'; g.beginPath(); g.arc(428,308,4,0,7); g.fill();
+  rr(g,544,298,84,30,6,'#5a3420'); P(g,548,301,76,9,'#704228'); P(g,562,312,18,10,'#7a4a2e'); solid(544,298,84,30);
+  for (const px of [338,598]){ P(g,px+3,426,14,12,'#7a4a2e'); for (let i=0;i<7;i++){ g.fillStyle = i%2 ? '#2f7a3a' : '#3f9a4a'; g.beginPath(); g.ellipse(px+10+Math.cos(i)*6, 420+Math.sin(i*1.7)*4, 5, 3, i, 0, 7); g.fill(); } solid(px,420,20,18); }
+
+  // PARKING
+  P(g,0,480,960,18,'#4a4c52'); for (let x=0;x<960;x+=24) P(g,x,480,1,18,'#3c3e43'); P(g,0,497,960,2,'#8a8c90');
+  for (const lx of [150,380,530,760]) P(g,lx,520,3,104,'#d8d8d0');
+  label(g,'МЕСТО МАКСА. НЕ ДЫШАТЬ НА МАШИНУ',645,628,7,'rgba(230,230,210,.55)');
+  label(g,'P',90,600,22,'rgba(230,230,210,.25)');
+  P(g,466,496,8,8,'#2a2a2a'); g.fillStyle = '#555'; g.beginPath(); g.arc(470,500,4,0,7); g.fill(); solid(466,494,8,10);
+  for (const [bx,by] of [[26,560],[40,612],[930,520],[915,600]]){ for (let i=0;i<5;i++){ g.fillStyle = i%2 ? '#1f3a24' : '#29492e'; g.beginPath(); g.arc(bx+Math.cos(i*1.3)*9, by+Math.sin(i*1.3)*7, 10, 0, 7); g.fill(); } }
+  drawHearse(g,160,532); solid(160,530,200,66);
+  drawTruck(g,540,532); solid(540,524,200,82);
+}
+function drawHearse(g,x,y){
+  rr(g,x-3,y+4,206,64,10,'rgba(0,0,0,.45)');
+  P(g,x+26,y-5,30,8,'#0b0b0b'); P(g,x+146,y-5,30,8,'#0b0b0b'); P(g,x+26,y+59,30,8,'#0b0b0b'); P(g,x+146,y+59,30,8,'#0b0b0b');
+  rr(g,x,y,200,62,9,'#121218'); rr(g,x+4,y+3,192,6,3,'#2c2c36');
+  rr(g,x+10,y+8,120,46,4,'#1b1b24'); P(g,x+14,y+12,112,4,'#3a2050'); P(g,x+14,y+46,112,4,'#3a2050');
+  rr(g,x+136,y+8,34,46,4,'#2a2f38'); P(g,x+172,y+7,8,48,'#3a4856'); P(g,x+196,y+10,4,42,'#bdbdbd');
+  label(g,'РИТУАЛ',x+70,y+31,10,'#9a9aa8');
+}
+function drawTruck(g,x,y){
+  rr(g,x-4,y+4,208,70,10,'rgba(0,0,0,.45)');
+  for (const wx of [x+28,x+140]){ P(g,wx,y-6,34,9,'#0e0e0e'); P(g,wx,y+65,34,9,'#0e0e0e'); P(g,wx+11,y-5,12,2,'#c8c8c8'); P(g,wx+11,y+71,12,2,'#c8c8c8'); }
+  rr(g,x,y,200,68,10,'#e8651f'); rr(g,x+3,y+3,194,8,4,'#ff8a3d'); P(g,x+6,y+60,188,5,'#c2521a');
+  rr(g,x+8,y+8,100,52,4,'#2f2420'); for (let i=0;i<8;i++) P(g,x+13+i*12,y+11,4,46,'#3d302a');
+  rr(g,x+112,y+5,60,58,6,'#d65a18'); P(g,x+112,y+10,6,48,'#24323e'); rr(g,x+120,y+10,40,48,4,'#c75214');
+  rr(g,x+162,y+8,12,52,3,'#3a5466'); P(g,x+164,y+12,3,18,'rgba(255,255,255,.4)');
+  rr(g,x+174,y+6,22,56,4,'#ef7330'); P(g,x+176,y+33,18,1,'#b84a12');
+  P(g,x+196,y+14,4,40,'#ececec'); for (let i=0;i<5;i++) P(g,x+196,y+17+i*8,4,2,'#9a9a9a');
+  P(g,x+193,y+5,7,9,'#fff3a8'); P(g,x+193,y+54,7,9,'#fff3a8');
+  P(g,x+160,y-5,6,6,'#222'); P(g,x+160,y+67,6,6,'#222');
+  P(g,x,y+6,3,10,'#d01020'); P(g,x,y+52,3,10,'#d01020');
+  label(g,'ДРАКОН',x+140,y+28,8,'#ffd9b5'); label(g,'4×4',x+140,y+40,8,'#ffd9b5');
+  P(g,x-6,y+27,6,14,'#f5f5f5'); g.save(); g.translate(x-3,y+34); g.rotate(-Math.PI/2); label(g,'Х777КИ',0,0,5,'#111'); g.restore();
+}
+
+// Client in the coffin (changes per level)
+const OCC_NAME = {gena:'Геннадий Петрович', tamara:'Тамара Ильинична', sidorov:'Нина Павловна?', petrova:'Нина Павловна'};
+function drawOccupant(g){
+  const o = S.occ; if (!o) return;
+  const skin = '#e4d6c6';
+  const body = {gena:'#23232c', tamara:'#3b2a5c', sidorov:'#4a3524', petrova:'#1f4a3a'}[o];
+  P(g,128,80,72,13,body);
+  if (o === 'gena' || o === 'sidorov') P(g,128,84,6,5,'#f2f2f2');
+  if (o === 'petrova'){ g.fillStyle = '#d9b26a'; g.beginPath(); g.arc(134,86,2,0,7); g.fill(); }
+  if (o === 'tamara'){ for (let i=0;i<4;i++) P(g,132+i*16,80,6,13,'#4a3870'); }
+  P(g,152,84,6,5,skin);
+  const leg = (o === 'tamara' || o === 'petrova') ? '#2a2a2a' : '#1b1b22';
+  P(g,200,80,6,5,leg); P(g,200,88,6,5,leg);
+  if (o === 'gena'){ P(g,206,80,7,5,'#2a5bd7'); P(g,206,88,7,5, S.sockFixed ? '#2a5bd7' : skin); if (!S.sockFixed){ P(g,212,88,1,1,'#c9a890'); P(g,212,90,1,1,'#c9a890'); P(g,212,92,1,1,'#c9a890'); } }
+  else { P(g,206,80,7,5,'#111'); P(g,206,88,7,5,'#111'); }
+  g.fillStyle = skin; g.beginPath(); g.arc(122,86,5.5,0,7); g.fill();
+  if (o === 'gena') P(g,116,81,3,10,'#b9b9b9');
+  if (o === 'sidorov'){ P(g,116,81,3,10,'#2a2018'); P(g,125.5,83.5,2,5,'#1a120c'); }
+  if (o === 'petrova'){ P(g,115.5,82,3,8,'#cfcfcf'); g.fillStyle = '#cfcfcf'; g.beginPath(); g.arc(114,86,3,0,7); g.fill(); }
+  if (o === 'tamara'){ g.fillStyle = '#7a4a8a'; for (const [cx,cy] of [[117,81],[116,86],[117,91],[120,79],[120,93]]){ g.beginPath(); g.arc(cx,cy,2.6,0,7); g.fill(); } }
+  P(g,124,84,2,1,'#6a5a50'); P(g,124,88,2,1,'#6a5a50');
+  if (o === 'tamara' && S.makeup){
+    P(g,123,82.5,3,2,'#2a6cff'); P(g,123,88,3,2,'#2a6cff'); P(g,122,84.5,4,0.6,'#000'); P(g,122,89,4,0.6,'#000');
+    g.fillStyle = '#ff6a9a'; g.beginPath(); g.arc(121,82,1.6,0,7); g.arc(121,90,1.6,0,7); g.fill();
+    P(g,126.3,84.5,2,3,'#ff1a40');
+  } else P(g,127,85,1,2,'#b07560');
+  if (S.blesna){ g.fillStyle = '#d8dde2'; g.beginPath(); g.ellipse(158,82,4,2,0.3,0,7); g.fill(); P(g,161,82,2,1,'#c9a24a'); }
+}
+
+// ---------- Audio ----------
+let AC = null, muted = false;
+function tone(f,d,type,v,slide){
+  if (!AC || muted) return;
+  const o = AC.createOscillator(), g = AC.createGain(), now = AC.currentTime;
+  o.type = type || 'square'; o.frequency.setValueAtTime(f, now); if (slide) o.frequency.linearRampToValueAtTime(f+slide, now+d);
+  g.gain.setValueAtTime(v || 0.03, now); g.gain.exponentialRampToValueAtTime(0.0001, now+d);
+  o.connect(g); g.connect(AC.destination); o.start(now); o.stop(now+d+0.02);
+}
+const jingle = () => [523,659,784,1046].forEach((f,i) => setTimeout(() => tone(f,0.16,'triangle',0.05), i*90));
+const honk = () => { tone(330,0.28,'sawtooth',0.05); setTimeout(() => tone(392,0.35,'sawtooth',0.05), 300); };
+const buzz = () => { tone(90,0.12,'square',0.05); setTimeout(() => tone(90,0.12,'square',0.05), 180); };
+const ringTone = () => { tone(988,0.1,'square',0.03); setTimeout(() => tone(784,0.1,'square',0.03), 130); setTimeout(() => tone(988,0.1,'square',0.03), 260); };
+
+// ---------- Speakers ----------
+const SP = {
+  daria:{n:'Дарья', c:'#ff7a52', p:330}, yulia:{n:'Юля', c:'#c4a6ff', p:200}, max:{n:'Макс', c:'#79c7ff', p:170},
+  kostya:{n:'Костя', c:'#a6dbb0', p:150}, rapai:{n:'Алёна', c:'#ff92cb', p:430},
+  ira:{n:'Ирина, дочь клиента', c:'#ffd38a', p:300, caller:true}, oleg:{n:'Олег, сын клиентки', c:'#9fd0ff', p:190, caller:true},
+  katya:{n:'Катя, частный заказ', c:'#ffb3d9', p:380, caller:true}, '':{n:'', c:'#aaa', p:0}
+};
+
+// ---------- Dialogue engine ----------
+const dlg = $('dlg'), dname = $('dname'), dtext = $('dtext'), dch = $('dch'), dport = $('dport');
+let D = null;
+const l = (s,t,a) => ({s,t,a});
+const ch = (text, lines, fn) => [text, lines, fn];
+function say(lines, done, opt){ D = {lines: lines.slice(), i:0, n:0, done, choice:0, shown:false, phone: !!(opt && opt.phone)}; showLine(); }
+function cur(){ return D.lines[D.i]; }
+function showLine(){
+  const L = cur(); D.n = 0; D.shown = false; D.choice = 0; D.text = typeof L.t === 'function' ? L.t() : L.t;
+  const sp = SP[L.s] || SP[''];
+  dlg.classList.add('on'); dlg.classList.toggle('narr', !L.s); dlg.classList.toggle('phone', D.phone);
+  dname.textContent = (D.phone && L.s && L.s !== 'daria' ? '📱 ' : '') + sp.n; dname.style.color = sp.c;
+  dch.innerHTML = ''; dtext.textContent = '';
+  if (L.s) drawPortrait(dport, L.s, D.phone);
+  if (L.s === 'yulia' && /бля|ёлк|ё-моё|ёшкин|дивиз|хрен|\*/i.test(D.text)) S.swears++;
+  if (L.a) L.a();
+}
+function advanceText(){
+  if (!D) return;
+  const L = cur();
+  if (D.n < D.text.length){ D.n = D.text.length; return; }
+  if (L.c){ pickChoice(D.choice); return; }
+  nextLine();
+}
+function nextLine(){
+  D.i++;
+  if (D.i >= D.lines.length){
+    const done = D.done; D = null; dlg.classList.remove('on');
+    if (done) done();
+    if (!D && S.nerves <= 0 && !S.over) breakdown();
+    updateHUD(); return;
+  }
+  showLine();
+}
+function pickChoice(k){
+  const L = cur(); if (!L || !L.c || !L.c[k] || D.n < D.text.length) return;
+  const c = L.c[k]; if (c[2]) c[2]();
+  D.lines.splice(D.i+1, 0, ...c[1]); tone(660,0.06,'triangle',0.04); nextLine();
+}
+function renderChoices(){
+  const L = cur(); dch.innerHTML = '';
+  L.c.forEach((c,i) => { const b = document.createElement('button'); b.innerHTML = '<span>' + (i+1) + '</span>'; b.appendChild(document.createTextNode(c[0]));
+    if (i === D.choice) b.classList.add('sel'); b.onclick = e => { e.stopPropagation(); pickChoice(i); }; dch.appendChild(b); });
+}
+dlg.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') advanceText(); });
+
+function drawPortrait(c,id,phone){
+  const g = c.getContext('2d'); g.clearRect(0,0,64,64);
+  const bg = g.createLinearGradient(0,0,0,64); bg.addColorStop(0, id === 'daria' ? '#3a1a22' : '#2a1d30'); bg.addColorStop(1,'#120a10'); g.fillStyle = bg; g.fillRect(0,0,64,64);
+  if (SP[id] && SP[id].caller){
+    rr(g,20,8,24,46,5,'#1b1b22'); rr(g,22,13,20,34,2,'#6fd2e8'); P(g,29,10,6,1,'#444');
+    g.fillStyle = '#123'; g.beginPath(); g.arc(32,25,5,0,7); g.fill(); rr(g,25,31,14,10,5,'#123');
+    for (let i=0;i<3;i++){ g.strokeStyle = 'rgba(143,227,239,' + (0.8-i*0.25) + ')'; g.lineWidth = 2; g.beginPath(); g.arc(32,30,26+i*5,-0.6,0.6); g.stroke(); }
+    return;
+  }
+  const L = LOOK[id]; drawPerson(g, 32, 13 + personH(L)*5, L, 0, 0, 5, performance.now()/1000);
+  if (phone && id !== 'daria'){ rr(g,44,38,14,22,3,'#1b1b22'); rr(g,46,41,10,15,1,'#6fd2e8'); }
+}
+
+// ---------- State & helpers ----------
+let S, player, NPC, running = false;
+const lastPick = {};
+function pick(arr,k){ let i; do { i = Math.floor(Math.random()*arr.length); } while (arr.length > 1 && i === lastPick[k]); lastPick[k] = i; return arr[i]; }
+function nerve(d){ S.nerves = Math.max(0, Math.min(100, S.nerves + d)); updateHUD(); }
+let toastTimer = 0; const toastEl = $('toast');
+function toast(m){ toastEl.textContent = m; toastEl.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('on'), 2800); }
+const give = it => { if (!S.inv.includes(it)) S.inv.push(it); updateHUD(); };
+const take = it => { S.inv = S.inv.filter(x => x !== it); updateHUD(); };
+function breakdown(){
+  say([l('','Нервы у Дарьи закончились. Она садится на пол и пять секунд смотрит в стену.'),
+       l('','Стена смотрит в ответ. Становится немного легче.'),
+       l('daria','Так. Я спокойна. Я профессионал. Я главная по моргу. Я никого не убью. Сегодня.')], () => { S.nerves = 45; updateHUD(); });
+}
+const LV = () => LEVELS[S.level];
+const curStep = () => LV().steps[S.step];
+const adv = () => advance();
+
+// ---------- Flavor pools ----------
+const Y_TEXT = ['📱 Юля: «Даш, Костя пишет, что ты без бахил. БЛЯХА-МУХА, бахилы!»',
+  '📱 Юля: «Мне тут доносят, что ты зевнула. Зевай тише, ёлки-моталки»',
+  '📱 Юля: «Костя прислал фото твоей кружки в морге. Даш. Ну Даш. #@$%!»',
+  '📱 Юля: «Я знаю, что Костя опять стучит. Но ты всё равно убери кружку, ёшкин кот»'];
+const K_FRIEND = ['О, Даш, привет! Чай будешь? Шучу, тут холодильник только для клиентов.',
+  'Слушай, если что — я прикрою. Наверное. Если будет выгодно.','Ты сегодня хорошо выглядишь. Прям как живая!',
+  'Видела, Рапай опять с кольцевой лампой бегает? Только тихо. Если услышит — сделает про меня рилс.',
+  'Рапай мне сегодня совет дала: «улыбайся клиентам». Клиентам, Даш. Нашим.'];
+const K_RUDE = ['Чего пришла? Тут холодно, мозги замёрзнут. Хотя чему там мёрзнуть.',
+  'Даш, отойди от света, ты мне клиента загораживаешь. Он, между прочим, вежливее тебя.',
+  'Рыжая, не мешай работать. Иди вон Максу машину погладь.',
+  'Ты, конечно, главная по моргу. Но чай в моей кружке — это уже перебор.'];
+const K_SNITCH = ['(в телефон) Юль, тут Даша опять… ага… без бахил ходит…',
+  'Я ничего не говорю. Но Юля всё узнает. Я ей скажу. Но я ничего не говорю.',
+  'Записал: «Дарья зевнула на рабочем месте». Для отчёта. Для какого — не скажу.'];
+const M_BRAG = ['Даш, глянь в окно! Видишь оранжевую красоту? Моя ласточка. «Великий Дракон 4×4»!',
+  'Китайский — не значит плохой! Там подогрев всего. Даже, кажется, номеров.',
+  'Расход? Не спрашивай про расход. Спроси про мультимедиа. Пятнадцать дюймов, Даша!',
+  'Я её на ночь накрываю. Пледом. С оленями. Ей так спокойнее.',
+  'Рапай вчера сфоткала ласточку и подписала «кринж». Я ей, конечно, ничего не сказал. Улыбнулся. Внутри — плакал.',
+  'Тс-с. Если Рапай спросит, где я, — я на выезде. В астрале. Где угодно.'];
+const R_FLAV = ['Даша, подписчики спрашивают: а вы клиентам ресницы клеите? А мне можно так же?',
+  'Совет от Алёны: если боишься морга — просто не заходи туда! Гениально, да? Я это запатентую.',
+  'Я сняла рилс «Один день в морге» — три просмотра! Один — Костя, и он пожаловался.',
+  'Хочу коллаб с другим бюро. Ну, типа батл венков! Кто красивее — тот и победил!',
+  'Меня тут все обожают, ты заметила? Костя мне всегда улыбается. Макс прячется — это он от смущения!',
+  'У меня рубрика «Алёна советует». Сегодня советую пить больше воды. Клиентам тоже. Ну, ладно, им не надо.'];
+const R_INNER = ['(Ты вежливо киваешь. Внутри — тихий вой.)','(«Очень интересно, Алён», — говоришь ты. Это неправда.)','(Ты улыбаешься. Улыбка держится на честном слове.)'];
+
+// ---------- LEVELS ----------
+const LEVELS = [
+{
+  day:'День 1 · Понедельник', name:'Носок раздора', clock:9*60+15, occ:'gena',
+  intro:[l('','Понедельник, 09:15. Прощальный зал «Вечность». Юля с утра в налоговой, так что за главную — ты.'),
+         l('daria','Кофе, улыбка, профессионализм. И телефон погромче.')],
+  setup(){ S.sockFixed = false; S.blesna = false; },
+  epilogue:'Геннадий Петрович отправился в последний путь в двух одинаковых носках и с любимой блесной. Ирина плакала и улыбалась. Макс протёр фары рукавом.',
+  steps:[
+    {t:'Ответить на звонок Юли', h:'Звонит телефон — нажми E.', call:{from:'Юля', lines:() => [
+      l('yulia','Даш, привет! Я в налоговой до вечера. Тут очередь, как на тот свет, бляха-муха.'),
+      l('daria','Привет, Юль. Что у нас сегодня?'),
+      l('yulia','В двенадцать прощание, Геннадий Петрович. Семья приличная, венков — как на свадьбе. Глянь клиента в зале, ладно?'),
+      l('yulia','И присмотри за своими орлами. Костя с утра подозрительно бодрый, а Макс опять гладит свою китайскую лошадь.'),
+      l('daria','Сделаю. Морг — моя территория.'),
+      l('yulia','Вот за это я тебя и люблю. Всё, целую. Ёлки-моталки, опять мой номерок пропустили!')]}},
+    {t:'Проверить клиента в зале', h:'Прощальный зал — слева от лобби. Подойди к гробу.', on:{coffin:() => say([
+      l('','В гробу — Геннадий Петрович. Выглядит прекрасно. Говорят, лучше, чем при жизни.'),
+      l('daria','Доброе утро, Геннадий Петрович. Как спалось? Можете не отвечать.'),
+      l('','Стоп. На левой ноге — строгий синий носок. На правой — ничего. Голая пятка смотрит в вечность.'),
+      l('daria','Так. Кто его одевал? Можно не гадать. Костя.')], adv)}},
+    {t:'Допросить Костю в морге', h:'Морг — справа по служебному коридору.', on:{kostya:() => say([
+      l('kostya','О, Дашенька. Чего такая строгая? Я вот вообще-то работаю.'),
+      l('daria','Костя. Почему у Геннадия Петровича один носок?'),
+      l('kostya','Потому что второй взял Макс! Сказал, фары протереть нечем, а носок — хлопок, мягкий.'),
+      l('daria','Ты отдал носок клиента Максу. Для фар.'),
+      l('kostya','Я не отдал. Я… позволил взять. Это разные вещи.'),
+      {s:'daria', t:'(Что сказать Косте?)', c:[
+        ch('Ещё раз — и будешь мыть катафалк зубной щёткой.', [l('kostya','Понял, понял. Строгая какая… (бормочет) Юле расскажу.')]),
+        ch('Ладно. Сама разберусь.', [l('kostya','Вот! Это руководитель. Не то что некоторые блогеры.'), l('','(Костя явно про Алёну. Ты делаешь вид, что не поняла.)')]),
+        ch('А ты куда смотрел вообще?', [l('kostya','В телефон. Там Рапай эфир вела, «Утро в морге». Ужас. Оторваться невозможно.'), l('','(За глаза — «Рапай». В лицо Костя зовёт её «Алёночка». Талант.)')])
+      ]}], adv)}},
+    {t:'Найти Макса на парковке', h:'Макс у оранжевого пикапа. Выход — нижние двери лобби.', on:{max:() => say([
+      l('max','Даша! Видела ласточку на солнце? Я фары натёр — горят, как твои глаза!'),
+      l('daria','Макс. Чем ты натёр фары?'),
+      l('max','Э-э… тряпочкой. Мягкой. Синей. Хлопок…'),
+      l('daria','Это носок Геннадия Петровича. Через три часа прощание.'),
+      l('max','Ох ты ж… Ну он же не узнает! Ладно-ладно, не смотри так. Он в кузове, в пакетике. Как родной.'),
+      l('max','Только сначала скажи честно: как тебе ласточка?'),
+      {s:'daria', t:'(Что сказать Максу?)', c:[
+        ch('Шикарная машина, Макс.', [l('max','Я ЗНАЛ! Ты единственная, кто понимает!')], () => { S.compliments += 2; }),
+        ch('Машина как машина. Носок давай.', [l('max','Как машина?! У неё подогрев руля, Даша! …Ладно. Кузов, слева.')]),
+        ch('Фары отличные. Особенно после носка.', [l('max','Вот! Хлопок — сила!')], () => { S.compliments++; })
+      ]}], adv)}},
+    {t:'Забрать носок из кузова', h:'Кузов — левая, задняя часть пикапа.', on:{bed:() => say([
+      l('','В кузове — аккуратный пакетик. В пакетике — синий носок, пахнущий автополиролью.')], () => { give('носок'); adv(); })}},
+    {t:'Ответить на звонок', h:'Звонит телефон — нажми E.', call:{from:'Ирина, дочь клиента', lines:() => [
+      l('ira','Здравствуйте, это Ирина, дочь Геннадия Петровича.'),
+      l('daria','Здравствуйте, Ирина. Примите мои соболезнования. Чем могу помочь?'),
+      l('ira','Папа очень любил рыбалку. Я утром привезла его любимую блесну. Положите ему, пожалуйста?'),
+      l('daria','Конечно. Кому вы её передали?'),
+      l('ira','Девушке на ресепшене. Такой… яркой. Она сказала, что снимет «распаковку блесны».'),
+      l('daria','…Поняла. Не волнуйтесь, всё будет сделано.'),
+      l('','(Рапай. Конечно же, это Рапай.)')]}},
+    {t:'Забрать блесну у Алёны', h:'Алёна в лобби. Вежливо: в лицо её Рапай никто не зовёт.', on:{rapai:() => say([
+      l('rapai','Даша, привет! Смотри, какая штука! Я назвала её «рыбка удачи». Уже два лайка!'),
+      l('daria','Алён, привет. Это блесна Геннадия Петровича. Её нужно положить ему в гроб.'),
+      l('rapai','В гроб?! Такую красоту? Давай я хотя бы сторис запишу: «Последняя рыбалка». Трогательно же!', () => nerve(-6)),
+      {s:'daria', t:'(Ответить Алёне)', c:[
+        ch('Алён, давай без сторис. Семья не поймёт.', [l('rapai','Ой, ну ладно… Ты такая правильная! Я тебя за это и уважаю.')]),
+        ch('Очень трогательно. Но мне правда пора.', [l('rapai','Держи! Но ты мне должна коллаб!'), l('','(Ты мысленно придумываешь сто причин никогда не делать коллаб.)')]),
+        ch('(Улыбнуться и молча протянуть руку)', [l('rapai','Поняла! Молчание — тоже эстетика. Хэштег #тишина.')], () => { S.followers++; })
+      ]},
+      l('rapai','Я её, кстати, отполировала! Средством для снятия макияжа. Блестит, да?'),
+      l('daria','Очень. Спасибо, Алён.'),
+      l('','Ты получаешь блесну. Она пахнет клубникой.')], () => { give('блесна'); adv(); })}},
+    {t:'Привести клиента в порядок', h:'Вернись к гробу с носком и блесной.', on:{coffin:() => say([
+      l('','Ты надеваешь Геннадию Петровичу носок и аккуратно вкладываешь ему в руки блесну.', () => { S.sockFixed = true; S.blesna = true; take('носок'); take('блесна'); }),
+      l('daria','Ну вот. Теперь вы готовы. И к прощанию, и к рыбалке.'),
+      l('','Где-то на парковке Макс сигналит. Видимо, от избытка чувств.', honk)], adv)}}
+  ]
+},
+{
+  day:'День 2 · Среда', name:'Макияж от Кости', clock:10*60+30, occ:'tamara',
+  intro:[l('','Среда, 10:30. В два часа прощаемся с Тамарой Ильиничной. Юля снова на выезде.'),
+         l('daria','Спокойная среда. Ничего не может пойти не так. Ничего.')],
+  setup(){ S.makeup = true; S.kitTaken = false; S.music = 'none'; },
+  epilogue:'Тамара Ильинична выглядела как на лучших своих фотографиях. Олег четыре раза сказал «спасибо». Алёна выложила рилс «Как я спасла прощание». Ты не стала спорить.',
+  steps:[
+    {t:'Ответить на звонок Юли', h:'Звонит телефон — нажми E.', call:{from:'Юля', lines:() => [
+      l('yulia','Даш, привет. Сразу говорю: я не ругаюсь.'),
+      l('daria','Это уже звучит страшно.'),
+      l('yulia','Костя мне написал, что ты в понедельник ушла в 17:58. На две минуты раньше. С фоткой часов, бляха-муха.'),
+      {s:'daria', t:'(Ответить Юле)', c:[
+        ch('Юль, он сам в 17:30 ушёл. Я закрывала морг.', [l('yulia','Да знаю я. Видела на камере. Он уходил с пакетом пельменей. Из камеры №4.')], () => { S.kostyaBusted = true; }),
+        ch('Я за блесной бегала, вообще-то.', [l('yulia','За какой блесной? Всё, не хочу знать. Справилась — и ладно.')]),
+        ch('А можно я его уволю?', [l('yulia','Нельзя. Кто тогда будет мне стучать? Шучу. Наверное.')])
+      ]},
+      l('yulia','Короче. Тамара Ильинична в два. Сын у неё нервный, Олег. Может звонить — будь с ним помягче.'),
+      l('yulia','И Рапай там ничего не снимает? Только ей не говори, что я её так назвала. Она мне вчера сердечко в директ прислала, ёшкин кот.'),
+      l('daria','Не скажу. Алёна у нас неприкосновенна.')]}},
+    {t:'Проверить Тамару Ильиничну', h:'Гроб в прощальном зале.', on:{coffin:() => say([
+      l('','В гробу — Тамара Ильинична. Точнее, кто-то очень яркий в её платье.'),
+      l('','Ярко-синие тени до бровей. Румяна, как у матрёшки. Стрелки — до ушей. Губы — сердечком.'),
+      l('daria','Это… это не макияж. Это мурал.'),
+      l('daria','Почерк знакомый. Костя.')], adv)}},
+    {t:'Выяснить у Кости, что случилось', h:'Костя в морге.', on:{kostya:() => say([
+      l('kostya','Ну как? Красота же? Я по видео учился!'),
+      l('daria','По какому видео, Костя?'),
+      l('kostya','У Алёны на канале. «Вечерний образ за пять минут». Ну, у Рапай. Только ей не говори, что я её так зову.'),
+      l('daria','Костя, это прощание, а не вечерний образ.'),
+      l('kostya','А что? Может, Тамара Ильинична всю жизнь мечтала о стрелках!'),
+      {s:'daria', t:'(Что сказать Косте?)', c:[
+        ch('Смою сама. А ты больше не трогаешь косметику.', [l('kostya','Ну и ладно. Творчество в этой стране не ценят.')]),
+        ch('Ещё раз — и на следующем прощании накрашу тебя.', [l('kostya','Я понял. Не надо меня красить. Я и так красивый.')]),
+        ch('Видео правда такое ужасное?', [l('kostya','Ты не представляешь. Сорок восемь подписчиков, половина — боты. Остальные — мы, под фейками.'), l('','(Ты делаешь вид, что не подписана под ником «Морг_и_Кофе». Хотя подписана.)')])
+      ]},
+      l('kostya','Твоя косметичка в комнате отдыха, на диване. Я её не трогал. Почти.')], adv)}},
+    {t:'Взять косметичку в комнате отдыха', h:'Комната отдыха — справа от лобби. Косметичка на диване.', on:{sofa:() => say([
+      l('','Твоя рабочая косметичка. Внутри — всё для профессионального макияжа. И отпечаток Костиного пальца на палетке.')], () => { S.kitTaken = true; give('косметичка'); adv(); })}},
+    {t:'Исправить макияж', h:'Вернись к гробу в зале.', on:{coffin:() => say([
+      l('','Ты аккуратно смываешь мурал и делаешь Тамаре Ильиничне спокойный, естественный образ.', () => { S.makeup = false; take('косметичка'); }),
+      l('daria','Вот. Теперь вы похожи на себя. А не на обложку альбома.')], adv)}},
+    {t:'Ответить на звонок', h:'Звонит телефон — нажми E.', call:{from:'Олег, сын клиентки', lines:() => [
+      l('oleg','Алло! Это Олег. Сын. Тамары Ильиничны. Сын!'),
+      l('daria','Здравствуйте, Олег. Примите мои соболезнования. К двум часам всё будет готово.'),
+      l('oleg','Да-да, спасибо… Мама очень любила одну песню. «Миллион алых роз». Можно её включить в зале? Просто… в начале.'),
+      l('daria','Конечно. Я сама включу.'),
+      l('oleg','Спасибо. И… она там красивая? Мама?'),
+      {s:'daria', t:'(Ответить Олегу)', c:[
+        ch('Очень. Спокойная и красивая. Как вы её помните.', [l('oleg','Спасибо… Спасибо вам.')]),
+        ch('Честно? Час назад была очень яркая. Но теперь — идеальная.', [l('oleg','Яркая? В каком смысле?.. Впрочем, неважно. Спасибо.')])
+      ]}]}},
+    {t:'Включить песню в зале', h:'Колонка в правой части зала, у стены.', on:{speaker:() => say([
+      l('','Ты нажимаешь «плей». На весь зал гремит: «ВСЕМ ПРИВЕЕЕТ! С ВАМИ АЛЁНА, И СЕГОДНЯ — ЛАЙФХАКИ!»', () => { S.music = 'jingle'; tone(520,0.3,'square',0.04,200); }),
+      l('','К колонке по блютузу подключён телефон Алёны. Звук громче, чем на дискотеке.'),
+      l('daria','(Сохраняй лицо. Сохраняй лицо.)')], adv)}},
+    {t:'Попросить Алёну отключить телефон', h:'Алёна в лобби. Вежливо, очень вежливо.', on:{rapai:() => say([
+      l('rapai','Даша! Слышала мой джингл? Его на весь зал слышно! Акустика тут — бомба!'),
+      l('daria','Алён, слышала. Очень… громко. Через полчаса прощание — отключишь телефон от колонки?'),
+      l('rapai','Ой, а я хотела джингл в начале! Для настроения! Людям же грустно, им нужен позитив!', () => nerve(-8)),
+      {s:'daria', t:'(Ответить Алёне)', c:[
+        ch('Алён, семья попросила особую песню. Давай уважим.', [l('rapai','Ой… ну раз семья. Я же не монстр. Отключаю!')]),
+        ch('Джингл чудесный. Давай сохраним его для эфира.', [l('rapai','Ты права! Эксклюзив! Подписчики оценят!'), l('','(Ты мысленно извиняешься перед всеми сорока восемью подписчиками.)')]),
+        ch('А давай ты потом снимешь, как я включаю песню?', [l('rapai','Коллаб!!! Да! Отключаю!'), l('','(Ты только что пообещала коллаб. Это цена тишины.)')], () => { S.followers += 2; })
+      ]},
+      l('rapai','Совет от Алёны: если людям грустно на прощании — пусть похлопают! Хлопки поднимают настроение!'),
+      l('daria','Я… запомню, Алён.'),
+      l('','Алёна убегает монтировать. Колонка свободна.')], adv)}},
+    {t:'Включить нужную песню', h:'Снова к колонке в зале.', on:{speaker:() => say([
+      l('','Ты включаешь песню, которую просил Олег. По залу разливается тихая мелодия. Даже свечи, кажется, горят ровнее.', () => { S.music = 'song'; }),
+      l('daria','Вот теперь — правильно.')], adv)}}
+  ]
+},
+{
+  day:'День 3 · Пятница', name:'Кто в гробу?', clock:8*60+50, occ:'sidorov',
+  intro:[l('','Пятница, 08:50. В одиннадцать прощание с Ниной Павловной Петровой. А ещё сегодня — твой частный заказ.'),
+         l('daria','Пятница. Короткий день. Наверное.')],
+  setup(){ S.wreath = 'box'; },
+  epilogue:'Нина Павловна попрощалась с близкими как Нина Павловна. Сидоров дождётся понедельника. У Барсика будет самый красивый венок в городе. Комиссия уехала задумчивой.',
+  steps:[
+    {t:'Ответить на звонок Юли', h:'Звонит телефон — нажми E.', call:{from:'Юля', lines:() => [
+      l('yulia','Даш, доброе. Слушай внимательно, это важно, бляха-муха.'),
+      l('yulia','К обеду заеду с проверкой. Со мной человек из комиссии. Серьёзный. В галстуке.'),
+      l('daria','Поняла. Всё будет чисто.'),
+      l('yulia','И Петрова в одиннадцать. Проверь всё сама. Я тебе одной доверяю, остальные — ну, ты знаешь.'),
+      l('yulia','И пусть Макс уберёт свою лошадь с места катафалка. Ёлки-моталки, мне клиенты звонят: «у вас там дракон стоит».')]}},
+    {t:'Проверить Нину Павловну', h:'Гроб в прощальном зале.', on:{coffin:() => say([
+      l('','Ты подходишь к гробу. Нина Павловна выглядит… мужественно. Очень мужественно. С усами.'),
+      l('daria','Это не Нина Павловна. Это Сидоров. Его прощание — в понедельник.'),
+      l('daria','Так. Без паники. Морг — мой. Я найду Нину Павловну.')], adv)}},
+    {t:'Найти Нину Павловну в морге', h:'Проверь холодильные камеры в морге.', on:{drawers:() => say([
+      l('','Ты проверяешь камеры. №3 — пусто. №5 — пусто. №7 — бирка «Сидоров».'),
+      l('','Под биркой «Сидоров» лежит Нина Павловна. Бирки перепутаны.'),
+      l('daria','Бирки вешал Костя. В зал отвозил Макс. Прекрасный тандем.')], adv)}},
+    {t:'Поговорить с Костей', h:'Костя у столов в морге.', on:{kostya:() => say([
+      l('kostya','Это не я! Я бирки правильно вешал! Просто… на других людей.'),
+      l('daria','Костя. В зале лежит Сидоров. Через два часа придут родственники Петровой.'),
+      l('kostya','Ну… Сидоров тоже хороший человек был.'),
+      {s:'daria', t:'(Что сказать Косте?)', c:[
+        ch('Сейчас же готовь Нину Павловну к выносу.', [l('kostya','Есть, начальник! …(тихо) Есть, Даша.')]),
+        ch('Ещё раз — и сам ляжешь вместо Сидорова. Для массовки.', [l('kostya','Это угроза?.. Понял. Готовлю Петрову.')]),
+        ch('Ладно. Все ошибаются. Давай исправим.', [l('kostya','Вот! Нормальный руководитель. Рапай бы на твоём месте сторис сняла.')])
+      ]},
+      l('','Костя уходит к камерам и почему-то сразу достаёт телефон.')], adv)}},
+    {t:'Ответить на звонок Юли', h:'Звонит телефон — нажми E.', call:{from:'Юля', lines:() => [
+      l('yulia','Даш. Мне Костя пишет: «Дарья перепутала клиентов». С тремя восклицательными знаками.', () => { S.snitch++; nerve(-6); }),
+      l('daria','Юль, это он перепутал. Бирки вешал он, а Макс отвёз не того.'),
+      l('yulia','Я так и подумала. Костя мне пишет, только когда сам накосячил. Это уже как прогноз погоды, ёшкин кот.'),
+      l('yulia','Исправляй. Я через пару часов с комиссией. Если в гробу будет Сидоров — я тебе такое скажу… бл… благодарность не объявлю.')]}},
+    {t:'Позвать Макса поменять клиентов', h:'Макс на парковке, у пикапа.', on:{max:() => say([
+      l('max','Даша, смотри! Неоновая подсветка днища! Ночью будет как в кино!'),
+      l('daria','Макс. Ты отвёз в зал Сидорова вместо Петровой.'),
+      l('max','Да? А они… похожи. Оба лежали тихо.'),
+      l('daria','Сейчас вы с Костей меняете их местами. А потом убираешь пикап с места катафалка. Юля едет с комиссией.'),
+      l('max','С комиссией?! А можно комиссии ласточку показать? Ну хоть одним глазком!'),
+      {s:'daria', t:'(Ответить Максу)', c:[
+        ch('Можно. Если всё успеешь до их приезда.', [l('max','Договорились! Я мигом!')], () => { S.compliments++; }),
+        ch('Нет. Комиссия смотрит на нас, а не на пикап.', [l('max','Эх… Ладно. Ты главная.')]),
+        ch('Подсветка, кстати, шикарная.', [l('max','ДА?! Даша, ты лучшая! Всё, бегу!')], () => { S.compliments += 2; })
+      ]},
+      l('max','Только Рапай про подсветку не говори. Снимет — и весь город будет писать, что ласточка «кринж».'),
+      l('','Макс и Костя меняют клиентов местами. Максу удаётся ни разу не оглянуться на пикап. Почти.')],
+      () => { S.occ = 'petrova'; Object.assign(NPC.max, {x:152, y:172, dir:0}); toast('В зале теперь правильный клиент. Макс остался рядом.'); adv(); })}},
+    {t:'Ответить на звонок', h:'Звонит телефон — нажми E.', call:{from:'Катя, частный заказ', lines:() => [
+      l('katya','Дарья, здравствуйте! Это Катя. Я по поводу… ну, моего заказа. Венок для Барсика.'),
+      l('daria','Здравствуйте, Катя. Венок готов. В форме кота, как договаривались.'),
+      l('katya','Ой, спасибо! Барсик был такой пушистый… Я вечером заеду. Пришлёте фото?'),
+      l('daria','Конечно. Сейчас сфотографирую.'),
+      l('','(Частные заказы — твоя маленькая тайна. Венок спрятан в коробке «ВЕНКИ» в коридоре. Там, где Алёна точно не найдёт.)')]}},
+    {t:'Достать венок-кота из коробки', h:'Коробка «ВЕНКИ» в углу служебного коридора.', on:{boxes:() => say([
+      l('','Ты открываешь коробку «ВЕНКИ». Внутри пусто. Только записка с сердечком:'),
+      l('','«Взяла котика для съёмки!!! Он такой милый!!! Верну!!! — А.»', () => { S.wreath = 'rapai'; nerve(-6); }),
+      l('daria','(Только не это.)')], adv)}},
+    {t:'Вернуть венок у Алёны', h:'Алёна в лобби. Вежливо. Очень вежливо.', on:{rapai:() => say([
+      l('rapai','Даша! У меня новая рубрика — «Котик дня»! Этот венок — просто вау! Кто его сделал?!'),
+      l('daria','Алён, это мой частный заказ. Его вечером заберут.'),
+      l('rapai','Твой?! Ты сама сделала?! Давай я тебя отмечу! Ты будешь звездой!', () => nerve(-8)),
+      {s:'daria', t:'(Ответить Алёне)', c:[
+        ch('Спасибо, Алён, но давай без отметок. Это для клиента.', [l('rapai','Ой, скромная! Тогда напишу «таинственный мастер». Интрига!')]),
+        ch('Отметь сам венок, но без меня.', [l('rapai','Поняла! Венок — звезда, ты — за кадром! Как продюсер!')], () => { S.followers += 2; }),
+        ch('(Глубоко вдохнуть) Алён, мне очень нужно его вернуть. Прямо сейчас.', [l('rapai','Ой, ты такая серьёзная. Держи, конечно!'), l('','(Голос у тебя спокойный. Внутри ты кричишь в подушку.)')])
+      ]},
+      l('rapai','Совет от Алёны: венки надо хранить в холодильнике, чтобы не завяли! Я уже предложила Косте камеру номер четыре!'),
+      l('daria','Алён… давай не будем.'),
+      l('rapai','Всё, побежала! Кстати, Юлия приехала с каким-то мужчиной в галстуке! Сниму, как они паркуются!'),
+      l('daria','Нет-нет, Алён, вот это точно не надо…'),
+      l('','Но Алёна уже убежала на парковку. Венок-кот снова у тебя.')],
+      () => { S.wreath = 'daria'; give('венок-кот'); NPC.yulia.hidden = false; Object.assign(NPC.rapai, {x:450, y:560}); S.rzone = [390,515,120,95]; toast('Юля приехала. Она ждёт в коридоре.'); adv(); })}},
+    {t:'Встретить Юлю и комиссию', h:'Юля в коридоре у своего стола.', on:{yulia:() => say([
+      l('yulia','Даш! Наконец-то. Комиссия у Петровой в зале. Ходит, смотрит, молчит. Я вся вспотела, бляха-муха.'),
+      l('daria','В зале всё как надо. Петрова — это Петрова. Носки одинаковые, макияж спокойный, колонка без джинглов.'),
+      l('yulia','Он сказал, что «давно не видел такого порядка». Даш. Ты понимаешь? ПОРЯДКА. У НАС.'),
+      l('yulia','А на парковке Рапай снимала его на телефон. Он спросил, кто это. Я сказала: «Алёна, наш креативный отдел».'),
+      l('daria','И что он?'),
+      l('yulia','Сказал «понятно». Таким тоном, каким врачи говорят «понятно». Ёлки-моталки.'),
+      {s:'daria', t:'(Ответить Юле)', c:[
+        ch('Главное — Петрова на месте. Остальное переживём.', [l('yulia','Вот поэтому ты у меня главная по моргу.')]),
+        ch('А комиссия видела неоновую подсветку пикапа?', [l('yulia','Видела. Спросил, где такую ставят. Даш, я не понимаю этот мир.')]),
+        ch('Можно я сегодня уйду вовремя? Без Костиных фоток часов?', [l('yulia','Можно. Я Косте сама сфоткаю часы. Перед носом.')])
+      ]},
+      l('yulia','Короче. Ты молодец. Пошли пить чай. Только не в морге, бляха-муха!')], adv)}}
+  ]
+}
+];
+
+// ---------- Level flow ----------
+let levelTok = 0;
+function startGame(){
+  S = {level:0, step:0, nerves:100, swears:0, snitch:0, followers:0, compliments:0, inv:[], occ:null,
+       kostyaBusted:false, over:false, time:0, lastMood:-1, lastRoom:'lobby', bub:4, pendingCall:null, ringing:null, ringT:0, rzone:[462,352,125,62]};
+  startLevel(0);
+}
+function startLevel(i){
+  S.level = i; S.step = 0; S.inv = []; S.occ = LEVELS[i].occ; S.time = 0; S.over = false;
+  S.pendingCall = null; S.ringing = null; S.rzone = [462,352,125,62];
+  S.sockFixed = true; S.blesna = false; S.makeup = false;
+  player = {x:392, y:376, dir:0, anim:0, moving:false};
+  NPC = {
+    yulia: {id:'yulia', x:400, y:142, dir:0, anim:0, hidden:true},
+    kostya:{id:'kostya',x:712, y:206, dir:2, anim:0},
+    max:   {id:'max',   x:800, y:552, dir:2, anim:0},
+    rapai: {id:'rapai', x:580, y:404, dir:0, anim:0, wt:2}
+  };
+  LEVELS[i].setup();
+  D = null; dlg.classList.remove('on'); hudKey = ''; updateHUD();
+  const tok = ++levelTok;
+  setTimeout(() => { if (tok === levelTok && running) say(LEVELS[i].intro, enterStep); }, 350);
+}
+function enterStep(){
+  const st = curStep();
+  if (st.call) S.pendingCall = Object.assign({}, st.call, {delay:1.4});
+  else toast('Новая задача: ' + st.t);
+  hudKey = ''; updateHUD();
+}
+function advance(){
+  S.step++;
+  if (S.step >= LV().steps.length) return levelDone();
+  jingle(); enterStep();
+}
+function answerCall(){
+  const c = S.ringing; S.ringing = null; updateHUD();
+  say(typeof c.lines === 'function' ? c.lines() : c.lines, adv, {phone:true});
+}
+function levelDone(){
+  S.over = true; jingle(); setTimeout(jingle, 500);
+  const last = S.level === LEVELS.length - 1, lv = LV();
+  setTimeout(() => {
+    if (!last){
+      card.innerHTML = '<div class="sub">' + lv.day + '</div><h2>«' + lv.name + '» — закрыто</h2>' +
+        '<p>' + lv.epilogue + '</p>' + statsHTML() + '<button id="nextb">Следующий день</button>';
+      ovEl.classList.remove('hide'); $('nextb').onclick = () => { ovEl.classList.add('hide'); startLevel(S.level + 1); }; $('nextb').focus();
+    } else {
+      const rank = S.nerves >= 70 ? 'Железная леди ритуала' : S.nerves >= 40 ? 'Крепкий профессионал' : 'Выжила — и это главное';
+      card.innerHTML = '<h1>НЕДЕЛЯ</h1><div class="sub">закрыта. Морг в надёжных руках.</div><div class="rank">' + rank + '</div>' +
+        '<p>' + lv.epilogue + '</p>' + statsHTML() + '<p class="note">Алёна до сих пор не знает, что её зовут Рапай. И пусть так и будет.</p>' +
+        '<button id="again">Начать неделю заново</button>';
+      ovEl.classList.remove('hide'); $('again').onclick = startBtn; $('again').focus();
+    }
+  }, 600);
+}
+function statsHTML(){
+  return '<div class="stats"><span>Ругательств Юли</span><span>' + S.swears + '</span>' +
+    '<span>Доносов Кости</span><span>' + S.snitch + '</span>' +
+    '<span>Комплиментов пикапу</span><span>' + S.compliments + '</span>' +
+    '<span>Подписчиков у Алёны</span><span>' + (48 + S.followers) + '</span>' +
+    '<span>Нервы</span><span>' + Math.round(S.nerves) + ' / 100</span></div>';
+}
+
+// ---------- Interaction ----------
+const OBJS = [
+  {id:'coffin', x:160, y:118, name:() => OCC_NAME[S.occ] || 'Гроб'}, {id:'flowers', x:52, y:96, name:'Венок'},
+  {id:'speaker', x:272, y:198, name:'Колонка'},
+  {id:'desk', x:388, y:342, name:'Стойка администратора'}, {id:'cooler', x:608, y:88, name:'Кулер'},
+  {id:'ydesk', x:400, y:108, name:'Стол Юли'}, {id:'boxes', x:345, y:80, name:'Коробка «ВЕНКИ»'},
+  {id:'kettle', x:800, y:372, name:'Чайник'}, {id:'sofa', x:850, y:402, name:() => S.level === 1 && !S.kitTaken ? 'Косметичка' : 'Диван'},
+  {id:'drawers', x:830, y:84, name:'Холодильные камеры'},
+  {id:'table', x:796, y:176, name:'Секционный стол'}, {id:'journal', x:800, y:250, name:'Журнал морга'},
+  {id:'hearse', x:260, y:610, name:'Катафалк'}, {id:'wheel', x:705, y:616, name:'Колёса пикапа'},
+  {id:'bed', x:526, y:566, name:'Кузов пикапа'}, {id:'grille', x:754, y:566, name:'Морда пикапа'}
+];
+const npcs = () => Object.values(NPC).filter(n => !n.hidden);
+function findTarget(){
+  let best = null, bd = 50; const px = player.x, py = player.y - 6;
+  for (const n of npcs()){ const d = Math.hypot(n.x-px, n.y-6-py);
+    if (d < bd){ bd = d; best = {kind:'npc', ref:n, id:n.id, x:n.x, y:n.y - personH(LOOK[n.id])*2 - 6, name:SP[n.id].n}; } }
+  for (const o of OBJS){ const d = Math.hypot(o.x-px, o.y-py);
+    if (d < bd - 4){ bd = d; best = {kind:'obj', id:o.id, x:o.x, y:o.y - 26, name: typeof o.name === 'function' ? o.name() : o.name}; } }
+  return best;
+}
+function faceTo(a,b){ const dx = b.x-a.x, dy = b.y-a.y; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
+function talk(tg){
+  if (tg.kind === 'npc'){ tg.ref.dir = faceTo(tg.ref, player); player.dir = faceTo(player, tg.ref); }
+  const st = curStep();
+  if (st && st.on && st.on[tg.id]) return st.on[tg.id]();
+  flavor(tg.id);
+}
+function flavor(id){
+  switch (id){
+    case 'kostya': return talkKostya();
+    case 'max': return say([l('max', NPC.max.x < 300 ? pick(['Стою тут, а мысленно — в пикапе. С подогревом.','Если что, я Петрову не трогал. В смысле, трогал, но правильно.','Не говори Рапай, что я тут. Она меня в рилс «Мужчины морга» хочет.'],'mh') : pick(M_BRAG,'mb'))]);
+    case 'rapai': return say([l('rapai', pick(R_FLAV,'rf'), () => { nerve(-4); S.followers++; }), l('', pick(R_INNER,'ri'))]);
+    case 'yulia': return say([l('yulia', pick(['Даш, комиссия ещё в зале. Улыбайся. Нет, не так. Нормально улыбайся, ёшкин кот.','Я горжусь тобой. Не говори никому, особенно Косте.'],'yf'))]);
+    case 'coffin': {
+      const o = S.occ, f = {
+        gena: S.sockFixed ? 'Геннадий Петрович в полном порядке. Самый спокойный человек в здании.' : 'Голая пятка Геннадия Петровича молча ждёт справедливости.',
+        tamara: S.makeup ? 'Тамара Ильинична смотрит в потолок синими тенями. Надо что-то делать.' : 'Тамара Ильинична выглядит спокойно и достойно. Твоя работа.',
+        sidorov: 'Сидоров. С усами. Явно не Нина Павловна.',
+        petrova: 'Нина Павловна. Наконец-то та, кто нужна.' }[o];
+      return say([l('', f)]);
+    }
+    case 'speaker': return say([l('', S.music === 'song' ? 'Тихо играет песня, которую просил Олег.' : S.music === 'jingle' ? 'Из колонки доносится: «…и ставьте лайк!» Это телефон Алёны.' : 'Колонка. Подключена к… лучше не проверять.')]);
+    case 'flowers': return say([l('','Венок с лентой «От коллектива». Нет, подожди… «От коллектора». Кто это заказывал?!')]);
+    case 'desk': return say([l('', pick(['Твой компьютер. На рабочем столе 47 файлов «Новый документ (12)». Это система. Ты её понимаешь.',
+      'Звонок на стойке. Ты нажимаешь. «Дзынь». Никто не пришёл. Классика.',
+      'Твой ежедневник. «Частный заказ: венок в форме кота, к пятнице». Работа есть работа.',
+      'Журнал записи. Напротив «17:30» кто-то вывел сердечком: «Алёна — маникюр».'],'d'))]);
+    case 'ydesk': return say([l('', NPC.yulia.hidden ? 'Стол Юли. Записка: «Я на выезде. Звонить, если горит. Если реально горит — звонить 01». Мило.' : 'Стол Юли. На нём папка «КОМИССИЯ» и три пустые чашки кофе.')]);
+    case 'boxes': return say([l('', S.level === 2 && S.wreath === 'box' ? 'Коробка «ВЕНКИ». Внутри — твоя тайна. Пока рано её доставать.' : 'Коробка «ВЕНКИ». Пахнет хвоей и чужими сторис.')]);
+    case 'cooler': return say([l('','Кулер булькает. Где-то в глубине здания булькает что-то ещё. Не думай об этом.', () => nerve(6))]);
+    case 'kettle': return say([l('', pick(['Ты наливаешь чай. Кружка «Лучший сотрудник» — Костина. Пьёшь из неё назло.','Чай. Горячий, сладкий, живой. Как ты. Почти.'],'k'), () => { nerve(100); toast('Нервы: 100. Чай — сила.'); })]);
+    case 'sofa': return say([l('','Диван. Здесь Макс спит в обед, обняв брелок от пикапа.')]);
+    case 'drawers': return say([l('', S.kostyaBusted ? 'Камера №4 пуста. Пельменей больше нет. Покойтесь с миром, пельмени.' : 'Холодильная камера №4. Жёлтая наклейка: «НЕ ОТКРЫВАТЬ. ОБЕД КОСТИ».')]);
+    case 'table': return say([l('','Под простынёй кто-то лежит. Лежит очень профессионально. Костя, учись.')]);
+    case 'journal': return say([l('','Журнал морга. Последняя запись Костиным почерком: «Дарья опять смотрела осуждающе».')]);
+    case 'hearse': return say([l('','Катафалк. Старенький, но надёжный. Макс зовёт его «дедом» и стесняется ставить рядом с ласточкой.')]);
+    case 'grille': honk(); return say([l('','БИ-БИ-И! Ты просто проверила клаксон. Где-то в морге Костя роняет поднос.')]);
+    case 'wheel': return say([l('','Колёса. Восемнадцать дюймов. Диски блестят, как зубы на аватарке у Алёны.')]);
+    case 'bed': return say([l('','Кузов пикапа. Чистый, как совесть Кости. То есть подозрительно чистый.')]);
+  }
+}
+function talkKostya(){
+  if (S.kostyaBusted && !S.kostyaBustTalk){ S.kostyaBustTalk = true; return say([
+    l('kostya','Даша… Юля выкинула мои пельмени. Все. Даже с грибами.'),
+    l('kostya','Из камеры номер четыре. Это была моя камера. Моё место силы.'),
+    l('daria','Не надо было стучать, Костя.'),
+    l('kostya','Я не стучу. Я информирую. Это разные вещи. Я тебе это припомню.')]); }
+  let m; do { m = Math.floor(Math.random()*3); } while (m === S.lastMood && Math.random() < 0.7); S.lastMood = m;
+  if (m === 0) return say([l('kostya', pick(K_FRIEND,'kf'))]);
+  if (m === 1) return say([l('kostya', pick(K_RUDE,'kr'), () => nerve(-5))]);
+  say([l('kostya', pick(K_SNITCH,'ks')), l('','Через минуту вибрирует телефон…', () => {
+    S.snitch++; S.swears++; buzz(); nerve(-6); toast(pick(Y_TEXT,'yt')); })]);
+}
+
+// ---------- Collision ----------
+const ov = (a,b) => a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+const boxOf = (e,x,y) => { const w = e.id === 'rapai' ? 24 : 18; return {x:x-w/2, y:y-10, w, h:10}; };
+function blocked(e,x,y){
+  const b = boxOf(e,x,y);
+  if (b.x < 2 || b.y < 2 || b.x+b.w > W-2 || b.y+b.h > H-2) return true;
+  const c0 = Math.floor(b.x/T), c1 = Math.floor((b.x+b.w-1)/T), r0 = Math.floor(b.y/T), r1 = Math.floor((b.y+b.h-1)/T);
+  for (let r=r0;r<=r1;r++) for (let c=c0;c<=c1;c++) if (MAP[r][c] === '#') return true;
+  for (const s of solids) if (ov(b,s)) return true;
+  for (const n of npcs()) if (n !== e && ov(b, boxOf(n,n.x,n.y))) return true;
+  if (e !== player && ov(b, boxOf(player,player.x,player.y))) return true;
+  return false;
+}
+function tryMove(e,dx,dy){ if (!blocked(e, e.x+dx, e.y+dy)){ e.x += dx; e.y += dy; return true; } return false; }
+function roomAt(x,y){ return region(Math.floor(x/T), Math.floor((y-5)/T)); }
+
+// ---------- Input ----------
+const K = {};
+addEventListener('keydown', e => {
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  if (!running){ if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat) startBtn(); return; }
+  K[e.code] = true;
+  if (e.repeat) return;
+  if (e.code === 'KeyM'){ muted = !muted; toast(muted ? 'Звук выключен' : 'Звук включён'); return; }
+  if (S.over) return;
+  const act = ['KeyE','Space','Enter'].includes(e.code);
+  if (D){
+    const L = cur();
+    if (L.c && D.n >= D.text.length){
+      if (e.code === 'ArrowUp' || e.code === 'KeyW'){ D.choice = (D.choice + L.c.length - 1) % L.c.length; renderChoices(); return; }
+      if (e.code === 'ArrowDown' || e.code === 'KeyS'){ D.choice = (D.choice + 1) % L.c.length; renderChoices(); return; }
+      const dg = {Digit1:0, Digit2:1, Digit3:2, Numpad1:0, Numpad2:1, Numpad3:2}[e.code];
+      if (dg !== undefined){ pickChoice(dg); return; }
+    }
+    if (act) advanceText();
+    return;
+  }
+  if (act) doAction();
+});
+addEventListener('keyup', e => { K[e.code] = false; });
+function doAction(){
+  if (!running || !S || S.over) return;
+  if (D) return advanceText();
+  if (S.ringing) return answerCall();
+  const tg = findTarget(); if (tg) talk(tg);
+}
+
+// ---------- Touch: joystick + action button ----------
+const JOY = {x:0, y:0, id:null}, joy = $('joy'), knob = $('knob'), actBtn = $('act');
+function joyMove(e){
+  const r = joy.getBoundingClientRect();
+  let dx = (e.clientX - (r.left + r.width/2)) / (r.width/2), dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+  const m = Math.hypot(dx,dy); if (m > 1){ dx /= m; dy /= m; }
+  JOY.x = m < 0.2 ? 0 : dx; JOY.y = m < 0.2 ? 0 : dy;
+  knob.style.transform = 'translate(' + (dx*52) + 'px,' + (dy*52) + 'px)';
+}
+function joyEnd(e){ if (e.pointerId !== JOY.id) return; JOY.id = null; JOY.x = JOY.y = 0; knob.style.transform = ''; }
+joy.addEventListener('pointerdown', e => { e.preventDefault(); JOY.id = e.pointerId; try { joy.setPointerCapture(e.pointerId); } catch (_) {} joyMove(e); });
+joy.addEventListener('pointermove', e => { if (e.pointerId === JOY.id) joyMove(e); });
+joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel', joyEnd); joy.addEventListener('lostpointercapture', joyEnd);
+actBtn.addEventListener('pointerdown', e => { e.preventDefault(); doAction(); });
+actBtn.addEventListener('click', e => e.preventDefault());
+$('menuBtn').addEventListener('click', () => document.body.classList.toggle('sideopen'));
+$('side').addEventListener('click', () => { if (TOUCH) document.body.classList.remove('sideopen'); });
+$('rotok').addEventListener('click', () => { document.body.classList.add('rotok'); fit(); });
+let actState = '';
+function updateTouchUI(){
+  if (!TOUCH || !S) return;
+  wrap.classList.toggle('dlgopen', !!D);
+  const st = S.ringing ? 'ring' : (!D && !S.over && findTarget()) ? 'talk' : 'idle';
+  if (st !== actState){ actState = st;
+    actBtn.className = st;
+    actBtn.innerHTML = st === 'ring' ? '📱<small>Ответить</small>' : 'E<small>' + (st === 'talk' ? 'Говорить' : 'Действие') + '</small>'; }
+}
+addEventListener('blur', () => { for (const k in K) K[k] = false; });
+
+// ---------- Lights ----------
+const lc = document.createElement('canvas'); lc.width = W; lc.height = H; const lg = lc.getContext('2d');
+const mf = {on:true, t:1, v:1};
+function lights(t){
+  const fl = (a,sp,amt) => a * (1 - amt + amt*(0.5 + 0.5*Math.sin(t*sp) * Math.sin(t*sp*1.7+1)));
+  return [
+    {room:'hall', x:160, y:240, r:300, a:0.42}, {room:'hall', x:73, y:96, r:120, a:fl(0.75,9,0.25)}, {room:'hall', x:249, y:96, r:120, a:fl(0.75,8,0.25)},
+    {room:'corridor', x:480, y:130, r:250, a:0.78}, {room:'morgue', x:800, y:140, r:270, a:mf.v},
+    {room:'staff', x:800, y:360, r:210, a:0.85}, {room:'lobby', x:480, y:360, r:270, a:0.9},
+    {room:'parking', x:470, y:494, r:240, a:0.85}, {room:'parking', x:480, y:580, r:560, a:0.3}
+  ];
+}
+function renderLight(t){
+  lg.globalCompositeOperation = 'source-over'; lg.clearRect(0,0,W,H);
+  lg.fillStyle = 'rgba(5,3,10,0.84)'; lg.fillRect(0,0,W,H);
+  lg.globalCompositeOperation = 'destination-out';
+  const pr = roomAt(player.x, player.y);
+  const all = lights(t).concat([{room: ROOMRECT[pr] ? pr : null, x:player.x, y:player.y-18, r:85, a:0.4}]);
+  for (const L of all){
+    if (L.a <= 0.01) continue; lg.save();
+    if (L.room){ const rc = ROOMRECT[L.room]; lg.beginPath(); lg.rect(rc[0],rc[1],rc[2],rc[3]); lg.clip(); }
+    const gr = lg.createRadialGradient(L.x,L.y,0,L.x,L.y,L.r);
+    gr.addColorStop(0,'rgba(0,0,0,' + L.a + ')'); gr.addColorStop(0.55,'rgba(0,0,0,' + (L.a*0.55) + ')'); gr.addColorStop(1,'rgba(0,0,0,0)');
+    lg.fillStyle = gr; lg.fillRect(L.x-L.r, L.y-L.r, L.r*2, L.r*2); lg.restore();
+  }
+  ctx.drawImage(lc,0,0);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const glow = (x,y,r,col,room) => { ctx.save(); const rc = ROOMRECT[room]; ctx.beginPath(); ctx.rect(rc[0],rc[1],rc[2],rc[3]); ctx.clip();
+    const g = ctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(x-r,y-r,r*2,r*2); ctx.restore(); };
+  glow(800,140,230,'rgba(60,170,190,' + (0.16*mf.v) + ')','morgue');
+  glow(73,96,90,'rgba(255,140,40,.2)','hall'); glow(249,96,90,'rgba(255,140,40,.2)','hall');
+  glow(470,494,160,'rgba(255,190,90,.1)','parking'); glow(480,360,200,'rgba(255,200,140,.05)','lobby');
+  ctx.restore();
+}
+const vig = document.createElement('canvas'); vig.width = W; vig.height = H;
+(() => { const g = vig.getContext('2d'); const gr = g.createRadialGradient(480,320,260,480,320,640); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(0,0,0,.6)'); g.fillStyle = gr; g.fillRect(0,0,W,H); })();
+
+// ---------- Dynamic decor ----------
+function drawDyn(t){
+  drawOccupant(ctx);
+  for (const cx of [73,249]){ const f = Math.sin(t*13+cx)*0.6 + Math.random()*0.5;
+    ctx.fillStyle = '#ffae34'; ctx.beginPath(); ctx.ellipse(cx, 92+f*0.3, 2.3, 4+f*0.5, 0, 0, 7); ctx.fill(); P(ctx,cx-0.8,92,1.6,2.5,'#fff4c4'); }
+  for (let i=0;i<3;i++){ const k = (t*0.6 + i/3) % 1; ctx.fillStyle = 'rgba(255,255,255,' + (0.35*(1-k)) + ')'; ctx.beginPath(); ctx.arc(793 + Math.sin(t*2+i)*3, 330 - k*26, 3 + k*4, 0, 7); ctx.fill(); }
+  const sp = [[560,540],[600,552],[650,536],[700,570],[738,548],[690,590],[620,575]];
+  sp.forEach((s,i) => { const a = Math.max(0, Math.sin(t*2.2 + i*1.9)); if (a < 0.85) return; const z = (a-0.85)*40;
+    ctx.fillStyle = 'rgba(255,255,230,' + ((a-0.85)*6) + ')'; ctx.fillRect(s[0]-z/2, s[1]-0.5, z, 1.5); ctx.fillRect(s[0]-0.5, s[1]-z/2, 1.5, z); });
+  if (S.level === 2 && NPC.max.x > 300){ ctx.fillStyle = 'rgba(180,80,255,' + (0.25 + 0.15*Math.sin(t*4)) + ')'; ctx.fillRect(540,598,200,6); }
+  P(ctx,354,290,20,11, Math.sin(t*3) > 0.97 ? '#8fe3ef' : '#4aa3b5');
+  if (S.level === 1 && !S.kitTaken){ rr(ctx,842,412,16,10,3,'#e86aa8'); P(ctx,848,410,4,3,'#c9a24a'); }
+  if (S.level === 2 && S.wreath === 'rapai'){ const r = NPC.rapai; ctx.strokeStyle = '#2f6b35'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(r.x+16, r.y-22, 6, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#2f6b35'; ctx.beginPath(); ctx.moveTo(r.x+11,r.y-26); ctx.lineTo(r.x+12,r.y-33); ctx.lineTo(r.x+15,r.y-28); ctx.moveTo(r.x+17,r.y-28); ctx.lineTo(r.x+20,r.y-33); ctx.lineTo(r.x+21,r.y-26); ctx.fill(); }
+  if (S.music === 'song' || S.music === 'jingle'){ const k = (t*0.8) % 1; ctx.fillStyle = 'rgba(217,178,106,' + (1-k) + ')'; ctx.font = '12px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillText(S.music === 'song' ? '♪' : '♫!', 272 + Math.sin(t*3)*4, 160 - k*24); }
+}
+function drawMorgueTube(){ P(ctx,764,133,72,10,'#6b777d'); ctx.fillStyle = mf.on ? 'rgba(225,255,255,' + mf.v + ')' : '#4a565c'; ctx.fillRect(768,135,64,5); }
+
+// ---------- Bubbles & prompts ----------
+const AMB = { yulia:['Ё-моё…','Где кофе?!','Бляха-муха…','Комиссия…'], max:['Ласточка моя…','Протру-ка фару…','Подогрев руля…','Хром!'],
+  kostya:['*печатает*','Хе-хе…','Я ничего не говорю…','Рапай опять в эфире…'], rapai:['Всем привееет!','Лайк, подписка!','Это контент!','#морг #вайб'] };
+function bubble(x,y,txt){
+  ctx.font = (TOUCH ? 14 : 11) + 'px Verdana, sans-serif'; const w = ctx.measureText(txt).width + 14;
+  rr(ctx, x-w/2, y-22, w, 18, 6, 'rgba(250,244,236,.95)'); ctx.fillStyle = 'rgba(250,244,236,.95)';
+  ctx.beginPath(); ctx.moveTo(x-4,y-4); ctx.lineTo(x+4,y-4); ctx.lineTo(x,y+1); ctx.fill();
+  ctx.fillStyle = '#2a1420'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y-13);
+}
+function drawPrompt(tg,t){
+  const bob = Math.sin(t*5)*2; ctx.font = 'bold ' + (TOUCH ? 14 : 11) + 'px Verdana, sans-serif';
+  const w = ctx.measureText(tg.name).width + 34, x = tg.x - w/2, y = tg.y - 22 + bob;
+  rr(ctx, x, y, w, 20, 6, 'rgba(20,8,14,.9)'); ctx.strokeStyle = '#d9b26a'; ctx.lineWidth = 1; ctx.stroke();
+  rr(ctx, x+4, y+3, 16, 14, 3, '#d9b26a'); ctx.fillStyle = '#1a0c14'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('E', x+12, y+10.5);
+  ctx.fillStyle = '#f1e7dc'; ctx.textAlign = 'left'; ctx.fillText(tg.name, x+25, y+10.5);
+}
+
+// ---------- HUD ----------
+const ql = $('ql'), hintEl = $('hint'), locEl = $('loc'), clkEl = $('clk'), nvEl = $('nv'), nbEl = $('nb'), invEl = $('inv'), phoneEl = $('phone');
+let hudKey = '';
+function updateHUD(){
+  if (!S) return;
+  const lv = LV();
+  const key = S.level + '|' + S.step + '|' + S.inv.join(',') + '|' + (S.ringing ? 1 : 0);
+  if (key !== hudKey){ hudKey = key;
+    $('d1').textContent = lv.day; $('d2').textContent = lv.name;
+    ql.innerHTML = lv.steps.map((s,i) => '<li class="' + (i < S.step ? 'done' : i === S.step ? 'cur' : i === S.step + 1 ? '' : 'hid') + '">' + (i > S.step + 1 ? '…' : s.t) + '</li>').join('');
+    const stp = lv.steps[S.step]; $('mini').innerHTML = '<div class="md">' + lv.day + ' · шаг ' + Math.min(S.step+1, lv.steps.length) + ' из ' + lv.steps.length + '<span class="mn" id="mnv"></span></div>' + (stp ? (S.ringing ? '📱 Звонит: ' + S.ringing.from : stp.t) : 'День закрыт');
+    const st = lv.steps[S.step]; hintEl.textContent = st ? (st.call && !S.ringing && !D ? 'Ждёшь звонка…' : st.h) : 'День закрыт.';
+    invEl.innerHTML = 'В руках: <b>' + (S.inv.length ? S.inv.join(', ') : 'ничего') + '</b>';
+    phoneEl.classList.toggle('on', !!S.ringing); phoneEl.textContent = S.ringing ? '📱 Звонит: ' + S.ringing.from + ' — нажми E' : '';
+  }
+  nvEl.textContent = Math.round(S.nerves); nbEl.style.width = S.nerves + '%';
+  const mnv = $('mnv'); if (mnv) mnv.textContent = 'нервы ' + Math.round(S.nerves);
+}
+function hhmm(){ const m = Math.floor(LV().clock + S.time*0.8); return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
+
+// ---------- Update ----------
+function update(dt,t){
+  if (S.over) return;
+  S.time += dt;
+  mf.t -= dt;
+  if (mf.t <= 0){
+    if (mf.on){ if (Math.random() < 0.4){ mf.on = false; mf.t = 0.04 + Math.random()*0.3; } else mf.t = 0.2 + Math.random()*1.6; }
+    else { mf.on = true; mf.t = 0.05 + Math.random()*1.0; }
+    if (roomAt(player.x,player.y) === 'morgue') tone(mf.on ? 120 : 60, 0.06, 'sawtooth', 0.012);
+  }
+  mf.v = mf.on ? 0.82 + Math.random()*0.12 : 0.1;
+
+  // phone
+  if (S.pendingCall && !D){ S.pendingCall.delay -= dt; if (S.pendingCall.delay <= 0){ S.ringing = S.pendingCall; S.pendingCall = null; S.ringT = 0; hudKey = ''; updateHUD(); toast('📱 Звонит: ' + S.ringing.from); } }
+  if (S.ringing){ S.ringT -= dt; if (S.ringT <= 0){ ringTone(); S.ringT = 1.3; } }
+
+  // player
+  let mx = 0, my = 0;
+  if (!D){
+    if (K.ArrowLeft || K.KeyA) mx -= 1; if (K.ArrowRight || K.KeyD) mx += 1;
+    if (K.ArrowUp || K.KeyW) my -= 1; if (K.ArrowDown || K.KeyS) my += 1;
+    if (JOY.x || JOY.y){ mx = JOY.x; my = JOY.y; }
+  }
+  if (mx || my){
+    const len = Math.hypot(mx,my), sp = 150*dt*Math.min(1, Math.max(0.45, len));
+    tryMove(player, mx/len*sp, 0); tryMove(player, 0, my/len*sp);
+    player.dir = Math.abs(mx) >= Math.abs(my) && mx ? (mx < 0 ? 2 : 3) : (my < 0 ? 1 : 0);
+    player.anim += dt; player.moving = true;
+  } else player.moving = false;
+  const pr = roomAt(player.x, player.y); if (ROOM[pr]) S.lastRoom = pr;
+
+  // Alyona wanders inside her zone
+  const r = NPC.rapai;
+  if (!D){
+    r.wt -= dt; const z = S.rzone;
+    if (r.wt <= 0 || r.tx === undefined){ r.tx = z[0] + Math.random()*z[2]; r.ty = z[1] + Math.random()*z[3]; r.wt = 3 + Math.random()*4; }
+    const dx = r.tx - r.x, dy = r.ty - r.y, d = Math.hypot(dx,dy);
+    if (d > 3 && Math.hypot(player.x-r.x, player.y-r.y) > 40){ const sp = 34*dt; const a = tryMove(r, dx/d*sp, 0), b = tryMove(r, 0, dy/d*sp); if (!a && !b) r.wt = 0; r.moving = true; r.anim += dt; r.dir = faceTo(r,{x:r.tx,y:r.ty}); }
+    else r.moving = false;
+  } else r.moving = false;
+
+  for (const n of npcs()){
+    if (!n.moving && !D && Math.hypot(n.x-player.x, n.y-player.y) < 110) n.dir = faceTo(n, player);
+    if (n.bubble){ n.bubble.life -= dt; if (n.bubble.life <= 0) n.bubble = null; }
+  }
+  S.bub -= dt;
+  if (S.bub <= 0 && !D){ S.bub = 4 + Math.random()*5; const list = npcs(); const n = list[Math.floor(Math.random()*list.length)];
+    n.bubble = {t: pick(AMB[n.id],'amb'+n.id), life:2.6}; }
+
+  if (D){
+    const before = Math.floor(D.n); D.n = Math.min(D.text.length, D.n + dt*48); const now = Math.floor(D.n);
+    if (now !== before){ dtext.textContent = D.text.slice(0, now); const sp = SP[cur().s] || SP['']; if (sp.p && now % 3 === 0) tone(sp.p + Math.random()*40, 0.03, 'square', 0.015); }
+    if (cur().c && D.n >= D.text.length && !D.shown){ D.shown = true; dtext.textContent = D.text; renderChoices(); }
+  }
+  if (locEl.textContent !== ROOM[S.lastRoom]) locEl.textContent = ROOM[S.lastRoom];
+  const c = hhmm(); if (clkEl.textContent !== c) clkEl.textContent = c;
+}
+
+// ---------- Render ----------
+function render(t){
+  ctx.drawImage(stat,0,0);
+  drawDyn(t);
+  const ents = [{e:player, L:LOOK.daria}].concat(npcs().map(n => ({e:n, L:LOOK[n.id]}))).sort((a,b) => a.e.y - b.e.y);
+  for (const {e,L} of ents){ const fr = e.moving ? [0,1,0,2][Math.floor(e.anim*8) % 4] : 0; drawPerson(ctx, e.x, e.y, L, e.dir, fr, 2, t); }
+  drawMorgueTube();
+  renderLight(t);
+  ctx.drawImage(vig,0,0);
+  for (const n of npcs()) if (n.bubble) bubble(n.x, n.y - personH(LOOK[n.id])*2 - 10, n.bubble.t);
+  if (S.ringing) bubble(player.x, player.y - 48 + Math.sin(t*20), '📱 дзынь!');
+  if (!D && !S.over){ const tg = findTarget(); if (tg) drawPrompt(tg,t); }
+}
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now; const t = now/1000;
+  if (running){ update(dt,t); render(t); updateTouchUI(); }
+  requestAnimationFrame(loop);
+}
+
+// ---------- Screens ----------
+const ovEl = $('ov'), card = $('card');
+function lineup(){
+  const c = document.createElement('canvas'); c.width = 500; c.height = 160; const g = c.getContext('2d');
+  [['daria','Дарья',''],['yulia','Юля','по телефону'],['max','Макс',''],['kostya','Костя',''],['rapai','Алёна','за глаза — Рапай']].forEach(([id,nm,sub],i) => {
+    const x = 50 + i*100; g.fillStyle = 'rgba(217,178,106,.12)'; g.beginPath(); g.ellipse(x,118,30,6,0,0,7); g.fill();
+    drawPerson(g, x, 118, LOOK[id], 0, 0, 4, 0);
+    g.font = '13px Georgia, serif'; g.fillStyle = id === 'daria' ? '#ff7a52' : '#d9c9d3'; g.textAlign = 'center'; g.fillText(nm, x, 140);
+    if (sub){ g.font = 'italic 10px Georgia, serif'; g.fillStyle = '#a8939a'; g.fillText(sub, x, 154); } });
+  return c;
+}
+function titleScreen(){
+  card.innerHTML = '<h1>ВЕЧНОСТЬ</h1><div class="sub">прощальный зал с моргом. Три смены.</div>';
+  card.appendChild(lineup());
+  card.insertAdjacentHTML('beforeend', '<p>Ты — Дарья, ритуальный агент и главная по моргу. Юля, твоя начальница и подруга, вечно на выезде и звонит, когда что-то горит. Клиенты звонят тоже. Костя и Макс косячат, а Алёна ведёт блог. В лицо её все зовут Алёной.</p><button id="go">Начать неделю</button>');
+  $('go').onclick = startBtn; $('go').focus();
+}
+function startBtn(){
+  if (running && S && !S.over) return;
+  try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch (e) {}
+  ovEl.classList.add('hide'); running = true; startGame(); last = performance.now(); jingle();
+}
+
+// ---------- Boot ----------
+buildStatic();
+drawPortrait($('hudp'),'daria');
+startGame(); D = null; S.over = true; dlg.classList.remove('on');
+titleScreen();
+render(0);
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
