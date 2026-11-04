@@ -194,7 +194,6 @@ function resizeCanvas(){
     const cw = innerWidth, chh = innerHeight;
     cv.width = Math.round(cw*DPR); cv.height = Math.round(chh*DPR);
     let z = Math.max(1, Math.min(2.4, Math.min(cw/560, chh/290)));
-    z = Math.max(1, z);
     cam.z = z; cam.vw = cw/z; cam.vh = chh/z;
   } else {
     DPR = 1; cv.width = W; cv.height = H; cam.z = 1; cam.vw = W; cam.vh = H; cam.x = cam.y = 0;
@@ -220,7 +219,6 @@ if (window.visualViewport) visualViewport.addEventListener('resize', () => setTi
 document.body.classList.toggle('touch', TOUCH);
 addEventListener('resize', fit); fit();
 
-// ---------- Map ----------
 const MAP = [
 '##############################',
 '#........#..........#........#',
@@ -254,7 +252,6 @@ const ROOM = {hall:'Прощальный зал', corridor:'Служебный �
 const ROOMRECT = {hall:[32,18,256,430], corridor:[320,18,320,238], morgue:[672,18,256,238], staff:[672,274,256,174], lobby:[320,274,320,174], parking:[0,466,960,174]};
 const FACE = {hall:'#4a1f34', corridor:'#56614f', morgue:'#a9c2c8', staff:'#86623f', lobby:'#9c8665', parking:'#6b3a31'};
 
-// ---------- Characters ----------
 const LOOK = {
   daria:{skin:'#f7d4bd',hair:'#ff3d17',hair2:'#b8260b',eye:'#1fd35a',big:true,top:'#1c1b27',top2:'#11101a',legs:'#111118',collar:'#ffffff',style:'long',lips:'#d4505c',freckles:true},
   yulia:{skin:'#efcdb3',hair:'#0b0a0f',hair2:'#000',eye:'#3b2716',top:'#2d1836',top2:'#1c0f23',legs:'#130f19',style:'short',tall:3,lips:'#a3122c',collar:'#cfcfe0'},
@@ -330,7 +327,6 @@ function drawPerson(g, x, y, L, dir, frame, s, t){
   else R(mx, 6.3, dir === 0 ? 2 : 1.5, 0.6, L.lips || '#b07560');
 }
 
-// ---------- Static layer ----------
 const solids = [];
 const stat = document.createElement('canvas'); stat.width = W; stat.height = H;
 const sg = stat.getContext('2d');
@@ -491,7 +487,6 @@ function drawOccupant(g){
   if (S.blesna){ g.fillStyle = '#d8dde2'; g.beginPath(); g.ellipse(158,82,4,2,0.3,0,7); g.fill(); P(g,161,82,2,1,'#c9a24a'); }
 }
 
-// ---------- Audio ----------
 let AC = null, muted = false;
 function tone(f,d,type,v,slide){
   if (!AC || muted) return;
@@ -532,39 +527,42 @@ function showLine(){
 function advanceText(){
   if (!D) return;
   const L = cur();
-  if (D.n < D.text.length){ D.n = D.text.length; return; }
+  // если текст ещё печатается — дописываем целиком, иначе идём дальше
+  if (D.n < D.text.length){ D.n = D.text.length; dtext.textContent = D.text; return; }
   if (L.c){ pickChoice(D.choice); return; }
   nextLine();
 }
 function nextLine(){
+  if (!D) return;
   D.i++;
   if (D.i >= D.lines.length){
     const done = D.done; D = null; dlg.classList.remove('on');
-    if (done) done();
-    if (!D && S.nerves <= 0 && !S.over) breakdown();
+    try { if (done) done(); } catch (err) { console.error(err); }
+    if (!D && S && S.nerves <= 0 && !S.over) breakdown();
     updateHUD(); return;
   }
   showLine();
 }
 function pickChoice(k){
+  if (!D) return;
   const L = cur(); if (!L || !L.c || !L.c[k] || D.n < D.text.length) return;
   const c = L.c[k]; if (c[2]) c[2]();
   D.lines.splice(D.i+1, 0, ...c[1]); tone(660,0.06,'triangle',0.04); nextLine();
 }
 function renderChoices(){
   const L = cur(); dch.innerHTML = '';
-  L.c.forEach((c,i) => { const b = document.createElement('button'); b.innerHTML = '<span>' + (i+1) + '</span>'; b.appendChild(document.createTextNode(c[0]));
-    if (i === D.choice) b.classList.add('sel'); b.onclick = e => { e.stopPropagation(); pickChoice(i); }; dch.appendChild(b); });
+  L.c.forEach((c,i) => { const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<span>' + (i+1) + '</span>'; b.appendChild(document.createTextNode(c[0]));
+    if (i === D.choice) b.classList.add('sel'); b.onclick = e => { e.stopPropagation(); e.preventDefault(); pickChoice(i); }; dch.appendChild(b); });
 }
 
-// Единая обработка клика/тапа по окну диалога
-let lastAdvance = 0;
+// Единый обработчик нажатия на диалог: pointerup / click → advance, но без дублей.
+let lastAdvanceAt = 0;
 function tryAdvance(e){
   if (!D) return;
   if (e && e.target && e.target.closest && e.target.closest('#dch button')) return;
   const now = performance.now();
-  if (now - lastAdvance < 250) return;
-  lastAdvance = now;
+  if (now - lastAdvanceAt < 220) return;
+  lastAdvanceAt = now;
   advanceText();
 }
 dlg.addEventListener('click', tryAdvance);
@@ -583,7 +581,6 @@ function drawPortrait(c,id,phone){
   if (phone && id !== 'daria'){ rr(g,44,38,14,22,3,'#1b1b22'); rr(g,46,41,10,15,1,'#6fd2e8'); }
 }
 
-// ---------- State & helpers ----------
 let S, player, NPC, running = false;
 const lastPick = {};
 function pick(arr,k){ let i; do { i = Math.floor(Math.random()*arr.length); } while (arr.length > 1 && i === lastPick[k]); lastPick[k] = i; return arr[i]; }
@@ -630,7 +627,6 @@ const R_FLAV = ['Даша, подписчики спрашивают: а вы к
   'У меня рубрика «Алёна советует». Сегодня советую пить больше воды. Клиентам тоже. Ну, ладно, им не надо.'];
 const R_INNER = ['(Ты вежливо киваешь. Внутри — тихий вой.)','(«Очень интересно, Алён», — говоришь ты. Это неправда.)','(Ты улыбаешься. Улыбка держится на честном слове.)'];
 
-// ---------- LEVELS ----------
 const LEVELS = [
 {
   day:'День 1 · Понедельник', name:'Носок раздора', clock:9*60+15, occ:'gena',
@@ -890,6 +886,7 @@ function startLevel(i){
 }
 function enterStep(){
   const st = curStep();
+  if (!st){ return levelDone(); }
   if (st.call) S.pendingCall = Object.assign({}, st.call, {delay:1.4});
   else toast('Новая задача: ' + st.t);
   hudKey = ''; updateHUD();
@@ -909,13 +906,13 @@ function levelDone(){
   setTimeout(() => {
     if (!last){
       card.innerHTML = '<div class="sub">' + lv.day + '</div><h2>«' + lv.name + '» — закрыто</h2>' +
-        '<p>' + lv.epilogue + '</p>' + statsHTML() + '<button id="nextb">Следующий день</button>';
+        '<p>' + lv.epilogue + '</p>' + statsHTML() + '<button id="nextb" type="button">Следующий день</button>';
       ovEl.classList.remove('hide'); $('nextb').onclick = () => { ovEl.classList.add('hide'); startLevel(S.level + 1); }; $('nextb').focus();
     } else {
       const rank = S.nerves >= 70 ? 'Железная леди ритуала' : S.nerves >= 40 ? 'Крепкий профессионал' : 'Выжила — и это главное';
       card.innerHTML = '<h1>НЕДЕЛЯ</h1><div class="sub">закрыта. Морг в надёжных руках.</div><div class="rank">' + rank + '</div>' +
         '<p>' + lv.epilogue + '</p>' + statsHTML() + '<p class="note">Алёна до сих пор не знает, что её зовут Рапай. И пусть так и будет.</p>' +
-        '<button id="again">Начать неделю заново</button>';
+        '<button id="again" type="button">Начать неделю заново</button>';
       ovEl.classList.remove('hide'); $('again').onclick = startBtn; $('again').focus();
     }
   }, 600);
@@ -1050,7 +1047,6 @@ function doAction(){
   const tg = findTarget(); if (tg) talk(tg);
 }
 
-// ---------- Touch controls ----------
 const JOY = {x:0, y:0, id:null}, joy = $('joy'), knob = $('knob'), actBtn = $('act');
 function joyMove(e){
   const r = joy.getBoundingClientRect();
@@ -1066,7 +1062,6 @@ joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel',
 actBtn.addEventListener('pointerdown', e => { e.preventDefault(); doAction(); });
 actBtn.addEventListener('click', e => e.preventDefault());
 
-// Тап по миру: выбор цели
 cv.addEventListener('pointerdown', e => {
   if (TOUCH) document.body.classList.remove('sideopen');
   if (!TOUCH || !running || !S || S.over) return;
@@ -1286,7 +1281,7 @@ function lineup(){
 function titleScreen(){
   card.innerHTML = '<h1>ВЕЧНОСТЬ</h1><div class="sub">прощальный зал с моргом. Три смены.</div>';
   card.appendChild(lineup());
-  card.insertAdjacentHTML('beforeend', '<p>Ты — Дарья, ритуальный агент и главная по моргу. Юля, твоя начальница и подруга, вечно на выезде и звонит, когда что-то горит. Клиенты звонят тоже. Костя и Макс косячат, а Алёна ведёт блог. В лицо её все зовут Алёной.</p><button id="go">Начать неделю</button>');
+  card.insertAdjacentHTML('beforeend', '<p>Ты — Дарья, ритуальный агент и главная по моргу. Юля, твоя начальница и подруга, вечно на выезде и звонит, когда что-то горит. Клиенты звонят тоже. Костя и Макс косячат, а Алёна ведёт блог. В лицо её все зовут Алёной.</p><button id="go" type="button">Начать неделю</button>');
   $('go').onclick = startBtn; $('go').focus();
 }
 function startBtn(){
