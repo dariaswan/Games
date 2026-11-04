@@ -556,10 +556,19 @@ function renderChoices(){
   L.c.forEach((c,i) => { const b = document.createElement('button'); b.innerHTML = '<span>' + (i+1) + '</span>'; b.appendChild(document.createTextNode(c[0]));
     if (i === D.choice) b.classList.add('sel'); b.onclick = e => { e.stopPropagation(); pickChoice(i); }; dch.appendChild(b); });
 }
-dlg.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') advanceText(); });
-dlg.addEventListener('pointerdown', e => {
-  if (e.pointerType === 'touch' && e.target.tagName !== 'BUTTON') { e.preventDefault(); advanceText(); }
-});
+
+// Единая обработка клика/тапа по окну диалога
+let lastAdvance = 0;
+function tryAdvance(e){
+  if (!D) return;
+  if (e && e.target && e.target.closest && e.target.closest('#dch button')) return;
+  const now = performance.now();
+  if (now - lastAdvance < 250) return;
+  lastAdvance = now;
+  advanceText();
+}
+dlg.addEventListener('click', tryAdvance);
+dlg.addEventListener('pointerup', e => { if (e.pointerType === 'touch') tryAdvance(e); });
 
 function drawPortrait(c,id,phone){
   const g = c.getContext('2d'); g.clearRect(0,0,64,64);
