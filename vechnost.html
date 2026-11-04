@@ -2,9 +2,10 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0c14">
 <title>«Вечность»: три смены Дарьи</title>
 <style>
 :root{
@@ -12,13 +13,12 @@
   --ink:#f1e7dc; --dim:#a8939a; --ember:#ff7a52; --frost:#8fe3ef; --line:#4a2a38;
   color-scheme: dark;
 }
-@media (prefers-color-scheme: light){ :root:not([data-theme="light"]){ --velvet2:#1a0c14; } }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:#07040a;color:var(--ink);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
   font-family:Verdana,"DejaVu Sans",Tahoma,sans-serif}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 #wrap{position:relative;width:1240px;height:640px;flex:none;transform-origin:center center}
-#c{position:absolute;left:0;top:0;width:960px;height:640px;background:#000;border-radius:8px 0 0 8px}
+#c{position:absolute;left:0;top:0;width:960px;height:640px;background:#000;border-radius:8px 0 0 8px;touch-action:none}
 
 #side{position:absolute;left:960px;top:0;width:280px;height:640px;padding:16px 18px 12px;
   background:linear-gradient(180deg,var(--velvet),var(--velvet2));border-left:3px solid var(--brass2);
@@ -93,12 +93,11 @@ html,body{margin:0;height:100%;background:#07040a;color:var(--ink);overflow:hidd
 .note{font-size:12px;color:var(--dim);font-style:italic}
 @media (prefers-reduced-motion: reduce){ #toast,.bar i{transition:none} #phone.on{animation:none} }
 
-/* ---------- Touch controls (phones / tablets) ---------- */
+/* ---------- Touch controls ---------- */
 #tc,#mini,#menuBtn,.tkeys{display:none}
 body.touch #tc,body.touch #mini,body.touch #menuBtn{display:block}
 body.touch .keys{display:none}
 body.touch .tkeys{display:block;margin-top:auto;font-size:13px;color:var(--dim);line-height:1.6}
-/* Touch mode: full-screen canvas with a following camera, UI sized in real screen pixels */
 body.touch #stage{display:block}
 body.touch #wrap{position:fixed;inset:0;width:auto !important;height:auto;transform:none !important}
 body.touch #c{width:100%;height:100%;border-radius:0;touch-action:none}
@@ -121,10 +120,11 @@ body.touch #hint,body.touch #inv,body.touch .meta,body.touch .nerves .lbl{font-s
 #act:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brass2)}
 #wrap.dlgopen #joy,#wrap.dlgopen #act{display:none}
 #mini{position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));max-width:calc(100% - 150px);z-index:2;pointer-events:none;
-  background:rgba(18,8,14,.86);border:1px solid var(--brass2);border-radius:8px;padding:6px 10px;font-size:14px;line-height:1.35}
+  background:rgba(18,8,14,.86);border:1px solid var(--brass2);border-radius:8px;padding:6px 10px;font-size:14px;line-height:1.35;overflow:hidden}
 #mini .md{font-family:Georgia,serif;color:var(--brass);font-size:12px}
 #mini .mn{display:inline-block;margin-left:8px;color:var(--dim);font-size:12px}
-#menuBtn{position:absolute;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));z-index:5;font:15px Georgia,serif;color:var(--ink);padding:8px 12px;border-radius:8px;
+#mini .mt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#menuBtn{position:absolute;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));z-index:7;font:15px Georgia,serif;color:var(--ink);padding:8px 12px;border-radius:8px;
   background:rgba(18,8,14,.9);border:1px solid var(--brass2);cursor:pointer}
 body.touch #dlg{left:calc(8px + env(safe-area-inset-left));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:auto;min-height:0;
   max-height:58%;overflow-y:auto;padding:10px 14px 24px 78px;z-index:4}
@@ -145,13 +145,7 @@ body.touch .card p{font-size:14px}
 body.touch .card canvas{width:min(500px,92vw);height:auto}
 body.touch .stats{font-size:14px}
 body.touch .card button{font-size:18px}
-#rot{display:none;position:fixed;inset:0;z-index:50;background:#07040a;color:var(--ink);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px}
-#rot .ph{font-size:64px;animation:turn 1.6s ease-in-out infinite}
-@keyframes turn{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
-#rot p{font-family:Georgia,serif;font-size:22px;margin:0;color:var(--brass)}
-#rot span{font-size:14px;color:var(--dim);max-width:300px;line-height:1.5}
-#rot button{font:16px Georgia,serif;margin-top:8px;padding:10px 20px;border-radius:6px;border:1px solid var(--brass2);background:transparent;color:var(--ink)}
-@media (prefers-reduced-motion: reduce){ #act.ring,#rot .ph{animation:none} }
+@media (prefers-reduced-motion: reduce){ #act.ring{animation:none} }
 </style>
 </head>
 <body>
@@ -169,7 +163,7 @@ body.touch .card button{font-size:18px}
     <div class="day"><div class="d1" id="d1"></div><div class="d2" id="d2"></div></div>
     <ol id="ql"></ol>
     <div id="hint"></div>
-    <div class="tkeys">Джойстик слева — идти<br>Кнопка справа — говорить, использовать, отвечать на звонок<br>Нажатие на окно диалога — дальше</div>
+    <div class="tkeys">Джойстик слева — идти<br>Кнопка справа — говорить, использовать, отвечать на звонок<br>Тап по миру — тоже действие</div>
     <div class="keys"><b>W</b><b>A</b><b>S</b><b>D</b> или стрелки — идти<br><b>E</b> или <b>Пробел</b> — говорить, отвечать на звонок<br><b>1</b><b>2</b><b>3</b> — выбор ответа · <b>M</b> — звук</div>
   </aside>
 
@@ -190,18 +184,21 @@ const W = 960, H = 640, T = 32;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
 const wrap = $('wrap');
-// Camera: on touch screens the world is zoomed in and follows Daria
 const cam = {x:0, y:0, z:1, vw:W, vh:H, snap:true};
 let DPR = 1;
+let TOUCH = matchMedia('(pointer: coarse)').matches;
+
 function resizeCanvas(){
   if (TOUCH){
     DPR = Math.min(2, window.devicePixelRatio || 1);
     const cw = innerWidth, chh = innerHeight;
     cv.width = Math.round(cw*DPR); cv.height = Math.round(chh*DPR);
     let z = Math.max(1, Math.min(2.4, Math.min(cw/560, chh/290)));
-    z = Math.max(z, Math.min(chh/640, cw/300));
+    z = Math.max(1, z);
     cam.z = z; cam.vw = cw/z; cam.vh = chh/z;
-  } else { DPR = 1; cv.width = W; cv.height = H; cam.z = 1; cam.vw = W; cam.vh = H; cam.x = cam.y = 0; }
+  } else {
+    DPR = 1; cv.width = W; cv.height = H; cam.z = 1; cam.vw = W; cam.vh = H; cam.x = cam.y = 0;
+  }
   cam.snap = true;
 }
 function updateCam(dt){
@@ -211,7 +208,6 @@ function updateCam(dt){
   if (cam.snap){ cam.x = tx; cam.y = ty; cam.snap = false; }
   else { const k = Math.min(1, dt*7); cam.x += (tx - cam.x)*k; cam.y += (ty - cam.y)*k; }
 }
-let TOUCH = matchMedia('(pointer: coarse)').matches;
 function setTouch(on){ TOUCH = on; document.body.classList.toggle('touch', on); fit(); }
 function fit(){
   if (TOUCH){ wrap.style.width = ''; wrap.style.transform = ''; }
@@ -220,6 +216,7 @@ function fit(){
 }
 addEventListener('touchstart', () => { if (!TOUCH) setTouch(true); }, {passive:true});
 addEventListener('orientationchange', () => setTimeout(fit, 250));
+if (window.visualViewport) visualViewport.addEventListener('resize', () => setTimeout(fit, 100));
 document.body.classList.toggle('touch', TOUCH);
 addEventListener('resize', fit); fit();
 
@@ -335,7 +332,6 @@ function drawPerson(g, x, y, L, dir, frame, s, t){
 
 // ---------- Static layer ----------
 const solids = [];
-const solid = (x,y,w,h) => solids.push({x,y,w,h});
 const stat = document.createElement('canvas'); stat.width = W; stat.height = H;
 const sg = stat.getContext('2d');
 function rr(g,x,y,w,h,r,fill){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); if (fill){ g.fillStyle = fill; g.fill(); } }
@@ -373,7 +369,6 @@ function drawWall(g,c,r){
 function buildStatic(){
   const g = sg; solids.length = 0; seed = 7;
   for (let r=0;r<20;r++) for (let c=0;c<30;c++){ if (MAP[r][c] === '#') drawWall(g,c,r); else drawFloor(g,c,r); }
-  // wall decorations
   for (let x=32;x<288;x+=16){ const gr = g.createLinearGradient(x,0,x+16,0); gr.addColorStop(0,'#2b0f22'); gr.addColorStop(.5,'#4e1a3c'); gr.addColorStop(1,'#2b0f22'); g.fillStyle = gr; g.fillRect(x,18,16,14); }
   P(g,148,17,24,15,'#0c0a0c'); P(g,151,19,18,11,'#7d7a74'); P(g,157,21,6,4,'#cfc6b8'); P(g,155,25,10,5,'#2a2a2a');
   g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.moveTo(166,17); g.lineTo(172,23); g.stroke();
@@ -387,69 +382,62 @@ function buildStatic(){
   rr(g,70,466,360,13,2,'#1a0c14'); label(g,'ПРОЩАЛЬНЫЙ ЗАЛ «ВЕЧНОСТЬ»',250,473,9,'#d9b26a');
   rr(g,530,466,370,13,2,'#1a0c14'); label(g,'РИТУАЛЬНЫЕ УСЛУГИ · МОРГ · КРУГЛОСУТОЧНО',715,473,8,'#d9b26a');
 
-  // HALL
   P(g,136,112,32,336,'#6b0f1d'); P(g,136,112,2,336,'#b8923e'); P(g,166,112,2,336,'#b8923e');
-  P(g,96,66,128,44,'#1e130d'); P(g,96,104,128,6,'#2e1d14'); solid(96,66,128,44);
+  P(g,96,66,128,44,'#1e130d'); P(g,96,104,128,6,'#2e1d14'); solids.push({x:96,y:66,w:128,h:44});
   g.fillStyle = '#7a4a24'; g.beginPath(); g.moveTo(102,86); g.lineTo(116,70); g.lineTo(212,72); g.lineTo(220,86); g.lineTo(212,100); g.lineTo(116,102); g.closePath(); g.fill();
   g.strokeStyle = '#3f2410'; g.lineWidth = 2; g.stroke();
   g.fillStyle = '#efe6d2'; g.beginPath(); g.moveTo(108,86); g.lineTo(119,75); g.lineTo(208,76); g.lineTo(214,86); g.lineTo(208,96); g.lineTo(119,97); g.closePath(); g.fill();
   g.fillStyle = '#ffffff'; g.beginPath(); g.ellipse(119,86,6,8,0,0,7); g.fill();
   for (const vx of [40,260]){ P(g,vx+5,74,10,12,'#2b2b33'); P(g,vx+5,74,10,2,'#55556a');
     for (let i=0;i<6;i++){ g.fillStyle = i%2 ? '#d92b3a' : '#f3efe6'; g.beginPath(); g.arc(vx+4+(i%3)*6, 64+Math.floor(i/3)*6, 3.5, 0, 7); g.fill(); }
-    P(g,vx+2,70,3,4,'#2f6b35'); P(g,vx+15,70,3,4,'#2f6b35'); solid(vx,60,20,26); }
-  for (const cx of [73,249]){ P(g,cx-7,120,14,5,'#a78232'); P(g,cx-2,104,4,16,'#c9a24a'); P(g,cx-6,103,12,3,'#c9a24a'); P(g,cx-3,96,6,8,'#f3ecd8'); solid(cx-7,110,14,15); }
-  for (const cy of [196,256,316]) for (const bx of [48,176]){ for (let i=0;i<5;i++){ const x = bx+i*16; P(g,x+1,cy,14,5,'#2a1a1f'); P(g,x+1,cy+5,14,9,'#5a3540'); P(g,x+2,cy+6,12,2,'#6b4250'); } solid(bx,cy,80,14); }
+    P(g,vx+2,70,3,4,'#2f6b35'); P(g,vx+15,70,3,4,'#2f6b35'); solids.push({x:vx,y:60,w:20,h:26}); }
+  for (const cx of [73,249]){ P(g,cx-7,120,14,5,'#a78232'); P(g,cx-2,104,4,16,'#c9a24a'); P(g,cx-6,103,12,3,'#c9a24a'); P(g,cx-3,96,6,8,'#f3ecd8'); solids.push({x:cx-7,y:110,w:14,h:15}); }
+  for (const cy of [196,256,316]) for (const bx of [48,176]){ for (let i=0;i<5;i++){ const x = bx+i*16; P(g,x+1,cy,14,5,'#2a1a1f'); P(g,x+1,cy+5,14,9,'#5a3540'); P(g,x+2,cy+6,12,2,'#6b4250'); } solids.push({x:bx,y:cy,w:80,h:14}); }
   for (const wx of [44,276]){ P(g,wx-2,384,4,10,'#3a2a1a'); g.strokeStyle = '#2f5a2e'; g.lineWidth = 6; g.beginPath(); g.arc(wx,372,11,0,7); g.stroke();
     for (let a=0;a<6.28;a+=1.05){ g.fillStyle = '#c42030'; g.beginPath(); g.arc(wx+Math.cos(a)*11,372+Math.sin(a)*11,2.5,0,7); g.fill(); }
-    P(g,wx-1,374,2,14,'#111'); P(g,wx+2,376,2,12,'#111'); solid(wx-12,380,24,12); }
-  // hall speaker
-  P(g,262,164,20,18,'#151318'); P(g,262,164,20,2,'#3a3540'); g.fillStyle = '#2c2a30'; g.beginPath(); g.arc(272,175,5,0,7); g.fill(); P(g,270,166,4,2,'#3a3540'); solid(262,164,20,18);
+    P(g,wx-1,374,2,14,'#111'); P(g,wx+2,376,2,12,'#111'); solids.push({x:wx-12,y:380,w:24,h:12}); }
+  P(g,262,164,20,18,'#151318'); P(g,262,164,20,2,'#3a3540'); g.fillStyle = '#2c2a30'; g.beginPath(); g.arc(272,175,5,0,7); g.fill(); P(g,270,166,4,2,'#3a3540'); solids.push({x:262,y:164,w:20,h:18});
 
-  // CORRIDOR
   P(g,330,190,300,3,'#43464c');
   P(g,380,44,40,18,'#1e1a22'); P(g,384,46,32,8,'#2c2632');
-  P(g,352,66,96,34,'#5a3b24'); P(g,352,66,96,4,'#6d4a2e'); solid(352,66,96,34);
+  P(g,352,66,96,34,'#5a3b24'); P(g,352,66,96,4,'#6d4a2e'); solids.push({x:352,y:66,w:96,h:34});
   P(g,362,74,16,12,'#efe8da'); P(g,366,72,14,12,'#ffffff'); P(g,396,72,26,16,'#2e3238'); P(g,398,74,22,11,'#6fb7d6');
   P(g,430,76,8,9,'#a01b2a'); P(g,431,74,6,2,'#d9d9d9'); rr(g,384,92,34,6,1,'#c9a24a');
-  P(g,330,40,30,28,'#a07a4a'); P(g,330,52,30,3,'#c9b38a'); label(g,'ВЕНКИ',345,62,6,'#3a2a1a'); solid(330,40,30,28);
-  P(g,596,44,24,36,'#e9edf0'); P(g,600,36,16,12,'#5fb6e3'); P(g,602,38,4,8,'#9fd8f5'); P(g,604,62,8,4,'#3b88c4'); solid(596,44,24,36);
-  P(g,566,212,18,16,'#e5c21c'); P(g,568,214,14,4,'#8ab6c8'); P(g,574,196,2,18,'#8a6a3a'); solid(566,212,18,16);
+  P(g,330,40,30,28,'#a07a4a'); P(g,330,52,30,3,'#c9b38a'); label(g,'ВЕНКИ',345,62,6,'#3a2a1a'); solids.push({x:330,y:40,w:30,h:28});
+  P(g,596,44,24,36,'#e9edf0'); P(g,600,36,16,12,'#5fb6e3'); P(g,602,38,4,8,'#9fd8f5'); P(g,604,62,8,4,'#3b88c4'); solids.push({x:596,y:44,w:24,h:36});
+  P(g,566,212,18,16,'#e5c21c'); P(g,568,214,14,4,'#8ab6c8'); P(g,574,196,2,18,'#8a6a3a'); solids.push({x:566,y:212,w:18,h:16});
 
-  // MORGUE
   P(g,688,34,224,40,'#8b989f'); P(g,688,34,224,3,'#aab6bc');
   for (let i=0;i<7;i++) for (let j=0;j<2;j++){ const x = 690+i*32, y = 38+j*18; P(g,x,y,28,15,'#a3afb5'); P(g,x+10,y+6,8,3,'#5d686e'); label(g,String(i+1+j*7),x+5,y+4,5,'#3b4448'); }
-  P(g,821,40,9,8,'#f5d43a'); solid(688,34,224,40);
+  P(g,821,40,9,8,'#f5d43a'); solids.push({x:688,y:34,w:224,h:40});
   for (const tx of [744,812,880]){ P(g,tx+3,104,4,64,'#5e6a70'); P(g,tx+27,104,4,64,'#5e6a70'); P(g,tx,100,34,70,'#b6c3c9'); P(g,tx,100,34,2,'#dce5e9');
     rr(g,tx+5,106,24,58,9,'#f4f6f7'); g.fillStyle = '#e3e8ea'; g.beginPath(); g.arc(tx+17,114,7,0,7); g.fill();
-    P(g,tx+14,164,7,5,'#e9d26a'); solid(tx,100,34,70); }
+    P(g,tx+14,164,7,5,'#e9d26a'); solids.push({x:tx,y:100,w:34,h:70}); }
   g.strokeStyle = '#7c8c93'; g.lineWidth = 2; g.beginPath(); g.arc(722,150,6,0,7); g.stroke(); P(g,719,149,7,1,'#7c8c93');
-  P(g,760,210,80,30,'#8f9ba1'); P(g,760,210,80,3,'#b5c0c5'); P(g,772,215,28,18,'#efe6cf'); P(g,786,215,1,18,'#9a8a6a'); P(g,806,218,16,2,'#2a2a8a'); solid(760,210,80,30);
+  P(g,760,210,80,30,'#8f9ba1'); P(g,760,210,80,3,'#b5c0c5'); P(g,772,215,28,18,'#efe6cf'); P(g,786,215,1,18,'#9a8a6a'); P(g,806,218,16,2,'#2a2a8a'); solids.push({x:760,y:210,w:80,h:30});
 
-  // STAFF ROOM
   P(g,740,320,120,60,'#5a3a26'); P(g,744,324,112,52,'#6b4630');
-  P(g,760,330,80,36,'#9b7048'); P(g,760,330,80,4,'#b08458'); solid(760,330,80,36);
+  P(g,760,330,80,36,'#9b7048'); P(g,760,330,80,4,'#b08458'); solids.push({x:760,y:330,w:80,h:36});
   P(g,786,334,14,14,'#f4f4f4'); P(g,800,338,4,4,'#d0d0d0'); P(g,786,332,14,3,'#cfcfcf');
   P(g,812,338,8,8,'#c83a3a'); P(g,824,340,8,8,'#3a6ac8'); g.fillStyle = '#e3c07a'; g.beginPath(); g.arc(770,352,7,0,7); g.fill(); for (let i=0;i<4;i++) P(g,765+i*3,349+(i%2)*4,3,3,'#9a5a2a');
-  rr(g,780,408,120,36,6,'#2f5b43'); P(g,784,412,112,10,'#3b6e53'); solid(780,408,120,36);
-  P(g,888,294,32,46,'#eef0f1'); P(g,888,315,32,1,'#b9bec1'); P(g,914,300,2,10,'#999'); P(g,893,299,6,6,'#e8651f'); P(g,902,322,5,5,'#5fb6e3'); solid(888,294,32,46);
+  rr(g,780,408,120,36,6,'#2f5b43'); P(g,784,412,112,10,'#3b6e53'); solids.push({x:780,y:408,w:120,h:36});
+  P(g,888,294,32,46,'#eef0f1'); P(g,888,315,32,1,'#b9bec1'); P(g,914,300,2,10,'#999'); P(g,893,299,6,6,'#e8651f'); P(g,902,322,5,5,'#5fb6e3'); solids.push({x:888,y:294,w:32,h:46});
 
-  // LOBBY
   P(g,400,360,160,72,'#5a1520'); P(g,404,364,152,64,'#6e1a28'); P(g,404,364,152,1,'#b8923e'); P(g,404,427,152,1,'#b8923e');
-  P(g,336,300,104,34,'#4a2f1f'); P(g,336,300,104,6,'#6b4632'); solid(336,300,104,34);
+  P(g,336,300,104,34,'#4a2f1f'); P(g,336,300,104,6,'#6b4632'); solids.push({x:336,y:300,w:104,h:34});
   P(g,352,288,24,16,'#1d1f24'); P(g,354,290,20,11,'#4aa3b5'); P(g,362,304,4,3,'#1d1f24');
   P(g,388,312,30,8,'#d9b26a'); label(g,'ДАРЬЯ',403,316.5,5.5,'#1a0c14'); g.fillStyle = '#c9a24a'; g.beginPath(); g.arc(428,308,4,0,7); g.fill();
-  rr(g,544,298,84,30,6,'#5a3420'); P(g,548,301,76,9,'#704228'); P(g,562,312,18,10,'#7a4a2e'); solid(544,298,84,30);
-  for (const px of [338,598]){ P(g,px+3,426,14,12,'#7a4a2e'); for (let i=0;i<7;i++){ g.fillStyle = i%2 ? '#2f7a3a' : '#3f9a4a'; g.beginPath(); g.ellipse(px+10+Math.cos(i)*6, 420+Math.sin(i*1.7)*4, 5, 3, i, 0, 7); g.fill(); } solid(px,420,20,18); }
+  rr(g,544,298,84,30,6,'#5a3420'); P(g,548,301,76,9,'#704228'); P(g,562,312,18,10,'#7a4a2e'); solids.push({x:544,y:298,w:84,h:30});
+  for (const px of [338,598]){ P(g,px+3,426,14,12,'#7a4a2e'); for (let i=0;i<7;i++){ g.fillStyle = i%2 ? '#2f7a3a' : '#3f9a4a'; g.beginPath(); g.ellipse(px+10+Math.cos(i)*6, 420+Math.sin(i*1.7)*4, 5, 3, i, 0, 7); g.fill(); } solids.push({x:px,y:420,w:20,h:18}); }
 
-  // PARKING
   P(g,0,480,960,18,'#4a4c52'); for (let x=0;x<960;x+=24) P(g,x,480,1,18,'#3c3e43'); P(g,0,497,960,2,'#8a8c90');
   for (const lx of [150,380,530,760]) P(g,lx,520,3,104,'#d8d8d0');
   label(g,'МЕСТО МАКСА. НЕ ДЫШАТЬ НА МАШИНУ',645,628,7,'rgba(230,230,210,.55)');
   label(g,'P',90,600,22,'rgba(230,230,210,.25)');
-  P(g,466,496,8,8,'#2a2a2a'); g.fillStyle = '#555'; g.beginPath(); g.arc(470,500,4,0,7); g.fill(); solid(466,494,8,10);
+  P(g,466,496,8,8,'#2a2a2a'); g.fillStyle = '#555'; g.beginPath(); g.arc(470,500,4,0,7); g.fill(); solids.push({x:466,y:494,w:8,h:10});
   for (const [bx,by] of [[26,560],[40,612],[930,520],[915,600]]){ for (let i=0;i<5;i++){ g.fillStyle = i%2 ? '#1f3a24' : '#29492e'; g.beginPath(); g.arc(bx+Math.cos(i*1.3)*9, by+Math.sin(i*1.3)*7, 10, 0, 7); g.fill(); } }
-  drawHearse(g,160,532); solid(160,530,200,66);
-  drawTruck(g,540,532); solid(540,524,200,82);
+  drawHearse(g,160,532); solids.push({x:160,y:530,w:200,h:66});
+  drawTruck(g,540,532); solids.push({x:540,y:524,w:200,h:82});
 }
 function drawHearse(g,x,y){
   rr(g,x-3,y+4,206,64,10,'rgba(0,0,0,.45)');
@@ -475,7 +463,6 @@ function drawTruck(g,x,y){
   P(g,x-6,y+27,6,14,'#f5f5f5'); g.save(); g.translate(x-3,y+34); g.rotate(-Math.PI/2); label(g,'Х777КИ',0,0,5,'#111'); g.restore();
 }
 
-// Client in the coffin (changes per level)
 const OCC_NAME = {gena:'Геннадий Петрович', tamara:'Тамара Ильинична', sidorov:'Нина Павловна?', petrova:'Нина Павловна'};
 function drawOccupant(g){
   const o = S.occ; if (!o) return;
@@ -518,7 +505,6 @@ const honk = () => { tone(330,0.28,'sawtooth',0.05); setTimeout(() => tone(392,0
 const buzz = () => { tone(90,0.12,'square',0.05); setTimeout(() => tone(90,0.12,'square',0.05), 180); };
 const ringTone = () => { tone(988,0.1,'square',0.03); setTimeout(() => tone(784,0.1,'square',0.03), 130); setTimeout(() => tone(988,0.1,'square',0.03), 260); };
 
-// ---------- Speakers ----------
 const SP = {
   daria:{n:'Дарья', c:'#ff7a52', p:330}, yulia:{n:'Юля', c:'#c4a6ff', p:200}, max:{n:'Макс', c:'#79c7ff', p:170},
   kostya:{n:'Костя', c:'#a6dbb0', p:150}, rapai:{n:'Алёна', c:'#ff92cb', p:430},
@@ -571,6 +557,9 @@ function renderChoices(){
     if (i === D.choice) b.classList.add('sel'); b.onclick = e => { e.stopPropagation(); pickChoice(i); }; dch.appendChild(b); });
 }
 dlg.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') advanceText(); });
+dlg.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch' && e.target.tagName !== 'BUTTON') { e.preventDefault(); advanceText(); }
+});
 
 function drawPortrait(c,id,phone){
   const g = c.getContext('2d'); g.clearRect(0,0,64,64);
@@ -603,7 +592,6 @@ const LV = () => LEVELS[S.level];
 const curStep = () => LV().steps[S.step];
 const adv = () => advance();
 
-// ---------- Flavor pools ----------
 const Y_TEXT = ['📱 Юля: «Даш, Костя пишет, что ты без бахил. БЛЯХА-МУХА, бахилы!»',
   '📱 Юля: «Мне тут доносят, что ты зевнула. Зевай тише, ёлки-моталки»',
   '📱 Юля: «Костя прислал фото твоей кружки в морге. Даш. Ну Даш. #@$%!»',
@@ -869,7 +857,6 @@ const LEVELS = [
 }
 ];
 
-// ---------- Level flow ----------
 let levelTok = 0;
 function startGame(){
   S = {level:0, step:0, nerves:100, swears:0, snitch:0, followers:0, compliments:0, inv:[], occ:null,
@@ -932,7 +919,6 @@ function statsHTML(){
     '<span>Нервы</span><span>' + Math.round(S.nerves) + ' / 100</span></div>';
 }
 
-// ---------- Interaction ----------
 const OBJS = [
   {id:'coffin', x:160, y:118, name:() => OCC_NAME[S.occ] || 'Гроб'}, {id:'flowers', x:52, y:96, name:'Венок'},
   {id:'speaker', x:272, y:198, name:'Колонка'},
@@ -945,12 +931,15 @@ const OBJS = [
   {id:'bed', x:526, y:566, name:'Кузов пикапа'}, {id:'grille', x:754, y:566, name:'Морда пикапа'}
 ];
 const npcs = () => Object.values(NPC).filter(n => !n.hidden);
+
 function findTarget(){
-  let best = null, bd = 50; const px = player.x, py = player.y - 6;
+  let best = null;
+  let bd = TOUCH ? 70 / cam.z : 50;
+  const px = player.x, py = player.y - 6;
   for (const n of npcs()){ const d = Math.hypot(n.x-px, n.y-6-py);
     if (d < bd){ bd = d; best = {kind:'npc', ref:n, id:n.id, x:n.x, y:n.y - personH(LOOK[n.id])*2 - 6, name:SP[n.id].n}; } }
   for (const o of OBJS){ const d = Math.hypot(o.x-px, o.y-py);
-    if (d < bd - 4){ bd = d; best = {kind:'obj', id:o.id, x:o.x, y:o.y - 26, name: typeof o.name === 'function' ? o.name() : o.name}; } }
+    if (d < bd * 0.92){ bd = d; best = {kind:'obj', id:o.id, x:o.x, y:o.y - 26, name: typeof o.name === 'function' ? o.name() : o.name}; } }
   return best;
 }
 function faceTo(a,b){ const dx = b.x-a.x, dy = b.y-a.y; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 2 : 3) : (dy < 0 ? 1 : 0); }
@@ -1007,7 +996,6 @@ function talkKostya(){
     S.snitch++; S.swears++; buzz(); nerve(-6); toast(pick(Y_TEXT,'yt')); })]);
 }
 
-// ---------- Collision ----------
 const ov = (a,b) => a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
 const boxOf = (e,x,y) => { const w = e.id === 'rapai' ? 24 : 18; return {x:x-w/2, y:y-10, w, h:10}; };
 function blocked(e,x,y){
@@ -1023,7 +1011,6 @@ function blocked(e,x,y){
 function tryMove(e,dx,dy){ if (!blocked(e, e.x+dx, e.y+dy)){ e.x += dx; e.y += dy; return true; } return false; }
 function roomAt(x,y){ return region(Math.floor(x/T), Math.floor((y-5)/T)); }
 
-// ---------- Input ----------
 const K = {};
 addEventListener('keydown', e => {
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
@@ -1054,7 +1041,7 @@ function doAction(){
   const tg = findTarget(); if (tg) talk(tg);
 }
 
-// ---------- Touch: joystick + action button ----------
+// ---------- Touch controls ----------
 const JOY = {x:0, y:0, id:null}, joy = $('joy'), knob = $('knob'), actBtn = $('act');
 function joyMove(e){
   const r = joy.getBoundingClientRect();
@@ -1069,8 +1056,37 @@ joy.addEventListener('pointermove', e => { if (e.pointerId === JOY.id) joyMove(e
 joy.addEventListener('pointerup', joyEnd); joy.addEventListener('pointercancel', joyEnd); joy.addEventListener('lostpointercapture', joyEnd);
 actBtn.addEventListener('pointerdown', e => { e.preventDefault(); doAction(); });
 actBtn.addEventListener('click', e => e.preventDefault());
-$('menuBtn').addEventListener('click', () => document.body.classList.toggle('sideopen'));
-$('side').addEventListener('click', () => { if (TOUCH) document.body.classList.remove('sideopen'); });
+
+// Тап по миру: выбор цели
+cv.addEventListener('pointerdown', e => {
+  if (TOUCH) document.body.classList.remove('sideopen');
+  if (!TOUCH || !running || !S || S.over) return;
+  if (D) return;
+  if (S.ringing) { answerCall(); return; }
+  const r = cv.getBoundingClientRect();
+  const wx = (e.clientX - r.left) / (r.width  / cam.vw) + cam.x;
+  const wy = (e.clientY - r.top)  / (r.height / cam.vh) + cam.y;
+  const R = 70 / cam.z;
+  let best = null, bd = R;
+  for (const n of npcs()) {
+    const d = Math.hypot(n.x - wx, (n.y - 12) - wy);
+    if (d < bd) { bd = d; best = {kind:'npc', ref:n, id:n.id, name:SP[n.id].n}; }
+  }
+  for (const o of OBJS) {
+    const d = Math.hypot(o.x - wx, (o.y - 10) - wy);
+    if (d < bd * 0.9) { bd = d; best = {kind:'obj', id:o.id, name: typeof o.name==='function'?o.name():o.name}; }
+  }
+  if (best) talk(best);
+});
+
+$('menuBtn').addEventListener('click', e => { e.stopPropagation(); document.body.classList.toggle('sideopen'); });
+document.body.addEventListener('pointerdown', e => {
+  if (!TOUCH) return;
+  if (!document.body.classList.contains('sideopen')) return;
+  if (e.target.closest('#side') || e.target.closest('#menuBtn')) return;
+  document.body.classList.remove('sideopen');
+});
+
 let actState = '';
 function updateTouchUI(){
   if (!TOUCH || !S) return;
@@ -1082,7 +1098,6 @@ function updateTouchUI(){
 }
 addEventListener('blur', () => { for (const k in K) K[k] = false; });
 
-// ---------- Lights ----------
 const lc = document.createElement('canvas'); lc.width = W; lc.height = H; const lg = lc.getContext('2d');
 const mf = {on:true, t:1, v:1};
 function lights(t){
@@ -1119,7 +1134,6 @@ function renderLight(t){
 const vig = document.createElement('canvas'); vig.width = W; vig.height = H;
 (() => { const g = vig.getContext('2d'); const gr = g.createRadialGradient(480,320,260,480,320,640); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(0,0,0,.6)'); g.fillStyle = gr; g.fillRect(0,0,W,H); })();
 
-// ---------- Dynamic decor ----------
 function drawDyn(t){
   drawOccupant(ctx);
   for (const cx of [73,249]){ const f = Math.sin(t*13+cx)*0.6 + Math.random()*0.5;
@@ -1137,7 +1151,6 @@ function drawDyn(t){
 }
 function drawMorgueTube(){ P(ctx,764,133,72,10,'#6b777d'); ctx.fillStyle = mf.on ? 'rgba(225,255,255,' + mf.v + ')' : '#4a565c'; ctx.fillRect(768,135,64,5); }
 
-// ---------- Bubbles & prompts ----------
 const AMB = { yulia:['Ё-моё…','Где кофе?!','Бляха-муха…','Комиссия…'], max:['Ласточка моя…','Протру-ка фару…','Подогрев руля…','Хром!'],
   kostya:['*печатает*','Хе-хе…','Я ничего не говорю…','Рапай опять в эфире…'], rapai:['Всем привееет!','Лайк, подписка!','Это контент!','#морг #вайб'] };
 function bubble(x,y,txt){
@@ -1154,7 +1167,6 @@ function drawPrompt(tg,t){
   ctx.fillStyle = '#f1e7dc'; ctx.textAlign = 'left'; ctx.fillText(tg.name, x+25, y+10.5);
 }
 
-// ---------- HUD ----------
 const ql = $('ql'), hintEl = $('hint'), locEl = $('loc'), clkEl = $('clk'), nvEl = $('nv'), nbEl = $('nb'), invEl = $('inv'), phoneEl = $('phone');
 let hudKey = '';
 function updateHUD(){
@@ -1164,7 +1176,8 @@ function updateHUD(){
   if (key !== hudKey){ hudKey = key;
     $('d1').textContent = lv.day; $('d2').textContent = lv.name;
     ql.innerHTML = lv.steps.map((s,i) => '<li class="' + (i < S.step ? 'done' : i === S.step ? 'cur' : i === S.step + 1 ? '' : 'hid') + '">' + (i > S.step + 1 ? '…' : s.t) + '</li>').join('');
-    const stp = lv.steps[S.step]; $('mini').innerHTML = '<div class="md">' + lv.day + ' · шаг ' + Math.min(S.step+1, lv.steps.length) + ' из ' + lv.steps.length + '<span class="mn" id="mnv"></span></div>' + (stp ? (S.ringing ? '📱 Звонит: ' + S.ringing.from : stp.t) : 'День закрыт');
+    const stp = lv.steps[S.step];
+    $('mini').innerHTML = '<div class="md">' + lv.day + ' · шаг ' + Math.min(S.step+1, lv.steps.length) + ' из ' + lv.steps.length + '<span class="mn" id="mnv"></span></div><div class="mt">' + (stp ? (S.ringing ? '📱 Звонит: ' + S.ringing.from : stp.t) : 'День закрыт') + '</div>';
     const st = lv.steps[S.step]; hintEl.textContent = st ? (st.call && !S.ringing && !D ? 'Ждёшь звонка…' : st.h) : 'День закрыт.';
     invEl.innerHTML = 'В руках: <b>' + (S.inv.length ? S.inv.join(', ') : 'ничего') + '</b>';
     phoneEl.classList.toggle('on', !!S.ringing); phoneEl.textContent = S.ringing ? '📱 Звонит: ' + S.ringing.from + ' — нажми E' : '';
@@ -1174,7 +1187,6 @@ function updateHUD(){
 }
 function hhmm(){ const m = Math.floor(LV().clock + S.time*0.8); return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
 
-// ---------- Update ----------
 function update(dt,t){
   if (S.over) return;
   S.time += dt;
@@ -1186,11 +1198,9 @@ function update(dt,t){
   }
   mf.v = mf.on ? 0.82 + Math.random()*0.12 : 0.1;
 
-  // phone
   if (S.pendingCall && !D){ S.pendingCall.delay -= dt; if (S.pendingCall.delay <= 0){ S.ringing = S.pendingCall; S.pendingCall = null; S.ringT = 0; hudKey = ''; updateHUD(); toast('📱 Звонит: ' + S.ringing.from); } }
   if (S.ringing){ S.ringT -= dt; if (S.ringT <= 0){ ringTone(); S.ringT = 1.3; } }
 
-  // player
   let mx = 0, my = 0;
   if (!D){
     if (K.ArrowLeft || K.KeyA) mx -= 1; if (K.ArrowRight || K.KeyD) mx += 1;
@@ -1205,7 +1215,6 @@ function update(dt,t){
   } else player.moving = false;
   const pr = roomAt(player.x, player.y); if (ROOM[pr]) S.lastRoom = pr;
 
-  // Alyona wanders inside her zone
   const r = NPC.rapai;
   if (!D){
     r.wt -= dt; const z = S.rzone;
@@ -1232,7 +1241,6 @@ function update(dt,t){
   const c = hhmm(); if (clkEl.textContent !== c) clkEl.textContent = c;
 }
 
-// ---------- Render ----------
 function render(t){
   const sc = cam.z*DPR;
   ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#000'; ctx.fillRect(0,0,cv.width,cv.height);
@@ -1256,7 +1264,6 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 
-// ---------- Screens ----------
 const ovEl = $('ov'), card = $('card');
 function lineup(){
   const c = document.createElement('canvas'); c.width = 500; c.height = 160; const g = c.getContext('2d');
@@ -1279,7 +1286,6 @@ function startBtn(){
   ovEl.classList.add('hide'); running = true; startGame(); last = performance.now(); jingle();
 }
 
-// ---------- Boot ----------
 buildStatic();
 drawPortrait($('hudp'),'daria');
 startGame(); D = null; S.over = true; dlg.classList.remove('on');
