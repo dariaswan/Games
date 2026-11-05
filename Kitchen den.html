@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Кухонный Хаос</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#1a1a1a;
+    font-family:-apple-system,Arial,sans-serif;touch-action:none;user-select:none;}
+  #game{display:block;width:100vw;height:100vh;}
+  #ui{position:fixed;top:0;left:0;right:0;padding:8px;color:#fff;
+    pointer-events:none;font-size:14px;text-shadow:0 1px 2px #000;}
+  .bar{height:14px;background:#333;border-radius:7px;overflow:hidden;margin:3px 0;}
+  .fill{height:100%;transition:width .1s;}
+  #anger .fill{background:linear-gradient(90deg,#ffcc00,#ff3300);}
+  #food .fill{background:linear-gradient(90deg,#66cc66,#228822);}
+  #msg{position:fixed;top:40%;left:0;right:0;text-align:center;color:#ff4444;
+    font-size:28px;font-weight:bold;text-shadow:0 2px 4px #000;opacity:0;
+    transition:opacity .2s;pointer-events:none;}
+  #hint{position:fixed;bottom:10px;left:0;right:0;text-align:center;color:#aaa;
+    font-size:12px;pointer-events:none;}
+  /* виньетка для эффекта опьянения */
+  #drunk-vignette{position:fixed;inset:0;pointer-events:none;opacity:0;
+    transition:opacity .4s;
+    background:radial-gradient(ellipse at center,
+      rgba(0,0,0,0) 40%,
+      rgba(120,20,40,0.35) 75%,
+      rgba(80,0,20,0.7) 100%);
+    mix-blend-mode:multiply;}
+  /* икание */
+  @keyframes hic{
+    0%{transform:translateY(0) rotate(0);}
+    20%{transform:translateY(-4px) rotate(-1deg);}
+    40%{transform:translateY(2px) rotate(1deg);}
+    100%{transform:translateY(0) rotate(0);}
+  }
+  #game.hiccup{animation:hic .3s ease;}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="drunk-vignette"></div>
+<div id="ui">
+  <div>Готовка</div><div class="bar" id="food"><div class="fill" style="width:0%"></div></div>
+  <div>Злость</div><div class="bar" id="anger"><div class="fill" style="width:0%"></div></div>
+</div>
+<div id="msg"></div>
+<div id="hint">Свайп — двигать посуду • Тап по коту/собаке — отогнать • Тап по доске — резать • 🥃💨 — успокоиться</div>
+
+<script>
+const cvs = document.getElementById('game');
+const ctx = cvs.getContext('2d');
+const vignette = document.getElementById('drunk-vignette');
+let W, H, DPR;
+
+function resize(){
+  DPR = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  cvs.width = W*DPR; cvs.height = H*DPR;
+  cvs.style.width = W+'px'; cvs.style.height = H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  layout();
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', ()=>setTimeout(resize,200));
+
+const state = {
+  food: 0, anger: 0, cutting: 0, combo: 0, gameOver: false, time: 0,
+  kitchen: {x:0,y:0,w:0,h:0},
+  man: {x:0,y:0,r:20, targetX:0, targetY:0, facing:1, walkPhase:0,
+        slow:0, smoke:0, hiccup:0, sway:0, drunkenness:0},
+  cat: {x:0,y:0,r:14, meowTimer:0, facing:1, tailPhase:0},
+  dog: {x:0,y:0,r:16, facing:1, tailPhase:0, tonguePhase:0},
+  plates: [],
+  board: {x:0,y:0,w:0,h:0},
+  furniture: [],
+  whiskey: { active:false, x:0, y:0, r:14, pourAnim:0 },
+  vape:    { active:false, x:0, y:0, r:14 },
+  smokeParticles: [],
+  bonusCooldown: { whiskey:0, vape:0 },
+  floats: [],
+  screenShake: 0,
+  drunkenness: 0
+};
+
+function layout(){
+  const pad = 30;
+  state.kitchen = {x:pad, y:80, w:W-pad*2, h:H-160};
+  const k = state.kitchen;
+  state.man.x = k.x + k.w/2;
+  state.man.y = k.y + k.h/2;
+  state.man.targetX = state.man.x;
+  state.man.targetY = state.man.y;
+  state.man.slow = 0;
+  state.man.smoke = 0;
+  state.man.hiccup = 0;
+  state.man.sway = 0;
+  state.man.drunkenness = 0;
+  state.drunkenness = 0;
+  state.cat.x = k.x + 50; state.cat.y = k.y + k.h - 50;
+  state.dog.x = k.x + k.w - 50; state.dog.y = k.y + 50;
+  state.board = {x: k.x + k.w/2 - 40, y: k.y + 20, w: 80, h: 60};
+  state.furniture = [
+    {x:k.x, y:k.y, w:60, h:60, type:'cab'},
+    {x:k.x+k.w-70, y:k.y, w:70, h:60, type:'fridge'},
+    {x:k.x, y:k.y+k.h-60, w:70, h:60, type:'stove'}
+  ];
+  state.plates = [];
+  const startPlates = [
+    {x:k.x+90, y:k.y+k.h-90, r:16},
+    {x:k.x+140, y:k.y+k.h-100, r:14},
+    {x:k.x+k.w-100, y:k.y+k.h-80, r:15},
+    {x:k.x+k.w-140, y:k.y+90, r:13},
+    {x:k.x+k.w/2+70, y:k.y+k.h/2+40, r:14}
+  ];
+  startPlates.forEach(p => state.plates.push({...p, dragging:false, ox:0, oy:0}));
+
+  state.food = 0; state.anger = 0; state.combo = 0;
+  state.cutting = 0; state.gameOver = false; state.time = 0;
+
+  state.whiskey = { active:false, x:0, y:0, r:14, pourAnim:0 };
+  state.vape    = { active:false, x:0, y:0, r:14 };
+  state.smokeParticles = [];
+  state.bonusCooldown = { whiskey: 2, vape: 5 };
+  state.floats = [];
+  state.screenShake = 0;
+
+  updateUI();
+  vignette.style.opacity = 0;
+}
+
+// ===== ЗВУК =====
+let audioCtx;
+function beep(freq, dur, type='square', vol=0.08){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = vol;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+    o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+function meow(){ beep(700,0.15,'sine',0.1); setTimeout(()=>beep(500,0.15,'sine',0.08),120); }
+function bark(){ beep(180,0.1,'sawtooth',0.1); }
+function slice(){ beep(900,0.05,'square',0.06); }
+function ouch(){ beep(200,0.2,'sawtooth',0.12); }
+function gulpSound(){
+  beep(320, 0.08, 'sine', 0.12);
+  setTimeout(()=>beep(260, 0.08, 'sine', 0.1), 90);
+  setTimeout(()=>beep(220, 0.12, 'sine', 0.1), 180);
+}
+function hiccupSound(){
+  beep(420, 0.06, 'square', 0.08);
+  setTimeout(()=>beep(380, 0.08, 'square', 0.06), 60);
+}
+function vapeSound(){
+  // шипение
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.4, audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * (1 - i/d.length) * 0.15;
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(audioCtx.destination);
+    src.start();
+  }catch(e){}
+}
+
+const shouts = ['Блядь!','Ну заебало!','Ну ебанный в вот!'];
+const msgEl = document.getElementById('msg');
+function shout(){
+  const txt = shouts[Math.floor(Math.random()*shouts.length)];
+  msgEl.textContent = txt;
+  msgEl.style.opacity = 1;
+  setTimeout(()=>msgEl.style.opacity = 0, 1200);
+  beep(120,0.4,'sawtooth',0.15);
+  const k = state.kitchen;
+  state.cat.x = k.x + 40 + Math.random()*40;
+  state.cat.y = k.y + k.h - 60 + Math.random()*40;
+  state.dog.x = k.x + k.w - 60 + Math.random()*40;
+  state.dog.y = k.y + 40 + Math.random()*40;
+  state.anger = Math.max(0, state.anger - 25);
+  state.combo++;
+  state.screenShake = 0.4;
+}
+
+// ===== ВВОД =====
+let dragPlate = null;
+function getPos(e){
+  const r = cvs.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  return {x: t.clientX - r.left, y: t.clientY - r.top};
+}
+
+function floatText(txt, x, y, color){
+  state.floats.push({txt, x, y, color, life: 1.2, vy:-30});
+}
+
+function spawnSmoke(x, y, count=20){
+  for(let i=0;i<count;i++){
+    state.smokeParticles.push({
+      x, y,
+      vx: (Math.random()-0.5)*80,
+      vy: -30 - Math.random()*40,
+      r: 6 + Math.random()*8,
+      life: 2 + Math.random()*1.5,
+      maxLife: 3.5
+    });
+  }
+}
+
+function onDown(e){
+  e.preventDefault();
+  if(state.gameOver){ layout(); return; }
+  const p = getPos(e);
+
+  // === БОНУС: ВИСКИ ===
+  if(state.whiskey.active &&
+     Math.hypot(p.x-state.whiskey.x, p.y-state.whiskey.y) < state.whiskey.r+18){
+    if(state.anger > 15 && state.anger < 90){
+      // запускаем анимацию наливания
+      state.whiskey.pourAnim = 0.6;
+      gulpSound();
+      state.anger = Math.max(0, state.anger - 30);
+      state.man.slow = 4;
+      state.man.drunkenness = Math.min(1, state.man.drunkenness + 0.6);
+      state.drunkenness = state.man.drunkenness;
+      state.screenShake = 0.2;
+      state.whiskey.active = false;
+      state.bonusCooldown.whiskey = 8 + Math.random()*4;
+      floatText('🥃 −злость', state.whiskey.x, state.whiskey.y - 20, '#ffcc44');
+      // отложенные икания
+      scheduleHiccups();
+    } else if(state.anger >= 90){
+      floatText('Слишком зол!', state.whiskey.x, state.whiskey.y - 20, '#ff6666');
+    }
+    return;
+  }
+
+  // === БОНУС: ВЕЙП ===
+  if(state.vape.active &&
+     Math.hypot(p.x-state.vape.x, p.y-state.vape.y) < state.vape.r+18){
+    if(state.anger > 15 && state.anger < 90){
+      state.anger = Math.max(0, state.anger - 20);
+      state.man.smoke = 3;
+      state.vape.active = false;
+      state.bonusCooldown.vape = 10 + Math.random()*5;
+      vapeSound();
+      spawnSmoke(state.man.x, state.man.y, 20);
+      floatText('💨 −злость', state.vape.x, state.vape.y - 20, '#aaddff');
+    }
+    return;
+  }
+
+  // посуда
+  for(let i=state.plates.length-1; i>=0; i--){
+    const pl = state.plates[i];
+    if(Math.hypot(p.x-pl.x, p.y-pl.y) < pl.r+10){
+      dragPlate = pl; pl.dragging = true;
+      pl.ox = p.x - pl.x; pl.oy = p.y - pl.y;
+      return;
+    }
+  }
+  // кот
+  if(Math.hypot(p.x-state.cat.x, p.y-state.cat.y) < state.cat.r+15){
+    meow(); state.anger = Math.min(100, state.anger+5);
+    state.cat.x += (Math.random()-0.5)*120;
+    state.cat.y += (Math.random()-0.5)*120;
+    clampToKitchen(state.cat); return;
+  }
+  // собака
+  if(Math.hypot(p.x-state.dog.x, p.y-state.dog.y) < state.dog.r+15){
+    bark(); state.anger = Math.min(100, state.anger+5);
+    state.dog.x += (Math.random()-0.5)*120;
+    state.dog.y += (Math.random()-0.5)*120;
+    clampToKitchen(state.dog); return;
+  }
+  // доска
+  if(p.x>state.board.x && p.x<state.board.x+state.board.w &&
+     p.y>state.board.y && p.y<state.board.y+state.board.h){
+    if(state.cutting <= 0){
+      state.cutting = 1;
+      state.food = Math.min(100, state.food + 8);
+      slice();
+      // при опьянении выше шанс пореза
+      const cutChance = 0.15 + state.man.drunkenness*0.15;
+      if(Math.random() < cutChance){
+        state.anger = Math.min(100, state.anger+12);
+        ouch();
+        floatText('Ой!', state.man.x, state.man.y-30, '#ff6666');
+      }
+    }
+    return;
+  }
+  // идти
+  state.man.targetX = p.x;
+  state.man.targetY = p.y;
+}
+
+function onMove(e){
+  e.preventDefault();
+  const p = getPos(e);
+  if(dragPlate){
+    dragPlate.x = Math.max(state.kitchen.x+20, Math.min(state.kitchen.x+state.kitchen.w-20, p.x - dragPlate.ox));
+    dragPlate.y = Math.max(state.kitchen.y+20, Math.min(state.kitchen.y+state.kitchen.h-20, p.y - dragPlate.oy));
+  }
+}
+function onUp(e){ e.preventDefault(); if(dragPlate){ dragPlate.dragging=false; dragPlate=null; } }
+cvs.addEventListener('pointerdown', onDown);
+cvs.addEventListener('pointermove', onMove);
+cvs.addEventListener('pointerup', onUp);
+cvs.addEventListener('pointercancel', onUp);
+
+// отложенные икания после виски
+function scheduleHiccups(){
+  const count = 2 + Math.floor(Math.random()*2);
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      if(state.gameOver) return;
+      hiccupSound();
+      state.man.hiccup = 0.3;
+      cvs.classList.add('hiccup');
+      setTimeout(()=>cvs.classList.remove('hiccup'), 300);
+      floatText('ик!', state.man.x + (Math.random()-0.5)*20, state.man.y - 40, '#ffaa66');
+      // лёгкий толчок
+      state.man.sway += (Math.random()-0.5)*1.5;
+    }, 800 + i*900 + Math.random()*400);
+  }
+}
+
+function clampToKitchen(o){
+  const k = state.kitchen;
+  o.x = Math.max(k.x+o.r, Math.min(k.x+k.w-o.r, o.x));
+  o.y = Math.max(k.y+o.r, Math.min(k.y+k.h-o.r, o.y));
+}
+function circleRectCollide(cx,cy,cr,rx,ry,rw,rh){
+  const nx = Math.max(rx, Math.min(cx, rx+rw));
+  const ny = Math.max(ry, Math.min(cy, ry+rh));
+  return Math.hypot(cx-nx, cy-ny) < cr;
+}
+function circleCircle(c1,c2){
+  return Math.hypot(c1.x-c2.x, c1.y-c2.y) < c1.r+c2.r;
+}
+
+// ===== ОБНОВЛЕНИЕ =====
+function update(dt){
+  if(state.gameOver) return;
+  state.time += dt;
+  if(state.cutting > 0) state.cutting -= dt;
+
+  // таймеры состояний
+  if(state.man.slow > 0){
+    state.man.slow -= dt;
+    if(state.man.slow <= 0) state.man.slow = 0;
+  }
+  if(state.man.smoke > 0) state.man.smoke -= dt;
+  if(state.man.hiccup > 0) state.man.hiccup -= dt;
+
+  // опьянение постепенно спадает
+  if(state.man.drunkenness > 0){
+    state.man.drunkenness = Math.max(0, state.man.drunkenness - dt*0.12);
+    state.drunkenness = state.man.drunkenness;
+  }
+  // виньетка + лёгкое покачивание камеры
+  vignette.style.opacity = Math.min(1, state.man.drunkenness * 0.9);
+  state.man.sway = Math.sin(state.time*2.2) * state.man.drunkenness * 0.5;
+
+  // тряска экрана
+  if(state.screenShake > 0) state.screenShake -= dt;
+
+  // анимация наливания
+  if(state.whiskey.pourAnim > 0){
+    state.whiskey.pourAnim -= dt;
+  }
+
+  // спавн бонусов
+  state.bonusCooldown.whiskey -= dt;
+  state.bonusCooldown.vape -= dt;
+  const k0 = state.kitchen;
+  if(!state.whiskey.active && state.bonusCooldown.whiskey <= 0){
+    state.whiskey.active = true;
+    state.whiskey.x = k0.x + 80 + Math.random()*(k0.w-160);
+    state.whiskey.y = k0.y + 60 + Math.random()*(k0.h-120);
+  }
+  if(!state.vape.active && state.bonusCooldown.vape <= 0){
+    state.vape.active = true;
+    state.vape.x = k0.x + 60 + Math.random()*(k0.w-120);
+    state.vape.y = k0.y + 60 + Math.random()*(k0.h-120);
+  }
+
+  // частицы пара
+  for(let i=state.smokeParticles.length-1; i>=0; i--){
+    const s = state.smokeParticles[i];
+    s.x += s.vx*dt; s.y += s.vy*dt;
+    s.vy += 20*dt;
+    s.r += 8*dt;
+    s.life -= dt;
+    if(s.life <= 0) state.smokeParticles.splice(i,1);
+  }
+
+  // плавающий текст
+  for(let i=state.floats.length-1; i>=0; i--){
+    const f = state.floats[i];
+    f.y += f.vy*dt; f.life -= dt;
+    if(f.life <= 0) state.floats.splice(i,1);
+  }
+
+  // === движение мужчины ===
+  const man = state.man;
+  const dx = man.targetX - man.x, dy = man.targetY - man.y;
+  const dist = Math.hypot(dx,dy);
+  if(dist > 2){
+    const sp = man.slow > 0 ? 60 : 120;
+    man.x += dx/dist * sp * dt;
+    man.y += dy/dist * sp * dt;
+    man.walkPhase += dt * (man.slow > 0 ? 5 : 10);
+    if(Math.abs(dx) > 0.5) man.facing = dx > 0 ? 1 : -1;
+  } else {
+    man.walkPhase *= 0.9;
+  }
+  clampToKitchen(man);
+
+  // столкновения с мебелью
+  for(const f of state.furniture){
+    if(circleRectCollide(man.x,man.y,man.r,f.x,f.y,f.w,f.h)){
+      state.anger = Math.min(100, state.anger + 25*dt);
+      const cx = f.x+f.w/2, cy = f.y+f.h/2;
+      const ang = Math.atan2(man.y-cy, man.x-cx);
+      man.x = cx + Math.cos(ang)*(f.w/2+man.r+2);
+      man.y = cy + Math.sin(ang)*(f.h/2+man.r+2);
+      man.targetX = man.x; man.targetY = man.y;
+      if(Math.random()<0.3) ouch();
+    }
+  }
+  // столкновения с посудой
+  for(const pl of state.plates){
+    if(!pl.dragging && circleCircle(man, pl)){
+      state.anger = Math.min(100, state.anger + 15*dt);
+      const ang = Math.atan2(man.y-pl.y, man.x-pl.x);
+      pl.x -= Math.cos(ang)*40*dt;
+      pl.y -= Math.sin(ang)*40*dt;
+      clampToKitchen(pl);
+    }
+  }
+
+  // кот
+  const cat = state.cat;
+  cat.meowTimer -= dt;
+  if(cat.meowTimer <= 0){
+    cat.meowTimer = 2 + Math.random()*2;
+    meow();
+    state.anger = Math.min(100, state.anger + 3);
+  }
+  const calm = state.man.smoke > 0 ? 0.2 : 1;
+  const cdx = man.x - cat.x, cdy = man.y - cat.y;
+  const cdist = Math.hypot(cdx,cdy) || 1;
+  if(cdist > 30){
+    cat.x += cdx/cdist * 60 * dt * calm;
+    cat.y += cdy/cdist * 60 * dt * calm;
+    cat.facing = cdx > 0 ? 1 : -1;
+    cat.tailPhase += dt * 8;
+  }
+  if(circleCircle(man, cat) && state.man.smoke <= 0){
+    state.anger = Math.min(100, state.anger + 8*dt);
+    const ang = Math.atan2(man.y-cat.y, man.x-cat.x);
+    man.x += Math.cos(ang)*30*dt;
+    man.y += Math.sin(ang)*30*dt;
+  }
+  clampToKitchen(cat);
+
+  // собака
+  const dog = state.dog;
+  dog.x += (Math.sin(state.time*2.5)*80*dt + (man.x-dog.x)*0.3*dt) * calm;
+  dog.y += (Math.cos(state.time*3.1)*80*dt + (man.y-dog.y)*0.3*dt) * calm;
+  dog.facing = (man.x-dog.x) > 0 ? 1 : -1;
+  dog.tailPhase += dt * 14;
+  dog.tonguePhase += dt * 6;
+  if(circleCircle(man, dog) && state.man.smoke <= 0){
+    state.anger = Math.min(100, state.anger + 10*dt);
+    const ang = Math.atan2(man.y-dog.y, man.x-dog.x);
+    man.x += Math.cos(ang)*40*dt;
+    man.y += Math.sin(ang)*40*dt;
+  }
+  clampToKitchen(dog);
+
+  // еда сгорает
+  state.food = Math.max(0, state.food - 2*dt);
+  // злость растёт
+  state.anger = Math.min(100, state.anger + 1.5*dt);
+
+  if(state.anger >= 100) shout();
+  if(state.food >= 100){
+    msgEl.textContent = 'Готово! 🍲';
+    msgEl.style.opacity = 1;
+    state.gameOver = true;
+    setTimeout(()=>{ msgEl.style.opacity = 0; layout(); }, 2000);
+  }
+  updateUI();
+}
+
+function updateUI(){
+  document.querySelector('#food .fill').style.width = state.food + '%';
+  document.querySelector('#anger .fill').style.width = state.anger + '%';
+}
+
+// ===== ХЕЛПЕРЫ РИСОВАНИЯ =====
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function ellipse(x,y,rx,ry,rot=0){
+  ctx.beginPath();
+  ctx.ellipse(x,y,rx,ry,rot,0,Math.PI*2);
+}
+
+// ===== РИСОВАНИЕ БОНУСОВ =====
+function drawWhiskey(x, y, r, pourAnim){
+  const pulse = 1 + Math.sin(state.time*4)*0.08;
+  // свечение
+  ctx.save();
+  ctx.shadowColor = '#ffaa33';
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = 'rgba(255,170,51,0.15)';
+  ellipse(x, y, r*1.7*pulse, r*1.7*pulse); ctx.fill();
+  ctx.restore();
+
+  // стакан-трапеция
+  ctx.fillStyle = 'rgba(200,220,240,0.35)';
+  ctx.beginPath();
+  ctx.moveTo(x-9, y-12);
+  ctx.lineTo(x+9, y-12);
+  ctx.lineTo(x+7, y+12);
+  ctx.lineTo(x-7, y+12);
+  ctx.closePath(); ctx.fill();
+
+  // уровень жидкости — зависит от pourAnim (в момент питья уменьшается)
+  let fillTop = y - 4;
+  if(pourAnim > 0){
+    // жидкость поднимается вверх при наливании (визуально)
+    fillTop = y - 4 + Math.sin(pourAnim*20)*3;
+  }
+  ctx.fillStyle = '#c87a1a';
+  ctx.beginPath();
+  ctx.moveTo(x-8, fillTop);
+  ctx.lineTo(x+8, fillTop);
+  ctx.lineTo(x+7, y+11);
+  ctx.lineTo(x-7, y+11);
+  ctx.closePath(); ctx.fill();
+
+  // лёд
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  roundRect(x-5, y-2, 5, 5, 1); ctx.fill();
+  roundRect(x+1, y+2, 4, 4, 1); ctx.fill();
+
+  // ободок
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x-9, y-12); ctx.lineTo(x+9, y-12);
+  ctx.stroke();
+
+  // блик
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillRect(x-7, y-10, 2, 18);
+
+  // иконка
+  ctx.fillStyle = '#ffdd88';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('🥃', x, y - 20);
+}
+
+function drawVape(x, y, r){
+  const pulse = 1 + Math.sin(state.time*5)*0.08;
+  ctx.save();
+  ctx.shadowColor = '#66ccff';
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = 'rgba(102,204,255,0.15)';
+  ellipse(x, y, r*1.7*pulse, r*1.7*pulse); ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = '#333';
+  roundRect(x-5, y-14, 10, 24, 3); ctx.fill();
+  ctx.fillStyle = '#555';
+  roundRect(x-4, y-16, 8, 4, 2); ctx.fill();
+  ctx.fillStyle = '#66ccff';
+  ellipse(x, y+6, 2.5, 2.5); ctx.fill();
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x-4, y-6); ctx.lineTo(x+4, y-6);
+  ctx.moveTo(x-4, y-2); ctx.lineTo(x+4, y-2);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillRect(x-3, y-12, 1.5, 20);
+
+  ctx.fillStyle = '#aaddff';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('💨', x, y - 22);
+}
+
+// ===== МУЖЧИНА =====
+function drawMan(man){
+  const {x, y} = man;
+  const f = man.facing;
+  const bob = Math.sin(man.walkPhase) * 2;
+  const drunk = man.drunkenness;
+  // покачивание при опьянении
+  const swayX = man.sway * 6;
+  const swayRot = man.sway * 0.15;
+  // лёгкая деформация при икании
+  const hicScale = man.hiccup > 0 ? 1 + man.hiccup*0.5 : 1;
+
+  ctx.save();
+  ctx.translate(x + swayX, y + bob);
+  ctx.rotate(swayRot);
+  ctx.scale(f * hicScale, hicScale);
+
+  // тень
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ellipse(0, 22, 16, 5); ctx.fill();
+
+  // ноги
+  ctx.fillStyle = '#2a3a4a';
+  roundRect(-9, 8, 8, 14, 3); ctx.fill();
+  roundRect(1, 8, 8, 14, 3); ctx.fill();
+
+  // туловище
+  ctx.fillStyle = '#4a7a5a';
+  roundRect(-12, -8, 24, 22, 6); ctx.fill();
+  // фартук
+  ctx.fillStyle = '#e8e0d0';
+  ctx.beginPath();
+  ctx.moveTo(-9, -4);
+  ctx.lineTo(9, -4);
+  ctx.lineTo(11, 12);
+  ctx.lineTo(-11, 12);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#c8c0b0';
+  ctx.fillRect(-10, 6, 20, 2);
+
+  // руки
+  ctx.fillStyle = '#e0b088';
+  roundRect(-18, -4, 6, 16, 3); ctx.fill();
+
+  // правая рука с ножом
+  ctx.save();
+  ctx.translate(16, -2);
+  // при опьянении рука покачивается
+  ctx.rotate(-0.6 + Math.sin(state.time*3)*drunk*0.3);
+  roundRect(-3, 0, 6, 14, 3); ctx.fill();
+  ellipse(0, 14, 4, 4); ctx.fill();
+  // нож
+  ctx.fillStyle = '#5a3a1a';
+  ctx.fillRect(-2, 14, 4, 6);
+  ctx.fillStyle = '#c0c0c0';
+  ctx.beginPath();
+  ctx.moveTo(-2, 20);
+  ctx.lineTo(2, 20);
+  ctx.lineTo(2, 34);
+  ctx.lineTo(0, 36);
+  ctx.lineTo(-2, 34);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#888';
+  ctx.fillRect(-1, 20, 2, 16);
+  ctx.restore();
+
+  // шея
+  ctx.fillStyle = '#e0b088';
+  ctx.fillRect(-4, -14, 8, 8);
+
+  // голова
+  ctx.fillStyle = '#e0b088';
+  ellipse(0, -22, 11, 12); ctx.fill();
+
+  // КРАСНЫЕ ЩЁКИ при опьянении
+  if(drunk > 0.1){
+    ctx.globalAlpha = drunk * 0.8;
+    ctx.fillStyle = '#ff4466';
+    ellipse(-7, -19, 3.5, 2.5); ctx.fill();
+    ellipse(7, -19, 3.5, 2.5); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // уши
+  ctx.fillStyle = '#e0b088';
+  ellipse(-11, -22, 2, 3); ctx.fill();
+  ellipse(11, -22, 2, 3); ctx.fill();
+
+  // волосы
+  ctx.fillStyle = '#1a1410';
+  ctx.beginPath();
+  ctx.moveTo(-11, -24);
+  ctx.quadraticCurveTo(-13, -34, -6, -34);
+  ctx.quadraticCurveTo(-4, -38, 0, -35);
+  ctx.quadraticCurveTo(4, -38, 8, -34);
+  ctx.quadraticCurveTo(13, -33, 11, -24);
+  ctx.quadraticCurveTo(9, -28, 6, -28);
+  ctx.quadraticCurveTo(3, -30, 0, -28);
+  ctx.quadraticCurveTo(-3, -30, -6, -28);
+  ctx.quadraticCurveTo(-9, -28, -11, -24);
+  ctx.closePath(); ctx.fill();
+
+  // брови — при опьянении поднимаются и расслабляются
+  const browTilt = drunk * 3;
+  ctx.strokeStyle = '#1a1410';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-8, -24 + browTilt); ctx.lineTo(-2, -22);
+  ctx.moveTo(8, -24 + browTilt); ctx.lineTo(2, -22);
+  ctx.stroke();
+
+  // глаза — при опьянении прищурены (полузакрыты)
+  const eyeOpen = 1 - drunk*0.55;
+  ctx.fillStyle = '#fff';
+  ellipse(-5, -21, 2.5, 2*eyeOpen); ctx.fill();
+  ellipse(5, -21, 2.5, 2*eyeOpen); ctx.fill();
+  ctx.fillStyle = '#3a2a1a';
+  ellipse(-5, -21, 1.4, 1.5*eyeOpen); ctx.fill();
+  ellipse(5, -21, 1.4, 1.5*eyeOpen); ctx.fill();
+
+  // нос (краснеет)
+  ctx.fillStyle = drunk > 0.2 ? '#e07070' : '#c89878';
+  ellipse(0, -18, 1.8, 2.2); ctx.fill();
+
+  // борода
+  ctx.fillStyle = '#1a1410';
+  ctx.beginPath();
+  ctx.moveTo(-9, -15);
+  ctx.quadraticCurveTo(-10, -8, -5, -6);
+  ctx.quadraticCurveTo(0, -4, 5, -6);
+  ctx.quadraticCurveTo(10, -8, 9, -15);
+  ctx.quadraticCurveTo(6, -12, 3, -13);
+  ctx.quadraticCurveTo(0, -11, -3, -13);
+  ctx.quadraticCurveTo(-6, -12, -9, -15);
+  ctx.closePath(); ctx.fill();
+
+  // усы
+  ctx.beginPath();
+  ctx.moveTo(-4, -16);
+  ctx.quadraticCurveTo(-1, -14, 0, -15);
+  ctx.quadraticCurveTo(1, -14, 4, -16);
+  ctx.quadraticCurveTo(1, -16, 0, -16.5);
+  ctx.quadraticCurveTo(-1, -16, -4, -16);
+  ctx.closePath(); ctx.fill();
+
+  // рот — при опьянении ухмыляется
+  ctx.strokeStyle = '#5a2a1a';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  if(drunk > 0.3){
+    ctx.moveTo(-3, -11);
+    ctx.quadraticCurveTo(0, -8, 4, -11);
+  } else {
+    ctx.moveTo(-3, -12);
+    ctx.quadraticCurveTo(0, -10, 3, -12);
+  }
+  ctx.stroke();
+
+  ctx.restore();
+
+  // ПАР ИЗО РТА при вейпе
+  if(man.smoke > 0){
+    for(let i=0;i<4;i++){
+      const t = state.time*2 + i*0.5;
+      const sx = x + 8 + Math.sin(t)*5;
+      const sy = y - 18 - ((t*15)%20);
+      ctx.globalAlpha = 0.35 - i*0.07;
+      ctx.fillStyle = '#ddeeff';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 5 + i*2, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // 💢
+  if(state.anger > 50){
+    const pulse = 1 + Math.sin(state.time*10)*0.15;
+    ctx.save();
+    ctx.translate(x + man.r + 6, y - man.r - 8);
+    ctx.scale(pulse, pulse);
+    ctx.fillStyle = state.anger > 85 ? '#ff2222' : '#ffaa00';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('💢', 0, 0);
+    ctx.restore();
+  }
+  // 🥃 при опьянении — иконка над головой
+  if(man.drunkenness > 0.4){
+    ctx.globalAlpha = Math.min(1, man.drunkenness);
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🥴', x + man.r + 4, y - man.r - 24);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ===== КОТ =====
+function drawCat(cat){
+  const {x, y} = cat;
+  const f = cat.facing;
+  const breathe = 1 + Math.sin(state.time*4)*0.03;
+  const tailSwing = Math.sin(cat.tailPhase) * 0.5;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(f, 1);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ellipse(0, 12, 14, 4); ctx.fill();
+
+  // хвост
+  ctx.save();
+  ctx.translate(10, 4);
+  ctx.rotate(-0.5 + tailSwing);
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(8, -4, 14, -10);
+  ctx.quadraticCurveTo(16, -12, 14, -14);
+  ctx.quadraticCurveTo(10, -12, 6, -6);
+  ctx.quadraticCurveTo(3, -3, 0, -3);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // тело
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.ellipse(0, 2, 11*breathe, 10, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // лапки
+  ellipse(-5, 10, 3.5, 2.5); ctx.fill();
+  ellipse(5, 10, 3.5, 2.5); ctx.fill();
+
+  // голова
+  ctx.fillStyle = '#0a0a0a';
+  ellipse(0, -8, 9, 8); ctx.fill();
+
+  // уши
+  ctx.beginPath();
+  ctx.moveTo(-8, -12); ctx.lineTo(-6, -20); ctx.lineTo(-2, -14);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(8, -12); ctx.lineTo(6, -20); ctx.lineTo(2, -14);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#553333';
+  ctx.beginPath();
+  ctx.moveTo(-7, -13); ctx.lineTo(-6, -18); ctx.lineTo(-4, -14);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(7, -13); ctx.lineTo(6, -18); ctx.lineTo(4, -14);
+  ctx.closePath(); ctx.fill();
+
+  // глаза
+  ctx.fillStyle = '#e8c040';
+  ellipse(-4, -8, 2.5, 3); ctx.fill();
+  ellipse(4, -8, 2.5, 3); ctx.fill();
+  ctx.fillStyle = '#000';
+  ellipse(-4, -8, 0.8, 2.5); ctx.fill();
+  ellipse(4, -8, 0.8, 2.5); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ellipse(-4.5, -9, 0.6, 0.8); ctx.fill();
+  ellipse(3.5, -9, 0.6, 0.8); ctx.fill();
+
+  // нос
+  ctx.fillStyle = '#e08090';
+  ctx.beginPath();
+  ctx.moveTo(0, -3);
+  ctx.lineTo(-1.5, -1.5);
+  ctx.lineTo(1.5, -1.5);
+  ctx.closePath(); ctx.fill();
+
+  // рот
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(0, -1.5); ctx.lineTo(-2, 0);
+  ctx.moveTo(0, -1.5); ctx.lineTo(2, 0);
+  ctx.stroke();
+
+  // усы
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(-3, -2); ctx.lineTo(-10, -4);
+  ctx.moveTo(-3, -1); ctx.lineTo(-10, 0);
+  ctx.moveTo(3, -2); ctx.lineTo(10, -4);
+  ctx.moveTo(3, -1); ctx.lineTo(10, 0);
+  ctx.stroke();
+
+  ctx.restore();
+
+  if(cat.meowTimer > 0 && cat.meowTimer < 0.8){
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, cat.meowTimer*2);
+    ctx.fillStyle = '#ffdd88';
+    ctx.font = 'bold 13px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('мяу!', x, y - 28 - (0.8-cat.meowTimer)*10);
+    ctx.restore();
+  }
+}
+
+// ===== СОБАКА =====
+function drawDog(dog){
+  const {x, y} = dog;
+  const f = dog.facing;
+  const tailSwing = Math.sin(dog.tailPhase) * 0.8;
+  const tongueOut = Math.sin(dog.tonguePhase) * 0.3 + 0.7;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(f, 1);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ellipse(0, 14, 15, 5); ctx.fill();
+
+  ctx.save();
+  ctx.translate(-12, -4);
+  ctx.rotate(tailSwing * 0.6);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(-6, -2, -8, -8);
+  ctx.quadraticCurveTo(-6, -6, -3, -4);
+  ctx.quadraticCurveTo(-1, -2, 0, 0);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = '#1a1a1a';
+  roundRect(-12, -6, 24, 16, 6); ctx.fill();
+
+  roundRect(-10, 8, 6, 8, 2); ctx.fill();
+  roundRect(-2, 8, 6, 8, 2); ctx.fill();
+  roundRect(4, 8, 6, 8, 2); ctx.fill();
+  roundRect(-6, 8, 6, 8, 2); ctx.fill();
+
+  ctx.fillStyle = '#1a1a1a';
+  ellipse(8, -8, 10, 9); ctx.fill();
+
+  ctx.fillStyle = '#2a2a2a';
+  ellipse(14, -6, 6, 5); ctx.fill();
+
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.ellipse(2, -12, 4, 7, 0.2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(12, -14, 4, 6, -0.1, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#fff';
+  ellipse(7, -10, 2, 2.2); ctx.fill();
+  ellipse(12, -10, 2, 2.2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ellipse(7.5, -10, 1.2, 1.5); ctx.fill();
+  ellipse(12.5, -10, 1.2, 1.5); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ellipse(7, -10.5, 0.5, 0.6); ctx.fill();
+  ellipse(12, -10.5, 0.5, 0.6); ctx.fill();
+
+  ctx.fillStyle = '#0a0a0a';
+  ellipse(17, -5, 2, 1.5); ctx.fill();
+
+  ctx.fillStyle = '#e8556a';
+  ctx.beginPath();
+  ctx.ellipse(17, -2 + tongueOut, 1.8, 2.5, 0, 0, Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle = '#0a0a0a';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(14, -2);
+  ctx.quadraticCurveTo(17, 0, 19, -3);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// ===== ОТРИСОВКА МИРА =====
+function draw(){
+  const k = state.kitchen;
+
+  ctx.save();
+  // тряска экрана
+  if(state.screenShake > 0){
+    const s = state.screenShake * 12;
+    ctx.translate((Math.random()-0.5)*s, (Math.random()-0.5)*s);
+  }
+  // лёгкое покачивание камеры при опьянении
+  if(state.man.drunkenness > 0.2){
+    ctx.translate(Math.sin(state.time*1.5)*3*state.man.drunkenness,
+                  Math.cos(state.time*1.2)*3*state.man.drunkenness);
+  }
+
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(0,0,W,H);
+
+  // пол
+  ctx.fillStyle = '#3d2f22';
+  ctx.fillRect(k.x, k.y, k.w, k.h);
+  ctx.strokeStyle = '#4a3a2a';
+  ctx.lineWidth = 1;
+  for(let x=k.x; x<k.x+k.w; x+=40){
+    ctx.beginPath(); ctx.moveTo(x,k.y); ctx.lineTo(x,k.y+k.h); ctx.stroke();
+  }
+  for(let y=k.y; y<k.y+k.h; y+=40){
+    ctx.beginPath(); ctx.moveTo(k.x,y); ctx.lineTo(k.x+k.w,y); ctx.stroke();
+  }
+  ctx.strokeStyle = '#5a4a3a';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(k.x, k.y, k.w, k.h);
+
+  // мебель
+  for(const f of state.furniture){
+    if(f.type === 'fridge'){
+      ctx.fillStyle = '#8a9aa8'; roundRect(f.x, f.y, f.w, f.h, 6); ctx.fill();
+      ctx.fillStyle = '#6a7a88'; ctx.fillRect(f.x+4, f.y+f.h*0.4, f.w-8, 2);
+      ctx.fillStyle = '#556';
+      ctx.fillRect(f.x+f.w-8, f.y+10, 3, 12);
+      ctx.fillRect(f.x+f.w-8, f.y+f.h*0.5, 3, 12);
+    } else if(f.type === 'stove'){
+      ctx.fillStyle = '#4a4a4a'; roundRect(f.x, f.y, f.w, f.h, 6); ctx.fill();
+      ctx.fillStyle = '#222';
+      ellipse(f.x+f.w*0.3, f.y+f.h*0.4, 8, 8); ctx.fill();
+      ellipse(f.x+f.w*0.7, f.y+f.h*0.4, 8, 8); ctx.fill();
+      ctx.fillStyle = '#666';
+      ellipse(f.x+f.w*0.3, f.y+f.h*0.4, 5, 5); ctx.fill();
+      ellipse(f.x+f.w*0.7, f.y+f.h*0.4, 5, 5); ctx.fill();
+    } else {
+      ctx.fillStyle = '#6b4a2a'; roundRect(f.x, f.y, f.w, f.h, 6); ctx.fill();
+      ctx.fillStyle = '#5a3a1a';
+      ctx.fillRect(f.x+5, f.y+5, f.w-10, f.h*0.4);
+      ctx.fillRect(f.x+5, f.y+f.h*0.55, f.w-10, f.h*0.4);
+    }
+    ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 2;
+    roundRect(f.x, f.y, f.w, f.h, 6); ctx.stroke();
+  }
+
+  // доска
+  const b = state.board;
+  ctx.fillStyle = state.cutting>0 ? '#c88a5a' : '#a87a4a';
+  roundRect(b.x,b.y,b.w,b.h,8); ctx.fill();
+  ctx.strokeStyle = '#6a4a2a'; ctx.lineWidth = 2;
+  roundRect(b.x,b.y,b.w,b.h,8); ctx.stroke();
+  ctx.fillStyle = '#e85a3a';
+  ellipse(b.x+b.w*0.35, b.y+b.h*0.55, 5, 4); ctx.fill();
+  ctx.fillStyle = '#5ac85a';
+  ellipse(b.x+b.w*0.6, b.y+b.h*0.6, 4, 5); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Arial'; ctx.textAlign='center';
+  ctx.fillText('РЕЗАТЬ', b.x+b.w/2, b.y+b.h/2+4);
+
+  // посуда
+  for(const pl of state.plates){
+    ctx.beginPath();
+    ctx.arc(pl.x, pl.y, pl.r, 0, Math.PI*2);
+    ctx.fillStyle = pl.dragging ? '#ffffff' : '#e8e8e8';
+    ctx.fill();
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(pl.x, pl.y, pl.r*0.65, 0, Math.PI*2);
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ellipse(pl.x - pl.r*0.3, pl.y - pl.r*0.3, pl.r*0.3, pl.r*0.2, -0.5); ctx.fill();
+  }
+
+  // бонусы
+  if(state.whiskey.active) drawWhiskey(state.whiskey.x, state.whiskey.y, state.whiskey.r, state.whiskey.pourAnim);
+  if(state.vape.active) drawVape(state.vape.x, state.vape.y, state.vape.r);
+
+  // пар
+  for(const s of state.smokeParticles){
+    ctx.globalAlpha = Math.min(1, s.life / s.maxLife) * 0.5;
+    ctx.fillStyle = '#ddeeff';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // персонажи
+  drawCat(state.cat);
+  drawDog(state.dog);
+  drawMan(state.man);
+
+  // плавающий текст
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 14px Arial';
+  for(const f of state.floats){
+    ctx.globalAlpha = Math.min(1, f.life);
+    ctx.fillStyle = f.color;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+    ctx.strokeText(f.txt, f.x, f.y);
+    ctx.fillText(f.txt, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+resize();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
